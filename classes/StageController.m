@@ -43,8 +43,10 @@ classdef StageController < handle
         % experiment objects at regular intervals
         AutosaveTimer timer
         
+        AutosaveTimerExecutionMode = 'fixedRate'
+        
         % The time in seconds between executions of the autosave function
-        AutosavePeriod = 30;
+        AutosavePeriod = 60
         
         StartTemp
         RampUpRate
@@ -60,6 +62,9 @@ classdef StageController < handle
     end
     
     properties (Constant)
+        % the file path to the default staging file
+        DEFAULT_STAGING = './staging/defaultStaging.stage';
+        
         % The minimum acceptable error between the sample temperatures and
         % the target temperature. The error for both samples must be less
         % than this value before the stage controller will continue to the
@@ -132,7 +137,7 @@ classdef StageController < handle
             
             switch loadPreset
                 case 'default'
-                    stagingFileName = 'default_DSC Staging.stage';
+                    stagingFileName = obj.DEFAULT_STAGING;
                     
                 otherwise
                     % Prompt the user to select a file
@@ -145,7 +150,7 @@ classdef StageController < handle
                     % if the user closes the file selection window
                     obj.TemperatureControlStaging = [];
                     
-                case 'default_DSC Staging.stage'
+                case obj.DEFAULT_STAGING
                     % Read the staging parameters from the default_DSC
                     % Staging.stage file
                     obj.TemperatureControlStaging = xlsread(stagingFileName);
@@ -167,7 +172,7 @@ classdef StageController < handle
             
             % Prompt the user to select a file
             [stagingFileName, stagingFilePath] = uiputfile(...
-                '*.stage', 'Save Staging File', 'DSC Staging.stage');
+                '*.stage', 'Save Staging File', './staging/newStaging.stage');
             
             switch stagingFileName
                 case 0
@@ -914,29 +919,53 @@ classdef StageController < handle
             %startAutosaveTimer
             %   Put description here
             
+            % Create a new timer object for performing the autosave
+            obj.AutosaveTimer = timer(...
+                'ExecutionMode', obj.AutosaveTimerExecutionMode, ...
+                'Period', obj.AutosavePeriod, ...
+                'TimerFcn', {@autosaveTimerFcn, obj});
+            
+            % Start the timer object
+            start(obj.AutosaveTimer)
+            
         end
         
         function stopAutosaveTimer(obj)
             %stopAutosaveTimer
             %   Put description here
             
+            % Stop the trigger timer object
+            for i=1:10 % Retry up to 10 times if timer fails to stop
+                try
+                    stop(obj.AutosaveTimer)
+                    delete(obj.AutosaveTimer)
+                    break
+                catch ME
+                    if isvalid(obj.AutosaveTimer)
+                        if isequal(obj.AutosaveTimer.Running, 'on')
+                            rethrow(ME)
+                        end
+                    end
+                end
+            end
         end
         
         function performAutosave(obj)
             %performAutosave
             %   Save a backup of the app, daqBox, and liveData objects as a
             %   .mat file
-            
+            autosaveTest = tic;
             % Assign the current DSC objects to temporary variables
             app = obj.app;
             daqBox = obj.daqBox;
             liveData = obj.liveData;
             
             % Save the temporary variables to .mat files
-            save('autosave_app.mat', 'app')
-            save('autosave_daqBox.mat', 'daqBox')
-            save('autosave_liveData.mat', 'liveData')
+            save('./autosave/autosave_app.mat', 'app')
+            save('./autosave/autosave_daqBox.mat', 'daqBox')
+            save('./autosave/autosave_liveData.mat', 'liveData')
             
+            toc(autosaveTest)
         end
     end
 end

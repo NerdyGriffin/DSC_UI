@@ -81,7 +81,7 @@ classdef DSC_CUI_APP < handle
         % Command-Line User Interface Properties
         % ________________________________________________________________________________________________________________________________
         
-        HelpFileName = 'cui_help.txt'
+        HelpFileName = './text/cui_help.txt'
         
     end
     
@@ -89,6 +89,22 @@ classdef DSC_CUI_APP < handle
         function app = DSC_CUI_APP(varargin)
             %DSC_CUI_APP Construct an instance of this class
             %   Detailed explanation goes here
+            
+            % Add the DSC subdirectories to the search path
+            for n = 3:-1:0
+                if n > 0
+                    [~, currentDirectory] = fileparts(pwd);
+                    switch currentDirectory
+                        case 'DSC'
+                            addpath(genpath('.'))
+                            break
+                        otherwise
+                            cd ..
+                    end
+                else
+                    error("The current working directory is not within the 'DSC' folder")
+                end
+            end
             
             disp('Starting DSC App. Please Wait...')
             

@@ -272,7 +272,7 @@ classdef DAQTrigger < handle
             
             obj.TriggerSemaphore.wait();
             
-            disp('should be done waiting')
+            disp('Done waiting for trigger')
         end
         
         function stop(obj)
@@ -313,7 +313,7 @@ classdef DAQTrigger < handle
             
             obj.Running = 'off';
             
-            disp('should be stopped')
+            disp('Trigger stopped')
         end
     end
 end
@@ -327,20 +327,17 @@ function singleTargetTimerFcn(~, ~, stageController)
 %singleTarget_TimerFcn
 %   The TimerFcn callback for single target heating
 stageController.singleTargetHeating();
-fprintf('\nDSC_CUI>> ')
 end
 
 function rampUpTimerFcn(~, ~, stageController)
 %rampUp_TimerFcn
 %   The TimerFcn callback for ramp up heating
 stageController.rampUpHeating();
-fprintf('\nDSC_CUI>> ')
 end
 
 function holdTempTimerFcn(~, ~, stageController)
 %holdTemp_TimerFcn
 %   The TimerFcn callback for hold temp heating
 stageController.holdTempHeating();
-fprintf('\nDSC_CUI>> ')
 end
 

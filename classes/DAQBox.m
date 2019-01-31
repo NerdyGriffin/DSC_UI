@@ -65,6 +65,9 @@ classdef DAQBox < handle
     end
     
     properties (Constant)
+        % The file path to the default config file
+        DEFAULT_CONFIG = './config/defaultConfig.cfg';
+        
         CONFIG_XL_RANGE = 'B2:B10';
         
         % The device ID of the DAQ Box
@@ -386,7 +389,7 @@ classdef DAQBox < handle
             elseif nargin > 1
                 switch loadPreset
                     case 'default'
-                        configFileName = 'default_config.cfg';
+                        configFileName = obj.DEFAULT_CONFIG;
                         
                     otherwise
                         % Inform the user that the give preset was not
@@ -417,7 +420,7 @@ classdef DAQBox < handle
                     configLoadStatus = false;
                     return
                     
-                case 'default_config.cfg'
+                case obj.DEFAULT_CONFIG
                     % Read the values from the defaultConfig.cfg file
                     [~, ~, configCellArray] = xlsread(configFileName, obj.CONFIG_XL_RANGE);
                     
@@ -452,7 +455,7 @@ classdef DAQBox < handle
             
             % Prompt the user to select a file
             [configFileName, configFilePath] = uiputfile(...
-                '*.cfg', 'Save Config File', 'config.cfg');
+                '*.cfg', 'Save Config File', './config/newConfig.cfg');
             
             switch configFileName
                 case 0

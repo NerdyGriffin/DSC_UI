@@ -638,7 +638,7 @@ classdef DSCData < handle
             
             % Prompt the user to select a file
             [dataFileName, dataFilePath] = uiputfile(...
-                '*.xlsx', 'Save Data File', 'DSC Data.xlsx');
+                '*.xlsx', 'Save Data File', './saveData/dscData.xlsx');
             
             switch dataFileName
                 case 0
