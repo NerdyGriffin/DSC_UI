@@ -74,10 +74,10 @@ classdef DAQBox < handle
         DEVICE_ID = 'Dev1';
         
         % The channel ID's for each sensor
-        CHANNEL_ID_TEMP_REF = 'ai6';
-        CHANNEL_ID_TEMP_SAMP = 'ai5';
-        CHANNEL_ID_CURRENT_REF = 'ai4';
-        CHANNEL_ID_CURRENT_SAMP = 'ai3';
+        CHANNEL_ID_TEMP_REF = 'ai5';
+        CHANNEL_ID_TEMP_SAMP = 'ai6';
+        CHANNEL_ID_CURRENT_REF = 'ai3';
+        CHANNEL_ID_CURRENT_SAMP = 'ai4';
         CHANNEL_ID_HEATING_COIL_REF = 'ctr0';
         CHANNEL_ID_HEATING_COIL_SAMP = 'ctr1';
         CHANNEL_ID_CLOCK = 'ai7';
@@ -90,16 +90,16 @@ classdef DAQBox < handle
         
         % The duration in seconds of the PWM outputs (if not manually
         % stopped)
-        OUTPUT_DURATION_IN_SECONDS = 1;
-        
-        % The maximum duty cycle allowed for both PWM channels
-        PWM_MAX_DUTY_CYCLE = 1 - 1e-6;
+        OUTPUT_DURATION_IN_SECONDS = 2;
         
         % The minimum duty cycle allowed for both PWM channels
-        PWM_MIN_DUTY_CYCLE = 1e-6;
+        PWM_MIN_DUTY_CYCLE = 1e-3;
+        
+        % The maximum duty cycle allowed for both PWM channels
+        PWM_MAX_DUTY_CYCLE = 1 - 1e-3;
         
         % The PWM frequency of the PWM channels
-        PWM_FREQUENCY = 1e6;
+        PWM_FREQUENCY = 1e3;
         
         MAX_PWM_ATTEMPTS = 10;
         
@@ -129,8 +129,28 @@ classdef DAQBox < handle
             %   Automatically creates the input and output sessions used
             %   for measurements and PWM pulse generation
             
+            s = 0;
+            n = 7;
+            
+            % Create a waitbar
+            f = waitbar(s/n,'Please wait...');
+            cuiWaitbar(s/n,'Please wait...');
+            
             obj.UseDAQHardware = false;
             
+            
+            message = 'Checking for DAQ devices...';
+            try
+                s = s + 1;
+                % Attempt to update the waitbar progress and label
+                waitbar(s/n,f,message);
+                % Update the cuiWaitbar progress and label
+                cuiWaitbar(s/n,message);
+            catch
+                % Recreate the waitbar if was closed by the user
+                f = waitbar(s/n,message);
+                cuiWaitbar(s/n,message);
+            end
             if isempty(obj.device)
                 % Check for DAQ devices before attempting to create
                 % sessions
@@ -145,18 +165,109 @@ classdef DAQBox < handle
                 end
             end
             
+            
+            message = 'Creating Input Session...';
+            try
+                s = s + 1;
+                % Attempt to update the waitbar progress and label
+                waitbar(s/n,f,message);
+                % Update the cuiWaitbar progress and label
+                cuiWaitbar(s/n,message);
+            catch
+                % Recreate the waitbar if was closed by the user
+                f = waitbar(s/n,message);
+                cuiWaitbar(s/n,message);
+            end
             obj.createInputSession();
+            
+            
+            message = 'Creating Output Session...';
+            try
+                s = s + 1;
+                % Attempt to update the waitbar progress and label
+                waitbar(s/n,f,message);
+                % Update the cuiWaitbar progress and label
+                cuiWaitbar(s/n,message);
+            catch
+                % Recreate the waitbar if was closed by the user
+                f = waitbar(s/n,message);
+                cuiWaitbar(s/n,message);
+            end
             obj.createOutputSession();
+            
+            
+            message = 'Creating Clock Session...';
+            try
+                s = s + 1;
+                % Attempt to update the waitbar progress and label
+                waitbar(s/n,f,message);
+                % Update the cuiWaitbar progress and label
+                cuiWaitbar(s/n,message);
+            catch
+                % Recreate the waitbar if was closed by the user
+                f = waitbar(s/n,message);
+                cuiWaitbar(s/n,message);
+            end
             obj.createClockSession();
             
+            
+            message = 'Loading Default DAQ Box Configuration...';
+            try
+                s = s + 1;
+                % Attempt to update the waitbar progress and label
+                waitbar(s/n,f,message);
+                % Update the cuiWaitbar progress and label
+                cuiWaitbar(s/n,message);
+            catch
+                % Recreate the waitbar if was closed by the user
+                f = waitbar(s/n,message);
+                cuiWaitbar(s/n,message);
+            end
             obj.loadConfigFile('default');
             
+            
+            message = 'Creating DAQ Trigger...';
+            try
+                s = s + 1;
+                % Attempt to update the waitbar progress and label
+                waitbar(s/n,f,message);
+                % Update the cuiWaitbar progress and label
+                cuiWaitbar(s/n,message);
+            catch
+                % Recreate the waitbar if was closed by the user
+                f = waitbar(s/n,message);
+                cuiWaitbar(s/n,message);
+            end
             % Create the DAQTrigger object
             obj.daqTrigger = DAQTrigger(obj.device);
             
+
             if obj.UseDAQHardware
-                fprintf('\tDAQ Box configuration complete\n')
+                message = 'DAQ Box configuration complete';
+            else
+                message = 'Simulated DAQ Box is ready';
             end
+            try
+                s = s + 1;
+                % Attempt to update the waitbar progress and label
+                waitbar(s/n,f,message);
+                % Update the cuiWaitbar progress and label
+                cuiWaitbar(s/n,message);
+            catch
+                % Recreate the waitbar if was closed by the user
+                f = waitbar(1,message);
+                cuiWaitbar(1,message);
+            end
+            
+            pause(0.5)
+            
+            % Attempt to close the waitbar
+            try close(f); catch, end
+            
+            disp(' ')
+            disp(' ')
+            disp(' ')
+            disp(' ')
         end
         
         function pwmRunning = get.PWMRunning(obj)
@@ -405,12 +516,12 @@ classdef DAQBox < handle
                         disp(' ')
                         
                         % Prompt the user to select a file
-                        [configFileName, configFilePath] = uigetfile('*.cfg');
+                        [configFileName, configFilePath] = uigetfile('./config/*.cfg');
                 end
                 
             else
                 % Prompt the user to select a file
-                [configFileName, configFilePath] = uigetfile('*.cfg');
+                [configFileName, configFilePath] = uigetfile('./config/*.cfg');
             end
             
             switch configFileName

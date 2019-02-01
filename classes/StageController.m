@@ -69,7 +69,7 @@ classdef StageController < handle
         % the target temperature. The error for both samples must be less
         % than this value before the stage controller will continue to the
         % next stage. Units: [\Delta degrees C]
-        MINIMUM_ACCEPTABLE_ERROR = 1
+        MINIMUM_ACCEPTABLE_ERROR = 2
     end
     
     methods
@@ -396,14 +396,19 @@ classdef StageController < handle
                     latestCurrent_Ref, latestCurrent_Samp]...
                     = obj.daqBox.takeMeasurement();
                 
-                if obj.UseAppUI
-                    % Update the clocks with the new values
-                    obj.app.updateOperationClock(latestSerialDate);
-                    
-                    % Update the Live Data gauges
-                    obj.app.updateOperationGauges(latestTemp_Ref, latestTemp_Samp, latestCurrent_Ref, latestCurrent_Samp);
-                    
-                end
+                 % Initialize the TargetTemp to zero
+                 obj.TargetTemp = 0;
+                
+                 if obj.UseAppUI
+                     % Update the clocks with the new values
+                     obj.app.updateOperationClock(latestSerialDate);
+                     
+                     % Update the Live Data gauges
+                     obj.app.updateOperationGauges(obj.TargetTemp,...
+                         latestTemp_Ref, latestTemp_Samp,...
+                         latestCurrent_Ref, latestCurrent_Samp);
+                     
+                 end
                 
                 
                 % Read and store the temperature control parameters for the
@@ -885,7 +890,9 @@ classdef StageController < handle
             obj.liveData.calculateLatestHeatFlow(obj.daqBox.HEATING_COIL_VOLTAGE);
             
             if obj.UseAppUI
-                obj.app.updateOperationGauges(latestTemp_Ref, latestTemp_Samp, latestCurrent_Ref, latestCurrent_Samp);
+                obj.app.updateOperationGauges(obj.TargetTemp,...
+                    latestTemp_Ref, latestTemp_Samp,...
+                    latestCurrent_Ref, latestCurrent_Samp);
                 
             end
             

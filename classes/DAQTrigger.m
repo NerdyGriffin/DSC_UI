@@ -120,6 +120,7 @@ classdef DAQTrigger < handle
                     obj.DEVICE_ID, obj.CHANNEL_ID_TRIGGER, 'PulseGeneration');
                 obj.TriggerOutputChannel.Frequency = obj.PWM_FREQUENCY;
                 obj.TriggerOutputChannel.Name = 'DAQ Trigger Output';
+                obj.TriggerSession.IsContinuous = true;
                 disp('Created: counter output channel for DAQ trigger')
                 
                 fprintf('\nCreating trigger connection...\n')
@@ -127,7 +128,7 @@ classdef DAQTrigger < handle
                 
                 % TRIGGER CONNECTION CODE HERE TRIGGER CONNECTION CODE HERE
                 % TRIGGER CONNECTION CODE HERE
-                warning(['Trigger connection code is not yet implemented.'...
+                warning(['Trigger connection code is not yet implemented.\n'...
                     'MATLAB timer objects will be used to trigger the data acquisition instead'])
                 
                 % CHANGE THE FOLLOWING LINE TO TRUE ONCE THE TRIGGER
@@ -135,8 +136,8 @@ classdef DAQTrigger < handle
                 obj.UseDAQHardware = false; %------------------------------
                 
                 % Confirm that the session was created successfully (for
-                % debug purposes)
-                disp(obj.TriggerSession)
+                % debug purposes) REMOVE THIS ONCE TRIGGER IS WORKING
+                %disp(obj.TriggerSession)
                 
             end
         end
@@ -272,7 +273,7 @@ classdef DAQTrigger < handle
             
             obj.TriggerSemaphore.wait();
             
-            disp('Done waiting for trigger')
+            disp('Done waiting for trigger') %DEBUG MESSAGE
         end
         
         function stop(obj)
@@ -313,7 +314,7 @@ classdef DAQTrigger < handle
             
             obj.Running = 'off';
             
-            disp('Trigger stopped')
+            disp('Trigger stopped') %DEBUG MESSAGE
         end
     end
 end
