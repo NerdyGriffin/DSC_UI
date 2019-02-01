@@ -3,6 +3,8 @@ UI and real-time equipment control software for a Differential Scanning Calorime
 
 Author: Christian Kunis (Nov 29 2018)
 
+NOTE: This project is currently a work-in-progress. Not all features have been implemented and all code may be subject to change.
+
 --------Graphic UI Instructions--------
 
 To run the Graphical User Interface (GUI), run the file DSC_GUI_APP.mlapp or type DSC_GUI_APP in the MATLAB command window.
