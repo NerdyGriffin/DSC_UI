@@ -62,8 +62,11 @@ classdef StageController < handle
     end
     
     properties (Constant)
-        % the file path to the default staging file
-        DEFAULT_STAGING = './staging/defaultStaging.stage';
+        % the file path to load the default staging file
+        DEFAULT_STAGING_LOAD_PATH = './staging/defaultStaging.stage';
+        
+        % the file path to save a new staging file
+        DEFAULT_STAGING_SAVE_PATH = './staging/newStaging.stage';
         
         % The minimum acceptable error between the sample temperatures and
         % the target temperature. The error for both samples must be less
@@ -137,7 +140,7 @@ classdef StageController < handle
             
             switch loadPreset
                 case 'default'
-                    stagingFileName = obj.DEFAULT_STAGING;
+                    stagingFileName = obj.DEFAULT_STAGING_LOAD_PATH;
                     
                 otherwise
                     % Prompt the user to select a file
@@ -150,7 +153,7 @@ classdef StageController < handle
                     % if the user closes the file selection window
                     obj.TemperatureControlStaging = [];
                     
-                case obj.DEFAULT_STAGING
+                case obj.DEFAULT_STAGING_LOAD_PATH
                     % Read the staging parameters from the default_DSC
                     % Staging.stage file
                     obj.TemperatureControlStaging = xlsread(stagingFileName);
@@ -172,7 +175,7 @@ classdef StageController < handle
             
             % Prompt the user to select a file
             [stagingFileName, stagingFilePath] = uiputfile(...
-                '*.stage', 'Save Staging File', './staging/newStaging.stage');
+                '*.stage', 'Save Staging File', obj.DEFAULT_STAGING_SAVE_PATH);
             
             switch stagingFileName
                 case 0
@@ -961,18 +964,55 @@ classdef StageController < handle
             %performAutosave
             %   Save a backup of the app, daqBox, and liveData objects as a
             %   .mat file
-            autosaveTest = tic;
-            % Assign the current DSC objects to temporary variables
-            app = obj.app;
-            daqBox = obj.daqBox;
-            liveData = obj.liveData;
             
-            % Save the temporary variables to .mat files
-            save('./autosave/autosave_app.mat', 'app')
-            save('./autosave/autosave_daqBox.mat', 'daqBox')
-            save('./autosave/autosave_liveData.mat', 'liveData')
+            % Try to autosave the app object
+            try
+                % Assign the current app object to a temporary variable
+                app = obj.app;
+                
+                % Save the temporary variable to a .mat file
+                save('./autosave/autosave_app.mat', 'app')
+                
+            catch ME
+                % If an autosave error occurs while an experiment is running,
+                % rethrow the error
+                if obj.ExperimentInProgress
+                    rethrow(ME)
+                end
+            end
             
-            toc(autosaveTest)
+            % Try to autosave the DAQBox object
+            try
+                % Assign the current DAQBox object to a temporary variable
+                daqBox = obj.daqBox;
+                
+                % Save the temporary variable to a .mat file
+                save('./autosave/autosave_daqBox.mat', 'daqBox')
+                
+            catch ME
+                % If an autosave error occurs while an experiment is running,
+                % rethrow the error
+                if obj.ExperimentInProgress
+                    rethrow(ME)
+                end
+            end
+            
+            % Try to autosave the DSCData object
+            try
+                % Assign the current DSCData object to a temporary variable
+                liveData = obj.liveData;
+                
+                % Save the temporary variable to a .mat file
+                save('./autosave/autosave_liveData.mat', 'liveData')
+                
+            catch ME
+                % If an autosave error occurs while an experiment is running,
+                % rethrow the error
+                if obj.ExperimentInProgress
+                    rethrow(ME)
+                end
+            end
+            
         end
     end
 end
@@ -985,5 +1025,5 @@ end
 function autosaveTimerFcn(~, ~, stageController)
 %autosaveTimerFcn
 %   The TimerFcn callback for performing an autosave
-stageController.performAtuosave();
+stageController.performAutosave();
 end

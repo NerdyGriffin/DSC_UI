@@ -65,8 +65,14 @@ classdef DAQBox < handle
     end
     
     properties (Constant)
-        % The file path to the default config file
+        % The file path to load the default config file
         DEFAULT_CONFIG = './config/defaultConfig.cfg';
+        
+        % The file path for loading new config files
+        CONFIG_LOAD_PATH = './config/*.cgf';
+
+        % The file path for saving new config files
+        CONFIG_SAVE_PATH = './config/newConfig.cgf';
         
         CONFIG_XL_RANGE = 'B2:B10';
         
@@ -129,6 +135,9 @@ classdef DAQBox < handle
             %   Automatically creates the input and output sessions used
             %   for measurements and PWM pulse generation
             
+            % Add the DSC subdirectories to the MATLAB search path
+            updatepath();
+
             s = 0;
             n = 7;
             
@@ -516,12 +525,12 @@ classdef DAQBox < handle
                         disp(' ')
                         
                         % Prompt the user to select a file
-                        [configFileName, configFilePath] = uigetfile('./config/*.cfg');
+                        [configFileName, configFilePath] = uigetfile(obj.CONFIG_LOAD_PATH);
                 end
                 
             else
                 % Prompt the user to select a file
-                [configFileName, configFilePath] = uigetfile('./config/*.cfg');
+                [configFileName, configFilePath] = uigetfile(obj.CONFIG_LOAD_PATH);
             end
             
             switch configFileName
@@ -566,7 +575,7 @@ classdef DAQBox < handle
             
             % Prompt the user to select a file
             [configFileName, configFilePath] = uiputfile(...
-                '*.cfg', 'Save Config File', './config/newConfig.cfg');
+                '*.cfg', 'Save Config File', obj.CONFIG_SAVE_PATH);
             
             switch configFileName
                 case 0
@@ -677,7 +686,7 @@ classdef DAQBox < handle
                     + obj.CurrentCalibrationOffset_Samp;
                 
                 % Release the daq hardware when done
-                obj.InputSession.release;
+                %obj.InputSession.release;
                 
             else
                 % Simulate the input values if a DAQ Box is not connected
@@ -695,7 +704,8 @@ classdef DAQBox < handle
             
             if obj.UseDAQHardware
                 try
-                    [~, serialDate] = obj.ClockSession.inputSingleScan;
+                    [~, ~, serialDate]...
+                        = startForeground(obj.ClockSession);
                 catch ME
                     warning('An error occured while trying to read the serial date from the DAQ Box')
                     rethrow(ME)

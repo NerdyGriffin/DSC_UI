@@ -90,21 +90,8 @@ classdef DSC_CUI_APP < handle
             %DSC_CUI_APP Construct an instance of this class
             %   Detailed explanation goes here
             
-            % Add the DSC subdirectories to the search path
-            for n = 3:-1:0
-                if n > 0
-                    [~, currentDirectory] = fileparts(pwd);
-                    switch currentDirectory
-                        case 'DSC'
-                            addpath(genpath('.'))
-                            break
-                        otherwise
-                            cd ..
-                    end
-                else
-                    error("The current working directory is not within the 'DSC' folder")
-                end
-            end
+            % Add the DSC subdirectories to the MATLAB search path
+            updatepath();
             
             disp('Starting DSC App. Please Wait...')
             

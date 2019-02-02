@@ -44,7 +44,7 @@ classdef DAQTrigger < handle
         DEVICE_ID = 'Dev1';
         
         % The channel ID's for each sensor
-        CHANNEL_ID_TRIGGER = 'ctr0';
+        CHANNEL_ID_TRIGGER = 'ctr2';
         
         % The PWM frequency of the PWM channels
         PWM_FREQUENCY = 1e6;
@@ -58,6 +58,9 @@ classdef DAQTrigger < handle
             %DAQTrigger Construct an instance of this class
             %   Detailed explanation goes here
             
+            % Add the DSC subdirectories to the MATLAB search path
+            updatepath();
+
             obj.UseDAQHardware = false;
             
             if nargin > 0
@@ -89,7 +92,7 @@ classdef DAQTrigger < handle
             %   Creates and configures the session that is used to trigger
             %   data aquisition
             
-            if isempty(obj.device)
+            if true %isempty(obj.device)
                 % Delete the session object if no DAQ devices are found
                 delete(obj.TriggerSession)
                 
@@ -134,10 +137,6 @@ classdef DAQTrigger < handle
                 % CHANGE THE FOLLOWING LINE TO TRUE ONCE THE TRIGGER
                 % CONNECTION CODE IS IMPLEMENTED
                 obj.UseDAQHardware = false; %------------------------------
-                
-                % Confirm that the session was created successfully (for
-                % debug purposes) REMOVE THIS ONCE TRIGGER IS WORKING
-                %disp(obj.TriggerSession)
                 
             end
         end
