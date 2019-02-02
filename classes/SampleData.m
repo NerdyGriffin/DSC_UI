@@ -13,6 +13,10 @@ classdef SampleData < handle
     methods
         function obj = SampleData(material, mass, specificHeat)
             %SampleData Construct an instance of this class
+            
+            % Add the DSC subdirectories to the MATLAB search path
+            updatepath();
+            
             if nargin > 0
                 obj.Material = material;
                 if nargin > 1

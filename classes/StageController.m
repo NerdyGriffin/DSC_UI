@@ -80,6 +80,9 @@ classdef StageController < handle
             %StageController Construct an instance of this class
             %   Detailed explanation goes here
             
+            % Add the DSC subdirectories to the MATLAB search path
+            updatepath();
+            
             if nargin > 0
                 obj.app = app;
                 obj.UseAppUI = true;
@@ -399,19 +402,19 @@ classdef StageController < handle
                     latestCurrent_Ref, latestCurrent_Samp]...
                     = obj.daqBox.takeMeasurement();
                 
-                 % Initialize the TargetTemp to zero
-                 obj.TargetTemp = 0;
+                % Initialize the TargetTemp to zero
+                obj.TargetTemp = 0;
                 
-                 if obj.UseAppUI
-                     % Update the clocks with the new values
-                     obj.app.updateOperationClock(latestSerialDate);
-                     
-                     % Update the Live Data gauges
-                     obj.app.updateOperationGauges(obj.TargetTemp,...
-                         latestTemp_Ref, latestTemp_Samp,...
-                         latestCurrent_Ref, latestCurrent_Samp);
-                     
-                 end
+                if obj.UseAppUI
+                    % Update the clocks with the new values
+                    obj.app.updateOperationClock(latestSerialDate);
+                    
+                    % Update the Live Data gauges
+                    obj.app.updateOperationGauges(obj.TargetTemp,...
+                        latestTemp_Ref, latestTemp_Samp,...
+                        latestCurrent_Ref, latestCurrent_Samp);
+                    
+                end
                 
                 
                 % Read and store the temperature control parameters for the
@@ -1012,7 +1015,6 @@ classdef StageController < handle
                     rethrow(ME)
                 end
             end
-            
         end
     end
 end

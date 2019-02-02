@@ -139,6 +139,9 @@ classdef DSCData < handle
             %DSCData Construct an instance of this class
             %   Detailed explanation goes here
             
+            % Add the DSC subdirectories to the MATLAB search path
+            updatepath();
+            
             if nargin > 1
                 obj.ReferenceSampleData = referenceSampleData;
             else
@@ -594,61 +597,61 @@ classdef DSCData < handle
         end
         
         function dataLoadStatus = loadMATFile(obj,...
-            fileName, filePath, varargin)
-        %loadMATFile
-        %   Read the values from a selected .mat file and store
-        %   them in the appropriate properties
-        
-        if nargin > 1
-            dataFileName = fileName;
-            if nargin > 2
-                dataFilePath = filePath;
+                fileName, filePath, varargin)
+            %loadMATFile
+            %   Read the values from a selected .mat file and store
+            %   them in the appropriate properties
+            
+            if nargin > 1
+                dataFileName = fileName;
+                if nargin > 2
+                    dataFilePath = filePath;
+                else
+                    dataFilePath = '';
+                end
             else
-                dataFilePath = '';
+                % Prompt the user to select a file
+                [dataFileName, dataFilePath] = uigetfile(obj.DEFAULT_MAT_LOAD_PATH);
             end
-        else
-        % Prompt the user to select a file
-        [dataFileName, dataFilePath] = uigetfile(obj.DEFAULT_MAT_LOAD_PATH);
+            
+            switch dataFileName
+                case 0
+                    % Cancel the read operation and return status as false
+                    % if the user closes the file selection window
+                    dataLoadStatus = false;
+                    return
+                    
+                otherwise
+                    % Create fully-formed filename as a string
+                    dataFullPath = fullfile(dataFilePath, dataFileName);
+                    
+                    % Load the .mat files into a temporary struct variable
+                    S = load(dataFullPath);
+                    
+                    % Get each of the properties from the temporary struct
+                    % and store them in the appropriate properties
+                    obj.ReferenceSampleData = S.dscData.ReferenceSampleData;
+                    obj.TestSampleData = S.dscData.TestSampleData;
+                    obj.ExpStartSerialDate = S.dscData.ExpStartSerialDate;
+                    obj.StageStartSerialDates = S.dscData.StageStartSerialDates;
+                    obj.SerialDateData = S.dscData.SerialDateData;
+                    obj.TargetTempData = S.dscData.TargetTempData;
+                    obj.TempData_Ref = S.dscData.TempData_Ref;
+                    obj.TempData_Samp = S.dscData.TempData_Samp;
+                    obj.TempErrorData_Ref = S.dscData.TempErrorData_Ref;
+                    obj.TempErrorData_Samp = S.dscData.TempErrorData_Samp;
+                    obj.CurrentData_Ref = S.dscData.CurrentData_Ref;
+                    obj.CurrentData_Samp = S.dscData.CurrentData_Samp;
+                    obj.HeatFlowData_Ref = S.dscData.HeatFlowData_Ref;
+                    obj.HeatFlowData_Samp = S.dscData.HeatFlowData_Samp;
+                    obj.HeatFlowData_Diff = S.dscData.HeatFlowData_Diff;
+                    obj.PWMDutyCycleData_Ref = S.dscData.PWMDutyCycleData_Ref;
+                    obj.PWMDutyCycleData_Samp = S.dscData.PWMDutyCycleData_Samp;
+            end
         end
         
-        switch dataFileName
-            case 0
-                % Cancel the read operation and return status as false
-                % if the user closes the file selection window
-                dataLoadStatus = false;
-                return
-                
-            otherwise
-                % Create fully-formed filename as a string
-                dataFullPath = fullfile(dataFilePath, dataFileName);
-                
-                % Load the .mat files into a temporary struct variable
-                S = load(dataFullPath);
-                
-                % Get each of the properties from the temporary struct
-                % and store them in the appropriate properties
-                obj.ReferenceSampleData = S.dscData.ReferenceSampleData;
-                obj.TestSampleData = S.dscData.TestSampleData;
-                obj.ExpStartSerialDate = S.dscData.ExpStartSerialDate;
-                obj.StageStartSerialDates = S.dscData.StageStartSerialDates;
-                obj.SerialDateData = S.dscData.SerialDateData;
-                obj.TargetTempData = S.dscData.TargetTempData;
-                obj.TempData_Ref = S.dscData.TempData_Ref;
-                obj.TempData_Samp = S.dscData.TempData_Samp;
-                obj.TempErrorData_Ref = S.dscData.TempErrorData_Ref;
-                obj.TempErrorData_Samp = S.dscData.TempErrorData_Samp;
-                obj.CurrentData_Ref = S.dscData.CurrentData_Ref;
-                obj.CurrentData_Samp = S.dscData.CurrentData_Samp;
-                obj.HeatFlowData_Ref = S.dscData.HeatFlowData_Ref;
-                obj.HeatFlowData_Samp = S.dscData.HeatFlowData_Samp;
-                obj.HeatFlowData_Diff = S.dscData.HeatFlowData_Diff;
-                obj.PWMDutyCycleData_Ref = S.dscData.PWMDutyCycleData_Ref;
-                obj.PWMDutyCycleData_Samp = S.dscData.PWMDutyCycleData_Samp;
-        end
-    end
-    
-    function dataLoadStatus = loadDataFile(obj,...
-        fileName, filePath, varargin)
+        function dataLoadStatus = loadDataFile(obj,...
+                fileName, filePath, varargin)
             %loadDataFile
             %   Read the values from a selected xlsx data file and store
             %   them in the appropriate properties
@@ -713,47 +716,47 @@ classdef DSCData < handle
         end
         
         function dataSaveStatus = saveMATFile(obj,...
-            fileName, filePath, varargin)
-        %saveMATFile
-        %   Save the current DSCData object as a .mat file
-        
-        if nargin > 1
-            dataFileName = fileName;
-            if nargin > 2
-                dataFilePath = filePath;
+                fileName, filePath, varargin)
+            %saveMATFile
+            %   Save the current DSCData object as a .mat file
+            
+            if nargin > 1
+                dataFileName = fileName;
+                if nargin > 2
+                    dataFilePath = filePath;
+                else
+                    dataFilePath = '';
+                end
             else
-                dataFilePath = '';
+                % Prompt the user to select a file
+                [dataFileName, dataFilePath] = uiputfile(...
+                    '*.mat', 'Save Data File', obj.DEFAULT_MAT_SAVE_PATH);
             end
-        else
-            % Prompt the user to select a file
-            [dataFileName, dataFilePath] = uiputfile(...
-                '*.mat', 'Save Data File', obj.DEFAULT_MAT_SAVE_PATH);
+            
+            switch dataFileName
+                case 0
+                    % Cancel the save operation if the user closes the file
+                    % selection window
+                    dataSaveStatus = false;
+                    return
+                    
+                otherwise
+                    % Create fully-formed filename as a string
+                    dataFullPath = fullfile(dataFilePath, dataFileName);
+                    
+                    % Copy the current DSCData object into a temporary
+                    % variable
+                    dscData = obj;
+                    
+                    % Save a .mat file
+                    save(dataFullPath, 'dscData')
+                    
+                    dataSaveStatus = true;
+            end
         end
         
-        switch dataFileName
-            case 0
-                % Cancel the save operation if the user closes the file
-                % selection window
-                dataSaveStatus = false;
-                return
-                
-            otherwise
-                % Create fully-formed filename as a string
-                dataFullPath = fullfile(dataFilePath, dataFileName);
-                
-                % Copy the current DSCData object into a temporary
-                % variable
-                dscData = obj;
-                
-                % Save a .mat file
-                save(dataFullPath, 'dscData')
-                
-                dataSaveStatus = true;
-        end
-    end
-    
-    function dataSaveStatus = saveDataFile(obj,...
-        fileName, filePath, varargin)
+        function dataSaveStatus = saveDataFile(obj,...
+                fileName, filePath, varargin)
             %saveDataFile
             %   Save the measured data from a DSC experiment to a .xlsx
             %   file
@@ -766,9 +769,9 @@ classdef DSCData < handle
                     dataFilePath = '';
                 end
             else
-            % Prompt the user to select a file
-            [dataFileName, dataFilePath] = uiputfile(...
-                '*.xlsx', 'Save Data File', obj.DEFAULT_XLSX_SAVE_PATH);
+                % Prompt the user to select a file
+                [dataFileName, dataFilePath] = uiputfile(...
+                    '*.xlsx', 'Save Data File', obj.DEFAULT_XLSX_SAVE_PATH);
             end
             
             switch dataFileName
@@ -787,7 +790,7 @@ classdef DSCData < handle
                     
                     % Create a row cell array of the column headers
                     columnHeaders = {'Timestamps (Serial Date)'...
-                    'Elapsed Time (sec)',...
+                        'Elapsed Time (sec)',...
                         'Target Temperature (*C)',...
                         'Reference Sample Temperature (*C)',...
                         'Test Sample Temperature (*C)',...
@@ -840,35 +843,35 @@ classdef DSCData < handle
                     % Correct for differences in the number of rows in each
                     % cell array
                     if size(stageStartSerialDataCellArray, 1) < size(dataCellArray, 1)...
-                        && size(sampleInfoRowHeaders, 1) < size(dataCellArray, 1)
-                    MaxRowIndex = size(dataCellArray, 1);
-                    
-                    paddingColumn{MaxRowIndex, 1} = '';
-                    expStartSerialDataCellArray{MaxRowIndex, 1} = [];
-                    stageStartSerialDataCellArray{MaxRowIndex, 1} = [];
-                    sampleInfoRowHeaders{MaxRowIndex, 1} = '';
-                    sampleInfoCellArray{MaxRowIndex, 2} = [];
-                    
-                elseif size(dataCellArray, 1) < size(stageStartSerialDataCellArray, 1)...
-                        && size(sampleInfoRowHeaders, 1) < size(stageStartSerialDataCellArray, 1)
-                    MaxRowIndex = size(stageStartSerialDataCellArray, 1);
-                    
-                    paddingColumn{MaxRowIndex, 1} = '';
-                    dataCellArray{MaxRowIndex, 2} = [];
-                    expStartSerialDataCellArray{MaxRowIndex, 1} = [];
-                    sampleInfoRowHeaders{MaxRowIndex, 1} = '';
-                    sampleInfoCellArray{MaxRowIndex, 2} = [];
-                    
-                elseif size(dataCellArray, 1) < size(sampleInfoRowHeaders, 1)...
-                        && size(stageStartSerialDataCellArray, 1) < size(sampleInfoRowHeaders, 1)
-                    MaxRowIndex = size(sampleInfoRowHeaders, 1);
-                    
-                    paddingColumn{MaxRowIndex, 1} = '';
-                    dataCellArray{MaxRowIndex, 2} = [];
-                    expStartSerialDataCellArray{MaxRowIndex, 1} = [];
-                    stageStartSerialDataCellArray{MaxRowIndex, 1} = [];
-                    
-                end
+                            && size(sampleInfoRowHeaders, 1) < size(dataCellArray, 1)
+                        MaxRowIndex = size(dataCellArray, 1);
+                        
+                        paddingColumn{MaxRowIndex, 1} = '';
+                        expStartSerialDataCellArray{MaxRowIndex, 1} = [];
+                        stageStartSerialDataCellArray{MaxRowIndex, 1} = [];
+                        sampleInfoRowHeaders{MaxRowIndex, 1} = '';
+                        sampleInfoCellArray{MaxRowIndex, 2} = [];
+                        
+                    elseif size(dataCellArray, 1) < size(stageStartSerialDataCellArray, 1)...
+                            && size(sampleInfoRowHeaders, 1) < size(stageStartSerialDataCellArray, 1)
+                        MaxRowIndex = size(stageStartSerialDataCellArray, 1);
+                        
+                        paddingColumn{MaxRowIndex, 1} = '';
+                        dataCellArray{MaxRowIndex, 2} = [];
+                        expStartSerialDataCellArray{MaxRowIndex, 1} = [];
+                        sampleInfoRowHeaders{MaxRowIndex, 1} = '';
+                        sampleInfoCellArray{MaxRowIndex, 2} = [];
+                        
+                    elseif size(dataCellArray, 1) < size(sampleInfoRowHeaders, 1)...
+                            && size(stageStartSerialDataCellArray, 1) < size(sampleInfoRowHeaders, 1)
+                        MaxRowIndex = size(sampleInfoRowHeaders, 1);
+                        
+                        paddingColumn{MaxRowIndex, 1} = '';
+                        dataCellArray{MaxRowIndex, 2} = [];
+                        expStartSerialDataCellArray{MaxRowIndex, 1} = [];
+                        stageStartSerialDataCellArray{MaxRowIndex, 1} = [];
+                        
+                    end
                     
                     % Join the cell arrays to add the column headers to the
                     % respective data

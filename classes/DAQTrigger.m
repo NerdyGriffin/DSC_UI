@@ -35,7 +35,7 @@ classdef DAQTrigger < handle
         
         
         % The time in seconds between executions of the trigger
-        TriggerPeriod = 0.1;
+        TriggerPeriod = 0.2;
         
     end
     
@@ -60,7 +60,7 @@ classdef DAQTrigger < handle
             
             % Add the DSC subdirectories to the MATLAB search path
             updatepath();
-
+            
             obj.UseDAQHardware = false;
             
             if nargin > 0
