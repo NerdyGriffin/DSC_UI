@@ -3,5 +3,9 @@
     "editor.wordWrap": "on",
     "editor.renderWhitespace": "boundary",
     "editor.mouseWheelZoom": true,
-    "editor.rulers": [80, 160]
+    "editor.rulers": [
+        80,
+        160
+    ],
+    "editor.trimAutoWhitespace": false
 }
