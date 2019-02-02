@@ -1,0 +1,12 @@
+-------------------------------------------------------------------------------
+List of DSC CUI commands:
+
+
+exit                Exit the DSC CUI program
+
+start daqbox        Check for DAQ Box hardware and create the nessecary sessions
+start daq box       Same as 'start daqbox'
+
+start experiment    Start a DSC experiment using the current staging table
+                    (A default staging table is loading if the user has not
+                    loaded a staging table or created a new staging table)

@@ -43,8 +43,10 @@ classdef StageController < handle
         % experiment objects at regular intervals
         AutosaveTimer timer
         
+        AutosaveTimerExecutionMode = 'fixedRate'
+        
         % The time in seconds between executions of the autosave function
-        AutosavePeriod = 30;
+        AutosavePeriod = 60
         
         StartTemp
         RampUpRate
@@ -60,17 +62,26 @@ classdef StageController < handle
     end
     
     properties (Constant)
+        % the file path to load the default staging file
+        DEFAULT_STAGING_LOAD_PATH = './staging/defaultStaging.stage';
+        
+        % the file path to save a new staging file
+        DEFAULT_STAGING_SAVE_PATH = './staging/newStaging.stage';
+        
         % The minimum acceptable error between the sample temperatures and
         % the target temperature. The error for both samples must be less
         % than this value before the stage controller will continue to the
         % next stage. Units: [\Delta degrees C]
-        MINIMUM_ACCEPTABLE_ERROR = 1
+        MINIMUM_ACCEPTABLE_ERROR = 2
     end
     
     methods
         function obj = StageController(app, TemperatureControlStaging)
             %StageController Construct an instance of this class
             %   Detailed explanation goes here
+            
+            % Add the DSC subdirectories to the MATLAB search path
+            updatepath();
             
             if nargin > 0
                 obj.app = app;
@@ -132,7 +143,7 @@ classdef StageController < handle
             
             switch loadPreset
                 case 'default'
-                    stagingFileName = 'default_DSC Staging.stage';
+                    stagingFileName = obj.DEFAULT_STAGING_LOAD_PATH;
                     
                 otherwise
                     % Prompt the user to select a file
@@ -145,7 +156,7 @@ classdef StageController < handle
                     % if the user closes the file selection window
                     obj.TemperatureControlStaging = [];
                     
-                case 'default_DSC Staging.stage'
+                case obj.DEFAULT_STAGING_LOAD_PATH
                     % Read the staging parameters from the default_DSC
                     % Staging.stage file
                     obj.TemperatureControlStaging = xlsread(stagingFileName);
@@ -167,7 +178,7 @@ classdef StageController < handle
             
             % Prompt the user to select a file
             [stagingFileName, stagingFilePath] = uiputfile(...
-                '*.stage', 'Save Staging File', 'DSC Staging.stage');
+                '*.stage', 'Save Staging File', obj.DEFAULT_STAGING_SAVE_PATH);
             
             switch stagingFileName
                 case 0
@@ -391,12 +402,17 @@ classdef StageController < handle
                     latestCurrent_Ref, latestCurrent_Samp]...
                     = obj.daqBox.takeMeasurement();
                 
+                % Initialize the TargetTemp to zero
+                obj.TargetTemp = 0;
+                
                 if obj.UseAppUI
                     % Update the clocks with the new values
                     obj.app.updateOperationClock(latestSerialDate);
                     
                     % Update the Live Data gauges
-                    obj.app.updateOperationGauges(latestTemp_Ref, latestTemp_Samp, latestCurrent_Ref, latestCurrent_Samp);
+                    obj.app.updateOperationGauges(obj.TargetTemp,...
+                        latestTemp_Ref, latestTemp_Samp,...
+                        latestCurrent_Ref, latestCurrent_Samp);
                     
                 end
                 
@@ -880,7 +896,9 @@ classdef StageController < handle
             obj.liveData.calculateLatestHeatFlow(obj.daqBox.HEATING_COIL_VOLTAGE);
             
             if obj.UseAppUI
-                obj.app.updateOperationGauges(latestTemp_Ref, latestTemp_Samp, latestCurrent_Ref, latestCurrent_Samp);
+                obj.app.updateOperationGauges(obj.TargetTemp,...
+                    latestTemp_Ref, latestTemp_Samp,...
+                    latestCurrent_Ref, latestCurrent_Samp);
                 
             end
             
@@ -914,12 +932,35 @@ classdef StageController < handle
             %startAutosaveTimer
             %   Put description here
             
+            % Create a new timer object for performing the autosave
+            obj.AutosaveTimer = timer(...
+                'ExecutionMode', obj.AutosaveTimerExecutionMode, ...
+                'Period', obj.AutosavePeriod, ...
+                'TimerFcn', {@autosaveTimerFcn, obj});
+            
+            % Start the timer object
+            start(obj.AutosaveTimer)
+            
         end
         
         function stopAutosaveTimer(obj)
             %stopAutosaveTimer
             %   Put description here
             
+            % Stop the trigger timer object
+            for i=1:10 % Retry up to 10 times if timer fails to stop
+                try
+                    stop(obj.AutosaveTimer)
+                    delete(obj.AutosaveTimer)
+                    break
+                catch ME
+                    if isvalid(obj.AutosaveTimer)
+                        if isequal(obj.AutosaveTimer.Running, 'on')
+                            rethrow(ME)
+                        end
+                    end
+                end
+            end
         end
         
         function performAutosave(obj)
@@ -927,16 +968,53 @@ classdef StageController < handle
             %   Save a backup of the app, daqBox, and liveData objects as a
             %   .mat file
             
-            % Assign the current DSC objects to temporary variables
-            app = obj.app;
-            daqBox = obj.daqBox;
-            liveData = obj.liveData;
+            % Try to autosave the app object
+            try
+                % Assign the current app object to a temporary variable
+                app = obj.app;
+                
+                % Save the temporary variable to a .mat file
+                save('./autosave/autosave_app.mat', 'app')
+                
+            catch ME
+                % If an autosave error occurs while an experiment is running,
+                % rethrow the error
+                if obj.ExperimentInProgress
+                    rethrow(ME)
+                end
+            end
             
-            % Save the temporary variables to .mat files
-            save('autosave_app.mat', 'app')
-            save('autosave_daqBox.mat', 'daqBox')
-            save('autosave_liveData.mat', 'liveData')
+            % Try to autosave the DAQBox object
+            try
+                % Assign the current DAQBox object to a temporary variable
+                daqBox = obj.daqBox;
+                
+                % Save the temporary variable to a .mat file
+                save('./autosave/autosave_daqBox.mat', 'daqBox')
+                
+            catch ME
+                % If an autosave error occurs while an experiment is running,
+                % rethrow the error
+                if obj.ExperimentInProgress
+                    rethrow(ME)
+                end
+            end
             
+            % Try to autosave the DSCData object
+            try
+                % Assign the current DSCData object to a temporary variable
+                liveData = obj.liveData;
+                
+                % Save the temporary variable to a .mat file
+                save('./autosave/autosave_liveData.mat', 'liveData')
+                
+            catch ME
+                % If an autosave error occurs while an experiment is running,
+                % rethrow the error
+                if obj.ExperimentInProgress
+                    rethrow(ME)
+                end
+            end
         end
     end
 end
@@ -949,5 +1027,5 @@ end
 function autosaveTimerFcn(~, ~, stageController)
 %autosaveTimerFcn
 %   The TimerFcn callback for performing an autosave
-stageController.performAtuosave();
+stageController.performAutosave();
 end

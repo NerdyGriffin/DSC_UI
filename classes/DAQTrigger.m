@@ -35,7 +35,7 @@ classdef DAQTrigger < handle
         
         
         % The time in seconds between executions of the trigger
-        TriggerPeriod = 0.1;
+        TriggerPeriod = 0.2;
         
     end
     
@@ -44,7 +44,7 @@ classdef DAQTrigger < handle
         DEVICE_ID = 'Dev1';
         
         % The channel ID's for each sensor
-        CHANNEL_ID_TRIGGER = 'ctr0';
+        CHANNEL_ID_TRIGGER = 'ctr2';
         
         % The PWM frequency of the PWM channels
         PWM_FREQUENCY = 1e6;
@@ -57,6 +57,9 @@ classdef DAQTrigger < handle
         function obj = DAQTrigger(device, varargin)
             %DAQTrigger Construct an instance of this class
             %   Detailed explanation goes here
+            
+            % Add the DSC subdirectories to the MATLAB search path
+            updatepath();
             
             obj.UseDAQHardware = false;
             
@@ -89,7 +92,7 @@ classdef DAQTrigger < handle
             %   Creates and configures the session that is used to trigger
             %   data aquisition
             
-            if isempty(obj.device)
+            if true %isempty(obj.device)
                 % Delete the session object if no DAQ devices are found
                 delete(obj.TriggerSession)
                 
@@ -120,6 +123,7 @@ classdef DAQTrigger < handle
                     obj.DEVICE_ID, obj.CHANNEL_ID_TRIGGER, 'PulseGeneration');
                 obj.TriggerOutputChannel.Frequency = obj.PWM_FREQUENCY;
                 obj.TriggerOutputChannel.Name = 'DAQ Trigger Output';
+                obj.TriggerSession.IsContinuous = true;
                 disp('Created: counter output channel for DAQ trigger')
                 
                 fprintf('\nCreating trigger connection...\n')
@@ -127,16 +131,12 @@ classdef DAQTrigger < handle
                 
                 % TRIGGER CONNECTION CODE HERE TRIGGER CONNECTION CODE HERE
                 % TRIGGER CONNECTION CODE HERE
-                warning(['Trigger connection code is not yet implemented.'...
+                warning(['Trigger connection code is not yet implemented.\n'...
                     'MATLAB timer objects will be used to trigger the data acquisition instead'])
                 
                 % CHANGE THE FOLLOWING LINE TO TRUE ONCE THE TRIGGER
                 % CONNECTION CODE IS IMPLEMENTED
                 obj.UseDAQHardware = false; %------------------------------
-                
-                % Confirm that the session was created successfully (for
-                % debug purposes)
-                disp(obj.TriggerSession)
                 
             end
         end
@@ -272,7 +272,7 @@ classdef DAQTrigger < handle
             
             obj.TriggerSemaphore.wait();
             
-            disp('should be done waiting')
+            disp('Done waiting for trigger') %DEBUG MESSAGE
         end
         
         function stop(obj)
@@ -313,7 +313,7 @@ classdef DAQTrigger < handle
             
             obj.Running = 'off';
             
-            disp('should be stopped')
+            disp('Trigger stopped') %DEBUG MESSAGE
         end
     end
 end
@@ -327,20 +327,17 @@ function singleTargetTimerFcn(~, ~, stageController)
 %singleTarget_TimerFcn
 %   The TimerFcn callback for single target heating
 stageController.singleTargetHeating();
-fprintf('\nDSC_CUI>> ')
 end
 
 function rampUpTimerFcn(~, ~, stageController)
 %rampUp_TimerFcn
 %   The TimerFcn callback for ramp up heating
 stageController.rampUpHeating();
-fprintf('\nDSC_CUI>> ')
 end
 
 function holdTempTimerFcn(~, ~, stageController)
 %holdTemp_TimerFcn
 %   The TimerFcn callback for hold temp heating
 stageController.holdTempHeating();
-fprintf('\nDSC_CUI>> ')
 end
 

@@ -3,6 +3,11 @@
 clc
 clear
 
+%%
+
+% Update the search path
+updatepath()
+
 %% Symbolic Constants
 
 KELVIN_CONVERSION_FACTOR = 273;
