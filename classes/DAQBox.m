@@ -109,6 +109,8 @@ classdef DAQBox < handle
         
         MAX_PWM_ATTEMPTS = 10;
         
+        AMPLIFIER_OFFSET = -1.25;
+        
         AMPLIFIER_CONVERSION_FACTOR = 0.005; % 5 mV/C = 0.005 V/C
         
         CURRENT_SENSOR_SENS = 0.1; % Sensitivity (Sens) 100 mV/A = 0.1 V/A
@@ -665,11 +667,13 @@ classdef DAQBox < handle
                 % equivalent temperature in degrees Celsius
                 switch obj.TempSensorSelection
                     case 'Thermocouple'
-                        tempReading_Ref = (rawTempAvg_Ref...
+                        tempReading_Ref = (...
+                            (rawTempAvg_Ref + obj.AMPLIFIER_OFFSET)...
                             ./ obj.AMPLIFIER_CONVERSION_FACTOR)...
                             + obj.TempCalibrationOffset_Ref;
                         
-                        tempReading_Samp = (rawTempAvg_Samp...
+                        tempReading_Samp = (...
+                            (rawTempAvg_Samp + obj.AMPLIFIER_OFFSET)...
                             ./ obj.AMPLIFIER_CONVERSION_FACTOR)...
                             + obj.TempCalibrationOffset_Samp;
                         
@@ -710,8 +714,16 @@ classdef DAQBox < handle
             
             if obj.UseDAQHardware
                 try
+                    % Read the input data from the session
                     [~, ~, serialDate]...
-                        = startForeground(obj.ClockSession);
+                        = startForeground(obj.InputSession);
+                    
+                    %[serialDate, ~, ~, ~, ~] = obj.takeMeasurement();
+                    
+                    %obj.ClockSession.release;
+                    %[~, ~, serialDate]...
+                    %    = startForeground(obj.ClockSession);
+                    %obj.ClockSession.release;
                 catch ME
                     warning('An error occured while trying to read the serial date from the DAQ Box')
                     rethrow(ME)
