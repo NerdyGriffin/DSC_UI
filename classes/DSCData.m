@@ -787,7 +787,7 @@ classdef DSCData < handle
                     
                 otherwise
                     % Save a .mat file backup
-                    obj.saveMATFile(dataFileName, dataFilePath);
+                    obj.saveMATFile([dataFileName, '.mat'], dataFilePath);
                     
                     % Create fully-formed filename as a string
                     dataFullPath = fullfile(dataFilePath, dataFileName);
