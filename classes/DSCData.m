@@ -628,6 +628,10 @@ classdef DSCData < handle
                     % Load the .mat files into a temporary struct variable
                     S = load(dataFullPath);
                     
+                    if ~isfield(S, 'dscData')
+                        error('The selected .mat file does not contain a DSCData object.')
+                    end
+                    
                     % Get each of the properties from the temporary struct
                     % and store them in the appropriate properties
                     obj.ReferenceSampleData = S.dscData.ReferenceSampleData;
@@ -783,7 +787,7 @@ classdef DSCData < handle
                     
                 otherwise
                     % Save a .mat file backup
-                    obj.saveMATFile(dataFileName, dataFilePath);
+                    obj.saveMATFile([dataFileName, '.mat'], dataFilePath);
                     
                     % Create fully-formed filename as a string
                     dataFullPath = fullfile(dataFilePath, dataFileName);

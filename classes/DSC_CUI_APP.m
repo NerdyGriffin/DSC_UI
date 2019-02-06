@@ -75,9 +75,9 @@ classdef DSC_CUI_APP < handle
         
         TemperatureUnits = 'Celsius'
         
-        
-        
-        
+    end
+    
+    properties (Access = private)
         % Command-Line User Interface Properties
         % ________________________________________________________________________________________________________________________________
         
@@ -200,6 +200,9 @@ classdef DSC_CUI_APP < handle
             
             % create a clean up object
             app.cleanupObj = onCleanup(@()cuiCleanup(app));
+            
+            % Set the command window format
+            format compact
             
             % Start the command-line user interface
             disp('DSC Command-Line User Interface - Dev Build (v1.2.0, Nov 27 2018, 21:58:42) [Author: Christian Kunis]')
@@ -429,23 +432,31 @@ classdef DSC_CUI_APP < handle
         function delete(app)
             % attempt to save then follow standard exit procedure
             if app.DataSaveStatus
-                SaveCheck = 'Yes';
+                SaveCheck = 'No';
             else
                 SaveCheck = questdlg(sprintf('WARNING: All unsaved data will be lost\nWould you like to save the current data?'));
             end
             
             switch SaveCheck
                 case 'Yes'
-                    % Attempt to save the data to a file
-                    app.DataSaveStatus = app.liveData.saveDataFile;
+                    % Attempt to save the data
+                    app.DataSaveStatus = app.liveData.saveDataFile();
                     
-                    app.updateMaintenanceUI();
-                    app.updateOperationUI();
+                    if app.DataSaveStatus
+                        %continue
+                    else
+                        return
+                    end
+                    
+                case 'No'
+                    %continue
                     
                 otherwise
-                    app.updateMaintenanceUI();
-                    app.updateOperationUI();
+                    return
             end
+            
+            try delete(app.daqBox); catch, end
+            try delete(app.stageController); catch, end
         end
     end
     

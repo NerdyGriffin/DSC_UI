@@ -7,14 +7,14 @@ NOTE: This project is currently a work-in-progress. Not all features have been i
 
 --------Graphic UI Instructions--------
 
-To run the Graphical User Interface (GUI), run the file DSC_GUI_APP.mlapp or type DSC_GUI_APP in the MATLAB command window.
+To run the Graphical User Interface (GUI), run the file classes/DSC_GUI_APP.mlapp or type Run_DSC_GUI in the MATLAB command window.
 
 
 --------Command-Line UI Instructions--------
 
 Note: The CUI is not yet full implemented. It is recommended that you use the GUI for any and all testing or experiments.
 
-To run the Command-Line User Interface (CUI), type DSC_CUI_APP in the MATLAB command window
+To run the Command-Line User Interface (CUI), type Run_DSC_CUI in the MATLAB command window
 
 To run an experiment with the CUI,
 type "start daq box" to start the daq box sessions,
