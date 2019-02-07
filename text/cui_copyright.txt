@@ -1,0 +1,4 @@
+DSC Command-Line User Interface  Copyright (C) 2019  Christian Kunis
+This program comes with ABSOLUTELY NO WARRANTY; for details type "show w".
+This is free software, and you are welcome to redistribute it
+under certain conditions; type "show c" for details.

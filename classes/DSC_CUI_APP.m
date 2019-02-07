@@ -1,3 +1,21 @@
+% DSC: UI and control systems for prototype DSC system
+%     Copyright (C) 2019  Christian Kunis
+% 
+%     This program is free software: you can redistribute it and/or modify
+%     it under the terms of the GNU General Public License as published by
+%     the Free Software Foundation, either version 3 of the License, or
+%     (at your option) any later version.
+% 
+%     This program is distributed in the hope that it will be useful,
+%     but WITHOUT ANY WARRANTY; without even the implied warranty of
+%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%     GNU General Public License for more details.
+% 
+%     You should have received a copy of the GNU General Public License
+%     along with this program. If not, see <https://www.gnu.org/licenses/>.
+%     
+%     You may contact the author at ckunis.contact@gmail.com
+
 classdef DSC_CUI_APP < handle
     %DSC_CUI_APP
     %   Responsible for providing a command-line user interface (CUI) for
@@ -81,7 +99,13 @@ classdef DSC_CUI_APP < handle
         % Command-Line User Interface Properties
         % ________________________________________________________________________________________________________________________________
         
+        LicenseFileName = './LICENSE'
+        
         HelpFileName = './text/cui_help.txt'
+        
+        CopyrightFileName = './text/cui_copyright.txt'
+        
+        WarrantyFileName = './text/warranty.txt'
         
     end
     
@@ -92,6 +116,8 @@ classdef DSC_CUI_APP < handle
             
             % Add the DSC subdirectories to the MATLAB search path
             updatepath();
+            
+            copyright = fileread(app.CopyrightFileName)
             
             disp('Starting DSC App. Please Wait...')
             
@@ -204,8 +230,10 @@ classdef DSC_CUI_APP < handle
             % Set the command window format
             format compact
             
+            copyright = fileread(app.CopyrightFileName)
+            
             % Start the command-line user interface
-            disp('DSC Command-Line User Interface - Dev Build (v1.2.0, Nov 27 2018, 21:58:42) [Author: Christian Kunis]')
+            %disp('DSC Command-Line User Interface - Dev Build (v1.2.0, Nov 27 2018, 21:58:42) [Author: Christian Kunis]')
             disp('Type "help", "copyright", or "credits" for more information.')
             while true
                 try
@@ -217,20 +245,28 @@ classdef DSC_CUI_APP < handle
                 
                 switch lower(userInput)
                     case 'help'
-                        app.displayHelpMenu;
+                        help = fileread(app.HelpFileName)
                         
                     case 'copyright'
-                        disp('This software has no copyright information')
+                        copyright = fileread(app.CopyrightFileName)
+                        
+                    case 'show w'
+                        warranty = fileread(app.WarrantyFileName)
+                        
+                    case 'show c'
+                        license = fileread(app.LicenseFileName)
+                        
                     case 'credits'
                         disp('Author: Christian Kunis')
+                        disp('Email: ckunis.contact@gmail.com')
                         
                     case {'start daqbox', 'start daq box'}
                         disp('Starting DAQ Box configuration...')
-                        app.startDAQBox;
+                        app.startDAQBox();
                         
                     case 'start experiment'
                         disp('Starting DSC Experiment...')
-                        app.startExperiment;
+                        app.startExperiment();
                         
                     case 'exit'
                         % debug message
@@ -273,14 +309,6 @@ classdef DSC_CUI_APP < handle
             %METHOD1 Summary of this method goes here
             %   Detailed explanation goes here
             outputArg = app.Property1 + inputArg;
-        end
-        
-        function displayHelpMenu(app)
-            %displayHelpMenu
-            %   Display the help menu, which contains a list of commands
-            %   for the DSC CUI
-            helpText = fileread(app.HelpFileName);
-            disp(helpText)
         end
         
         function startDAQBox(app)
