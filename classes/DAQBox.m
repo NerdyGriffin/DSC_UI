@@ -42,9 +42,6 @@ classdef DAQBox < handle
         % The session for controlling the power output to the heating coils
         OutputSession daq.ni.Session
         
-        % The session for reading the current time as a serial date number
-        ClockSession daq.ni.Session
-        
         CurrentChannel_Ref
         CurrentChannel_Samp
         
@@ -104,7 +101,6 @@ classdef DAQBox < handle
         CHANNEL_ID_CURRENT_SAMP = 'ai4';
         CHANNEL_ID_HEATING_COIL_REF = 'ctr0';
         CHANNEL_ID_HEATING_COIL_SAMP = 'ctr1';
-        CHANNEL_ID_CLOCK = 'ai7';
         
         % The scan rate used during sensor readings
         SCAN_RATE = 62500;
@@ -127,7 +123,7 @@ classdef DAQBox < handle
         
         MAX_PWM_ATTEMPTS = 10;
         
-        AMPLIFIER_OFFSET = -1.25;
+        AMPLIFIER_VOLTAGE_OFFSET = -1.25;
         
         AMPLIFIER_CONVERSION_FACTOR = 0.005; % 5 mV/C = 0.005 V/C
         
@@ -165,7 +161,7 @@ classdef DAQBox < handle
             updatepath();
 
             s = 0;
-            n = 7;
+            n = 6;
             
             % Create a waitbar
             f = waitbar(s/n,'Please wait...');
@@ -229,21 +225,6 @@ classdef DAQBox < handle
                 cuiWaitbar(s/n,message);
             end
             obj.createOutputSession();
-            
-            
-            message = 'Creating Clock Session...';
-            try
-                s = s + 1;
-                % Attempt to update the waitbar progress and label
-                waitbar(s/n,f,message);
-                % Update the cuiWaitbar progress and label
-                cuiWaitbar(s/n,message);
-            catch
-                % Recreate the waitbar if was closed by the user
-                f = waitbar(s/n,message);
-                cuiWaitbar(s/n,message);
-            end
-            obj.createClockSession();
             
             
             message = 'Loading Default DAQ Box Configuration...';
@@ -483,48 +464,6 @@ classdef DAQBox < handle
             
         end
         
-        function obj = createClockSession(obj)
-            %createClockSession
-            %   Creates and configures the session that is used to take
-            %   measurements of the time as a serial date number
-            
-            if isempty(obj.device)
-                % Delete the session object if no DAQ devices are found
-                delete(obj.ClockSession)
-                
-                obj.UseDAQHardware = false;
-                
-                % Inform the user that no devices were detected
-                fprintf('\nTo allow for UI testing, time measurements will be made using the MATLAB command "datenum(datetime)"\n')
-                
-            else
-                % Release any existing sessions
-                try
-                    release(obj.ClockSession)
-                catch
-                    % Do nothing in the event of an error
-                end
-                
-                fprintf('\nCreating clock session...\n')
-                % Create the session for the input measurements
-                obj.ClockSession = daq.createSession('Ni');
-                disp('Clock session was successfully created')
-                
-                fprintf('\nConfiguring clock session channels...\n')
-                
-                %Add a generic voltage measurement channel to an unused
-                %port
-                clockChannel = addAnalogInputChannel(obj.ClockSession,...
-                    obj.DEVICE_ID, obj.CHANNEL_ID_CLOCK, 'Voltage');
-                clockChannel.TerminalConfig = 'SingleEnded';
-                clockChannel.Name = 'Clock Channel';
-                disp('Created: analog input channel for time measurements')
-                
-                obj.UseDAQHardware = true;
-                
-            end
-        end
-        
         function configLoadStatus = loadConfigFile(obj, loadPreset, varargin)
             %loadConfigFile
             %   Read the values from a selected config file and store them
@@ -686,12 +625,12 @@ classdef DAQBox < handle
                 switch obj.TempSensorSelection
                     case 'Thermocouple'
                         tempReading_Ref = (...
-                            (rawTempAvg_Ref + obj.AMPLIFIER_OFFSET)...
+                            (rawTempAvg_Ref + obj.AMPLIFIER_VOLTAGE_OFFSET)...
                             ./ obj.AMPLIFIER_CONVERSION_FACTOR)...
                             + obj.TempCalibrationOffset_Ref;
                         
                         tempReading_Samp = (...
-                            (rawTempAvg_Samp + obj.AMPLIFIER_OFFSET)...
+                            (rawTempAvg_Samp + obj.AMPLIFIER_VOLTAGE_OFFSET)...
                             ./ obj.AMPLIFIER_CONVERSION_FACTOR)...
                             + obj.TempCalibrationOffset_Samp;
                         
@@ -735,13 +674,6 @@ classdef DAQBox < handle
                     % Read the input data from the session
                     [~, ~, serialDate]...
                         = startForeground(obj.InputSession);
-                    
-                    %[serialDate, ~, ~, ~, ~] = obj.takeMeasurement();
-                    
-                    %obj.ClockSession.release;
-                    %[~, ~, serialDate]...
-                    %    = startForeground(obj.ClockSession);
-                    %obj.ClockSession.release;
                 catch ME
                     warning('An error occured while trying to read the serial date from the DAQ Box')
                     rethrow(ME)
@@ -916,7 +848,6 @@ classdef DAQBox < handle
             %   Configure the trigger to perform single target heating
             
             obj.daqTrigger.startSingleTargetHeating(stageController)
-            
         end
         
         function startRampUpHeating(obj, stageController)
@@ -924,7 +855,6 @@ classdef DAQBox < handle
             %   Configure the trigger to perform ramp up heating
             
             obj.daqTrigger.startRampUpHeating(stageController)
-            
         end
         
         function startHoldTempHeating(obj, stageController)
@@ -932,7 +862,6 @@ classdef DAQBox < handle
             %   Configure the trigger to perform hold temp heating
             
             obj.daqTrigger.startHoldTempHeating(stageController)
-            
         end
         
         function waitForTrigger(obj)
