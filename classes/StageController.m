@@ -1,19 +1,19 @@
 % DSC: UI and control systems for prototype DSC system
 %     Copyright (C) 2019  Christian Kunis
-% 
+%
 %     This program is free software: you can redistribute it and/or modify
 %     it under the terms of the GNU General Public License as published by
 %     the Free Software Foundation, either version 3 of the License, or
 %     (at your option) any later version.
-% 
+%
 %     This program is distributed in the hope that it will be useful,
 %     but WITHOUT ANY WARRANTY; without even the implied warranty of
 %     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 %     GNU General Public License for more details.
-% 
+%
 %     You should have received a copy of the GNU General Public License
 %     along with this program. If not, see <https://www.gnu.org/licenses/>.
-%     
+%
 %     You may contact the author at ckunis.contact@gmail.com
 
 classdef StageController < handle
@@ -335,202 +335,315 @@ classdef StageController < handle
         function runExperimentStaging(obj)
             % Run the DSC experiment staging loops
             
-            
-            % Set the ExperimentInProgress to true to activate the
-            % appropriate UI settings
-            obj.ExperimentInProgress = true;
-            
-            if obj.UseAppUI
-                % Update the UI for the new ExperimentInProgress
-                obj.app.updateMaintenanceUI();
-                obj.app.updateOperationUI();
-                
-            end
-            
-            if obj.UseAppUI
-                % Attempt to import DAQBox object from app
-                try
-                    obj.daqBox = obj.app.daqBox;
-                catch
-                    error('Error: DAQBox object does not exist')
-                end
-            else
-                % Create a DAQBox object if app UI is not being used
-                obj.startDAQBox();
-            end
-            
-            % Attempt to import DSCData object from app is one does not
-            % already exist
-            if obj.UseAppUI
-                % Attempt to import DSCData object from app
-                try
-                    obj.liveData = obj.app.liveData;
-                catch
-                    try
-                        % Attempt to pass this DSCData object to the app
-                        obj.app.liveData = obj.createLiveData();
-                    catch
-                        error('Failed to pass live data to the app')
-                    end
-                end
-            else
-                % Create a DSCData object if app UI is not being used
-                obj.createLiveData();
-            end
-            
-            
-            % Measure and record the start time of the experiment
-            obj.liveData.ExpStartSerialDate...
-                = obj.daqBox.getCurrentSerialDate;
-            
-            % Initialize the EstimatedStageDuration to an empty array
-            obj.EstimatedStageDuration = [];
-            
-            if obj.UseAppUI
-                % Update the clocks with the new values
-                obj.app.updateOperationClock();
-                
-            end
-            
-            
-            
-            % Iterate through each given control staging cycle
-            for stageCounter = 1:obj.NumberOfStages
-                
-                % Force the loop to end if requested by the user
-                if obj.ForceStop
-                    obj.stopTrigger();
-                    continue
-                    
-                else
-                    % Reset the ForceSkipStage controller
-                    obj.ForceSkipStage = false;
-                    
-                    % Force the loop to skip to the next iteration if the
-                    % user requested to skip the stage
-                    if obj.ForceSkipStage
-                        obj.stopTrigger();
-                        continue
-                    end
-                end
-                
-                
-                % Take an initial reading of the temperatures and power
-                [latestSerialDate, latestTemp_Ref, latestTemp_Samp,...
-                    latestCurrent_Ref, latestCurrent_Samp]...
-                    = obj.daqBox.takeMeasurement();
-                
-                % Initialize the TargetTemp to zero
-                obj.TargetTemp = 0;
+            try
+                % Set the ExperimentInProgress to true to activate the
+                % appropriate UI settings
+                obj.ExperimentInProgress = true;
                 
                 if obj.UseAppUI
-                    % Update the clocks with the new values
-                    obj.app.updateOperationClock(latestSerialDate);
-                    
-                    % Update the Live Data gauges
-                    obj.app.updateOperationGauges(obj.TargetTemp,...
-                        latestTemp_Ref, latestTemp_Samp,...
-                        latestCurrent_Ref, latestCurrent_Samp);
+                    % Update the UI for the new ExperimentInProgress
+                    obj.app.updateMaintenanceUI();
+                    obj.app.updateOperationUI();
                     
                 end
                 
-                
-                % Read and store the temperature control parameters for the
-                % current stage
-                obj.StartTemp = obj.TemperatureControlStaging(stageCounter, 2);
-                obj.RampUpRate = obj.TemperatureControlStaging(stageCounter, 3);
-                obj.EndTemp = obj.TemperatureControlStaging(stageCounter, 4);
-                obj.HoldTime = obj.TemperatureControlStaging(stageCounter, 5);
-                
-                
-                if obj.StartTemp > latestTemp_Ref || obj.StartTemp > latestTemp_Samp
-                    % Heat the samples until they reach the Start temp if
-                    % the Start Temp is great than the Current Temp
-                    
-                    if obj.UseAppUI
-                        % Update the staging info displayed on the UI
-                        obj.app.updateStagingInfo(stageCounter, 'Heating to Start Temp');
+                if obj.UseAppUI
+                    % Attempt to import DAQBox object from app
+                    try
+                        obj.daqBox = obj.app.daqBox;
+                    catch
+                        error('Error: DAQBox object does not exist')
                     end
-                    
                 else
-                    % Allow the samples to cool if the Start Temp is less
-                    % than the Current Temp
-                    
-                    if obj.UseAppUI
-                        % Update the staging info displayed on the UI
-                        obj.app.updateStagingInfo(stageCounter, 'Cooling to Start Temp');
+                    % Create a DAQBox object if app UI is not being used
+                    obj.startDAQBox();
+                end
+                
+                % Attempt to import DSCData object from app is one does not
+                % already exist
+                if obj.UseAppUI
+                    % Attempt to import DSCData object from app
+                    try
+                        obj.liveData = obj.app.liveData;
+                    catch
+                        try
+                            % Attempt to pass this DSCData object to the app
+                            obj.app.liveData = obj.createLiveData();
+                        catch
+                            error('Failed to pass live data to the app')
+                        end
                     end
-                    
+                else
+                    % Create a DSCData object if app UI is not being used
+                    obj.createLiveData();
                 end
                 
-                % Set the target temp to the start temp
-                obj.TargetTemp = obj.StartTemp;
                 
-                % Measure the start time of the current stage
-                latestStageSerialDate = obj.daqBox.getCurrentSerialDate();
+                % Measure and record the start time of the experiment
+                obj.liveData.ExpStartSerialDate...
+                    = obj.daqBox.getCurrentSerialDate;
                 
-                % Record the latest stage serial date
-                obj.liveData.LatestStageSerialDate = latestStageSerialDate;
-                
-                % Start single target heating
-                obj.daqBox.startSingleTargetHeating(obj)
-                
-                % Wait for trigger to be stopped
-                obj.waitForTrigger();
-                disp('StageController.m, line 446. This text should only print once the single target heating stops')
-                
-                
-                % Force the loop to skip to the next iteration if the user
-                % requested to skip the stage
-                if obj.ForceSkipStage
-                    obj.stopTrigger();
-                    continue
-                end
+                % Initialize the EstimatedStageDuration to an empty array
+                obj.EstimatedStageDuration = [];
                 
                 if obj.UseAppUI
                     % Update the clocks with the new values
                     obj.app.updateOperationClock();
+                    
                 end
                 
                 
-                if obj.EndTemp > obj.StartTemp
-                    if obj.RampUpRate > 0
-                        % Run the Ramp Up loop if the End Temp is greater
-                        % than the Start Temp and the Ramp Up Rate is a
-                        % positive, non-zero value
+                % Start the autosave Timer
+                obj.startAutosaveTimer();
+                
+                
+                % Iterate through each given control staging cycle
+                for stageCounter = 1:obj.NumberOfStages
+                    
+                    % Force the loop to end if requested by the user
+                    if obj.ForceStop
+                        obj.stopTrigger();
+                        continue
                         
-                        % Estimate the total duration for the current stage
-                        obj.EstimatedStageDuration...
-                            = obj.HoldTime...
-                            + ((obj.EndTemp - obj.StartTemp)...
-                            / (obj.RampUpRate / 60));
+                    else
+                        % Reset the ForceSkipStage controller
+                        obj.ForceSkipStage = false;
+                        
+                        % Force the loop to skip to the next iteration if the
+                        % user requested to skip the stage
+                        if obj.ForceSkipStage
+                            obj.stopTrigger();
+                            continue
+                        end
+                    end
+                    
+                    
+                    % Take an initial reading of the temperatures and power
+                    [latestSerialDate, latestTemp_Ref, latestTemp_Samp,...
+                        latestCurrent_Ref, latestCurrent_Samp]...
+                        = obj.daqBox.takeMeasurement();
+                    
+                    % Initialize the TargetTemp to zero
+                    obj.TargetTemp = 0;
+                    
+                    if obj.UseAppUI
+                        % Update the clocks with the new values
+                        obj.app.updateOperationClock(latestSerialDate);
+                        
+                        % Update the Live Data gauges
+                        obj.app.updateOperationGauges(obj.TargetTemp,...
+                            latestTemp_Ref, latestTemp_Samp,...
+                            latestCurrent_Ref, latestCurrent_Samp);
+                        
+                    end
+                    
+                    
+                    % Read and store the temperature control parameters for the
+                    % current stage
+                    obj.StartTemp = obj.TemperatureControlStaging(stageCounter, 2);
+                    obj.RampUpRate = obj.TemperatureControlStaging(stageCounter, 3);
+                    obj.EndTemp = obj.TemperatureControlStaging(stageCounter, 4);
+                    obj.HoldTime = obj.TemperatureControlStaging(stageCounter, 5);
+                    
+                    
+                    if obj.StartTemp > latestTemp_Ref || obj.StartTemp > latestTemp_Samp
+                        % Heat the samples until they reach the Start temp if
+                        % the Start Temp is great than the Current Temp
                         
                         if obj.UseAppUI
                             % Update the staging info displayed on the UI
-                            obj.app.updateStagingInfo(stageCounter, 'Ramping up to End Temp');
+                            obj.app.updateStagingInfo(stageCounter, 'Heating to Start Temp');
+                        end
+                        
+                    else
+                        % Allow the samples to cool if the Start Temp is less
+                        % than the Current Temp
+                        
+                        if obj.UseAppUI
+                            % Update the staging info displayed on the UI
+                            obj.app.updateStagingInfo(stageCounter, 'Cooling to Start Temp');
+                        end
+                        
+                    end
+                    
+                    % Set the target temp to the start temp
+                    obj.TargetTemp = obj.StartTemp;
+                    
+                    % Measure the start time of the current stage
+                    latestStageSerialDate = obj.daqBox.getCurrentSerialDate();
+                    
+                    % Record the latest stage serial date
+                    obj.liveData.LatestStageSerialDate = latestStageSerialDate;
+                    
+                    % Start single target heating
+                    obj.daqBox.startSingleTargetHeating(obj)
+                    
+                    % Wait for trigger to be stopped
+                    obj.waitForTrigger();
+                    disp('StageController.m, line 446. This text should only print once the single target heating stops')
+                    
+                    
+                    % Force the loop to skip to the next iteration if the user
+                    % requested to skip the stage
+                    if obj.ForceSkipStage
+                        obj.stopTrigger();
+                        continue
+                    end
+                    
+                    if obj.UseAppUI
+                        % Update the clocks with the new values
+                        obj.app.updateOperationClock();
+                    end
+                    
+                    
+                    if obj.EndTemp > obj.StartTemp
+                        if obj.RampUpRate > 0
+                            % Run the Ramp Up loop if the End Temp is greater
+                            % than the Start Temp and the Ramp Up Rate is a
+                            % positive, non-zero value
+                            
+                            % Estimate the total duration for the current stage
+                            obj.EstimatedStageDuration...
+                                = obj.HoldTime...
+                                + ((obj.EndTemp - obj.StartTemp)...
+                                / (obj.RampUpRate / 60));
+                            
+                            if obj.UseAppUI
+                                % Update the staging info displayed on the UI
+                                obj.app.updateStagingInfo(stageCounter, 'Ramping up to End Temp');
+                                
+                            end
+                            
+                            % Initialize the TargetTemp to zero
+                            obj.TargetTemp = 0;
+                            
+                            % Measure the start time of the current stage
+                            latestStageSerialDate = obj.daqBox.getCurrentSerialDate();
+                            
+                            % Record the latest stage serial date
+                            obj.liveData.LatestStageSerialDate = latestStageSerialDate;
+                            
+                            % Start ramp up heating
+                            obj.daqBox.startRampUpHeating(obj)
+                            
+                        else
+                            % Heat the samples until they reach the End Temp if
+                            % the End Temp is greater than the Start Temp and
+                            % the Ramp Up Rate is a negative or zero value
+                            
+                            if obj.UseAppUI
+                                % Update the staging info displayed on the UI
+                                obj.app.updateStagingInfo(stageCounter, 'Heating to End Temp');
+                                
+                            end
+                            
+                            % Set the target temp to the start temp
+                            obj.TargetTemp = obj.EndTemp;
+                            
+                            % Measure the start time of the current stage
+                            latestStageSerialDate = obj.daqBox.getCurrentSerialDate();
+                            
+                            % Record the latest stage serial date
+                            obj.liveData.LatestStageSerialDate = latestStageSerialDate;
+                            
+                            % Start single target heating
+                            obj.daqBox.startRampUpHeating(obj)
                             
                         end
                         
-                        % Initialize the TargetTemp to zero
-                        obj.TargetTemp = 0;
-                        
-                        % Measure the start time of the current stage
-                        latestStageSerialDate = obj.daqBox.getCurrentSerialDate();
-                        
-                        % Record the latest stage serial date
-                        obj.liveData.LatestStageSerialDate = latestStageSerialDate;
-                        
-                        % Start ramp up heating
-                        obj.daqBox.startRampUpHeating(obj)
+                    elseif obj.EndTemp < obj.StartTemp
+                        if obj.RampUpRate < 0
+                            % Run the Ramp Up loop if the End Temp is less than
+                            % the Start Temp and the Ramp Up Rate is a
+                            % negative, non-zero value
+                            
+                            % Estimate the total duration for the current stage
+                            obj.EstimatedStageDuration...
+                                = obj.HoldTime...
+                                + ((obj.StartTemp - obj.EndTemp)...
+                                / (-obj.RampUpRate / 60));
+                            
+                            if obj.UseAppUI
+                                % Update the staging info displayed on the UI
+                                obj.app.updateStagingInfo(stageCounter, 'Ramping down to End Temp');
+                                
+                            end
+                            
+                            % Initialize the TargetTemp to zero
+                            obj.TargetTemp = 0;
+                            
+                            % Measure the start time of the current stage
+                            latestStageSerialDate = obj.daqBox.getCurrentSerialDate();
+                            
+                            % Record the latest stage serial date
+                            obj.liveData.LatestStageSerialDate = latestStageSerialDate;
+                            
+                            % Start ramp up heating
+                            obj.daqBox.startRampUpHeating(obj)
+                            
+                        else
+                            % Allow the samples to cool if the End Temp is less
+                            % than the Start Temp and the Ramp Up Rate is a
+                            % positive or zero value
+                            
+                            if obj.UseAppUI
+                                % Update the staging info displayed on the UI
+                                obj.app.updateStagingInfo(stageCounter, 'Cooling to End Temp');
+                                
+                            end
+                            
+                            % Set the target temp to the start temp
+                            obj.TargetTemp = obj.StartTemp;
+                            
+                            % Measure the start time of the current stage
+                            latestStageSerialDate = obj.daqBox.getCurrentSerialDate();
+                            
+                            % Record the latest stage serial date
+                            obj.liveData.LatestStageSerialDate = latestStageSerialDate;
+                            
+                            % Start single target heating
+                            obj.daqBox.startSingleTargetHeating(obj)
+                            
+                        end
                         
                     else
-                        % Heat the samples until they reach the End Temp if
-                        % the End Temp is greater than the Start Temp and
-                        % the Ramp Up Rate is a negative or zero value
+                        % Proceed to the holdTemp function if the End Temp is
+                        % equal to the Start Temp
+                        
+                    end
+                    
+                    % Wait for trigger to be stopped
+                    obj.waitForTrigger();
+                    
+                    
+                    % Force the loop to skip to the next iteration if the user
+                    % requested to skip the stage
+                    if obj.ForceSkipStage
+                        obj.stopTrigger();
+                        continue
+                    end
+                    
+                    
+                    
+                    if obj.UseAppUI
+                        % Update the clocks with the new values
+                        obj.app.updateOperationClock();
+                        
+                    end
+                    
+                    
+                    % Run the Hold Temp Loop if there is a specified HoldTime
+                    % value
+                    if obj.HoldTime > 0
+                        % Run the Hold Temp loop if a valid HoldTime value is
+                        % given
+                        
+                        % Estimate the total duration for the current stage
+                        obj.EstimatedStageDuration  = obj.HoldTime;
                         
                         if obj.UseAppUI
                             % Update the staging info displayed on the UI
-                            obj.app.updateStagingInfo(stageCounter, 'Heating to End Temp');
+                            obj.app.updateStagingInfo(stageCounter, 'Holding at End Temp');
                             
                         end
                         
@@ -544,165 +657,88 @@ classdef StageController < handle
                         obj.liveData.LatestStageSerialDate = latestStageSerialDate;
                         
                         % Start single target heating
-                        obj.daqBox.startRampUpHeating(obj)
+                        obj.daqBox.startHoldTempHeating(obj)
                         
                     end
                     
-                elseif obj.EndTemp < obj.StartTemp
-                    if obj.RampUpRate < 0
-                        % Run the Ramp Up loop if the End Temp is less than
-                        % the Start Temp and the Ramp Up Rate is a
-                        % negative, non-zero value
-                        
-                        % Estimate the total duration for the current stage
-                        obj.EstimatedStageDuration...
-                            = obj.HoldTime...
-                            + ((obj.StartTemp - obj.EndTemp)...
-                            / (-obj.RampUpRate / 60));
-                        
-                        if obj.UseAppUI
-                            % Update the staging info displayed on the UI
-                            obj.app.updateStagingInfo(stageCounter, 'Ramping down to End Temp');
-                            
-                        end
-                        
-                        % Initialize the TargetTemp to zero
-                        obj.TargetTemp = 0;
-                        
-                        % Measure the start time of the current stage
-                        latestStageSerialDate = obj.daqBox.getCurrentSerialDate();
-                        
-                        % Record the latest stage serial date
-                        obj.liveData.LatestStageSerialDate = latestStageSerialDate;
-                        
-                        % Start ramp up heating
-                        obj.daqBox.startRampUpHeating(obj)
-                        
-                    else
-                        % Allow the samples to cool if the End Temp is less
-                        % than the Start Temp and the Ramp Up Rate is a
-                        % positive or zero value
-                        
-                        if obj.UseAppUI
-                            % Update the staging info displayed on the UI
-                            obj.app.updateStagingInfo(stageCounter, 'Cooling to End Temp');
-                            
-                        end
-                        
-                        % Set the target temp to the start temp
-                        obj.TargetTemp = obj.StartTemp;
-                        
-                        % Measure the start time of the current stage
-                        latestStageSerialDate = obj.daqBox.getCurrentSerialDate();
-                        
-                        % Record the latest stage serial date
-                        obj.liveData.LatestStageSerialDate = latestStageSerialDate;
-                        
-                        % Start single target heating
-                        obj.daqBox.startSingleTargetHeating(obj)
-                        
+                    % Wait for trigger to be stopped
+                    obj.waitForTrigger();
+                    
+                    
+                    % Force the loop to skip to the next iteration if the user
+                    % requested to skip the stage
+                    if obj.ForceSkipStage
+                        obj.stopTrigger();
+                        continue
                     end
-                    
-                else
-                    % Proceed to the holdTemp function if the End Temp is
-                    % equal to the Start Temp
-                    
-                end
-                
-                % Wait for trigger to be stopped
-                obj.waitForTrigger();
-                
-                
-                % Force the loop to skip to the next iteration if the user
-                % requested to skip the stage
-                if obj.ForceSkipStage
-                    obj.stopTrigger();
-                    continue
-                end
-                
-                
-                
-                if obj.UseAppUI
-                    % Update the clocks with the new values
-                    obj.app.updateOperationClock();
-                    
-                end
-                
-                
-                % Run the Hold Temp Loop if there is a specified HoldTime
-                % value
-                if obj.HoldTime > 0
-                    % Run the Hold Temp loop if a valid HoldTime value is
-                    % given
-                    
-                    % Estimate the total duration for the current stage
-                    obj.EstimatedStageDuration  = obj.HoldTime;
                     
                     if obj.UseAppUI
-                        % Update the staging info displayed on the UI
-                        obj.app.updateStagingInfo(stageCounter, 'Holding at End Temp');
+                        % Update the clocks with the new values
+                        obj.app.updateOperationClock();
                         
                     end
-                    
-                    % Set the target temp to the start temp
-                    obj.TargetTemp = obj.EndTemp;
-                    
-                    % Measure the start time of the current stage
-                    latestStageSerialDate = obj.daqBox.getCurrentSerialDate();
-                    
-                    % Record the latest stage serial date
-                    obj.liveData.LatestStageSerialDate = latestStageSerialDate;
-                    
-                    % Start single target heating
-                    obj.daqBox.startHoldTempHeating(obj)
-                    
                 end
                 
-                % Wait for trigger to be stopped
-                obj.waitForTrigger();
                 
+                % Reset the ForceSkipStage controller
+                obj.ForceSkipStage = false;
                 
-                % Force the loop to skip to the next iteration if the user
-                % requested to skip the stage
-                if obj.ForceSkipStage
-                    obj.stopTrigger();
-                    continue
+                if obj.ForceStop
+                    msgbox('Experiment procedure has been successfully stopped')
+                    obj.ForceStop = false;
+                else
+                    msgbox('Experiment Procedure Complete')
                 end
+                
+                obj.ExperimentInProgress = false;
+                
+                % Stop the autosave timer
+                obj.stopAutosaveTimer();
                 
                 if obj.UseAppUI
-                    % Update the clocks with the new values
+                    obj.app.DataSaveStatus = false;
+                    
+                    % Update the UI on the Operation Tab
+                    obj.app.updateOperationUI();
+                    
+                    % Update the clock
                     obj.app.updateOperationClock();
                     
+                    % Update the data plots on the Operation Tab
+                    obj.app.updateOperationPlots();
+                    
+                    % Update the UI on the Maintenance Tab
+                    obj.app.updateMaintenanceUI();
+                    
                 end
-            end
-            
-            
-            % Reset the ForceSkipStage controller
-            obj.ForceSkipStage = false;
-            
-            if obj.ForceStop
-                msgbox('Experiment procedure has been successfully stopped')
-                obj.ForceStop = false;
-            else
-                msgbox('Experiment Procedure Complete')
-            end
-            
-            obj.ExperimentInProgress = false;
-            
-            if obj.UseAppUI
-                obj.app.DataSaveStatus = false;
                 
-                % Update the UI on the Operation Tab
-                obj.app.updateOperationUI();
+            catch ME
+                obj.ExperimentInProgress = false;
                 
-                % Update the clock
-                obj.app.updateOperationClock();
+                % Stop the autosave timer
+                obj.stopAutosaveTimer();
                 
-                % Update the data plots on the Operation Tab
-                obj.app.updateOperationPlots();
+                try
+                    if obj.UseAppUI
+                        obj.app.DataSaveStatus = false;
+                        
+                        % Update the UI on the Operation Tab
+                        obj.app.updateOperationUI();
+                        
+                        % Update the clock
+                        obj.app.updateOperationClock();
+                        
+                        % Update the data plots on the Operation Tab
+                        obj.app.updateOperationPlots();
+                        
+                        % Update the UI on the Maintenance Tab
+                        obj.app.updateMaintenanceUI();
+                        
+                    end
+                catch
+                end
                 
-                % Update the UI on the Maintenance Tab
-                obj.app.updateMaintenanceUI();
+                rethrow(ME)
                 
             end
         end
