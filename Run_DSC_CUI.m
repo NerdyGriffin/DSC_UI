@@ -14,7 +14,7 @@ for n = 3:-1:0
                 cd ..
         end
     else
-        error("The current working directory is not within the 'DSC' folder")
+        error("The current working directory is not within the 'DSC_UI' folder")
     end
 end
 

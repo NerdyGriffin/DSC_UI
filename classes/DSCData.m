@@ -708,7 +708,7 @@ classdef DSCData < handle
                     
                     % Read the data from the selected .xlsx file and store
                     % it temporarily in a array
-                    dataArray = xlsread(dataFullPath, 'A:O');
+                    dataArray = xlsread(dataFullPath, 'A:N');
                     
                     % Separate the data values into the appropriate
                     % variables
@@ -726,9 +726,16 @@ classdef DSCData < handle
                     obj.PWMDutyCycleData_Ref = dataArray(:,13);
                     obj.PWMDutyCycleData_Samp = dataArray(:,14);
                     
+                    serialDateArray = xlsread(dataFullPath, 'P:Q')
+                    
+                    % Separate the serial date values into the appropriate
+                    % variables
+                    obj.ExpStartSerialDate = serialDateArray(1,1);
+                    obj.StageStartSerialDates = serialDateArray(:,2);
+                    
                     % Read the sample info from the last two columns of the
                     % spreadsheet
-                    [~, ~, sampleInfoCellArray] = xlsread(dataFileName, 'R2:S4');
+                    [~, ~, sampleInfoCellArray] = xlsread(dataFileName, 'T2:U4');
                     
                     obj.ReferenceSampleData.Material = sampleInfoCellArray{1,1};
                     obj.ReferenceSampleData.Mass = sampledataCellArray(2,1);
