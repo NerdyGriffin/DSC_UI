@@ -1,4 +1,4 @@
-% DSC: UI and control systems for prototype DSC system
+% DSC_UI: UI and control systems for prototype DSC system
 %     Copyright (C) 2019  Christian Kunis
 %
 %     This program is free software: you can redistribute it and/or modify
@@ -342,8 +342,8 @@ classdef StageController < handle
                 
                 if obj.UseAppUI
                     % Update the UI for the new ExperimentInProgress
-                    obj.app.updateMaintenanceUI();
-                    obj.app.updateOperationUI();
+                    obj.app.refreshMaintenaceUI();
+                    obj.app.refreshOperationUI();
                     
                 end
                 
@@ -388,7 +388,7 @@ classdef StageController < handle
                 
                 if obj.UseAppUI
                     % Update the clocks with the new values
-                    obj.app.updateOperationClock();
+                    obj.app.refreshOperationClock();
                     
                 end
                 
@@ -428,10 +428,10 @@ classdef StageController < handle
                     
                     if obj.UseAppUI
                         % Update the clocks with the new values
-                        obj.app.updateOperationClock(latestSerialDate);
+                        obj.app.refreshOperationClock(latestSerialDate);
                         
                         % Update the Live Data gauges
-                        obj.app.updateOperationGauges(obj.TargetTemp,...
+                        obj.app.refreshOperationGauges(obj.TargetTemp,...
                             latestTemp_Ref, latestTemp_Samp,...
                             latestCurrent_Ref, latestCurrent_Samp);
                         
@@ -492,7 +492,7 @@ classdef StageController < handle
                     
                     if obj.UseAppUI
                         % Update the clocks with the new values
-                        obj.app.updateOperationClock();
+                        obj.app.refreshOperationClock();
                     end
                     
                     
@@ -627,7 +627,7 @@ classdef StageController < handle
                     
                     if obj.UseAppUI
                         % Update the clocks with the new values
-                        obj.app.updateOperationClock();
+                        obj.app.refreshOperationClock();
                         
                     end
                     
@@ -674,7 +674,7 @@ classdef StageController < handle
                     
                     if obj.UseAppUI
                         % Update the clocks with the new values
-                        obj.app.updateOperationClock();
+                        obj.app.refreshOperationClock();
                         
                     end
                 end
@@ -699,40 +699,51 @@ classdef StageController < handle
                     obj.app.DataSaveStatus = false;
                     
                     % Update the UI on the Operation Tab
-                    obj.app.updateOperationUI();
+                    obj.app.refreshOperationUI();
                     
                     % Update the clock
-                    obj.app.updateOperationClock();
+                    obj.app.refreshOperationClock();
                     
                     % Update the data plots on the Operation Tab
-                    obj.app.updateOperationPlots();
+                    obj.app.refreshOperationPlots();
                     
                     % Update the UI on the Maintenance Tab
-                    obj.app.updateMaintenanceUI();
+                    obj.app.refreshMaintenaceUI();
                     
                 end
                 
             catch ME
                 obj.ExperimentInProgress = false;
                 
-                % Stop the autosave timer
-                obj.stopAutosaveTimer();
+                try
+                    % Stop the DAQ Box trigger
+                    obj.stopTrigger();
+                catch
+                    warning('Could not stop trigger')
+                end
+                
+                try
+                    % Stop the autosave timer
+                    obj.stopAutosaveTimer();
+                catch
+                    warning('Could not stop autosave timer')
+                end
                 
                 try
                     if obj.UseAppUI
                         obj.app.DataSaveStatus = false;
                         
                         % Update the UI on the Operation Tab
-                        obj.app.updateOperationUI();
+                        obj.app.refreshOperationUI();
                         
                         % Update the clock
-                        obj.app.updateOperationClock();
+                        obj.app.refreshOperationClock();
                         
                         % Update the data plots on the Operation Tab
-                        obj.app.updateOperationPlots();
+                        obj.app.refreshOperationPlots();
                         
                         % Update the UI on the Maintenance Tab
-                        obj.app.updateMaintenanceUI();
+                        obj.app.refreshMaintenaceUI();
                         
                     end
                 catch
@@ -894,7 +905,7 @@ classdef StageController < handle
             
             if obj.UseAppUI
                 % Update the clocks with the new values
-                obj.app.updateOperationClock();
+                obj.app.refreshOperationClock();
                 
             end
             disp('TargetTemp:')
@@ -950,7 +961,7 @@ classdef StageController < handle
             obj.liveData.calculateLatestHeatFlow(obj.daqBox.HEATING_COIL_VOLTAGE);
             
             if obj.UseAppUI
-                obj.app.updateOperationGauges(obj.TargetTemp,...
+                obj.app.refreshOperationGauges(obj.TargetTemp,...
                     latestTemp_Ref, latestTemp_Samp,...
                     latestCurrent_Ref, latestCurrent_Samp);
                 
@@ -973,10 +984,10 @@ classdef StageController < handle
             
             if obj.UseAppUI
                 % Update the clocks with the new values
-                obj.app.updateOperationClock();
+                obj.app.refreshOperationClock();
                 
                 % Update the data plots
-                obj.app.updateOperationPlots();
+                obj.app.refreshOperationPlots();
             end
         end
     end

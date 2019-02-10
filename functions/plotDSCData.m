@@ -1,4 +1,4 @@
-% DSC: UI and control systems for prototype DSC system
+% DSC_UI: UI and control systems for prototype DSC system
 %     Copyright (C) 2019  Christian Kunis
 % 
 %     This program is free software: you can redistribute it and/or modify
