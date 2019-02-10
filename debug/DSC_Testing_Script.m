@@ -317,7 +317,7 @@ while HeatingLoopController
     
     
     
-%     % Update the data plots
+%     % Redraw the data plots
 %     plotData(UIAxesDifferential, UIAxesSamples,...
 %        AllData, XAxisData, TemperatureUnits, Interp1Type)
 %     xlabel(UIAxesDifferential, 'Temperature (C)')

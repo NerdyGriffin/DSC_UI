@@ -251,8 +251,8 @@ classdef StageController < handle
             obj.TemperatureControlStaging(newStageNumber, 5) = newHoldTime;
             
             if obj.UseAppUI
-                % Update the values displayed in the staging table
-                obj.app.updateStagingTable();
+                % Refresh the values displayed in the staging table
+                obj.app.refreshStagingTable();
                 
             end
         end
@@ -270,8 +270,8 @@ classdef StageController < handle
             obj.TemperatureControlStaging(stageNumber, 5) = newHoldTime;
             
             if obj.UseAppUI
-                % Update the values displayed in the staging table
-                obj.app.updateStagingTable();
+                % Refresh the values displayed in the staging table
+                obj.app.refreshStagingTable();
                 
             end
         end
@@ -289,8 +289,8 @@ classdef StageController < handle
             end
             
             if obj.UseAppUI
-                % Update the values displayed in the staging table
-                obj.app.updateStagingTable;
+                % Refresh the values displayed in the staging table
+                obj.app.refreshStagingTable;
                 
             end
         end
@@ -341,8 +341,8 @@ classdef StageController < handle
                 obj.ExperimentInProgress = true;
                 
                 if obj.UseAppUI
-                    % Update the UI for the new ExperimentInProgress
-                    obj.app.refreshMaintenaceUI();
+                    % Refresh the UI for the new ExperimentInProgress
+                    obj.app.refreshMaintenanceUI();
                     obj.app.refreshOperationUI();
                     
                 end
@@ -387,7 +387,7 @@ classdef StageController < handle
                 obj.EstimatedStageDuration = [];
                 
                 if obj.UseAppUI
-                    % Update the clocks with the new values
+                    % Refresh the clocks with the new values
                     obj.app.refreshOperationClock();
                     
                 end
@@ -427,10 +427,10 @@ classdef StageController < handle
                     obj.TargetTemp = 0;
                     
                     if obj.UseAppUI
-                        % Update the clocks with the new values
+                        % Refresh the clocks with the new values
                         obj.app.refreshOperationClock(latestSerialDate);
                         
-                        % Update the Live Data gauges
+                        % Refresh the Live Data gauges
                         obj.app.refreshOperationGauges(obj.TargetTemp,...
                             latestTemp_Ref, latestTemp_Samp,...
                             latestCurrent_Ref, latestCurrent_Samp);
@@ -451,8 +451,8 @@ classdef StageController < handle
                         % the Start Temp is great than the Current Temp
                         
                         if obj.UseAppUI
-                            % Update the staging info displayed on the UI
-                            obj.app.updateStagingInfo(stageCounter, 'Heating to Start Temp');
+                            % Refresh the staging info displayed on the UI
+                            obj.app.refreshStagingInfo(stageCounter, 'Heating to Start Temp');
                         end
                         
                     else
@@ -460,8 +460,8 @@ classdef StageController < handle
                         % than the Current Temp
                         
                         if obj.UseAppUI
-                            % Update the staging info displayed on the UI
-                            obj.app.updateStagingInfo(stageCounter, 'Cooling to Start Temp');
+                            % Refresh the staging info displayed on the UI
+                            obj.app.refreshStagingInfo(stageCounter, 'Cooling to Start Temp');
                         end
                         
                     end
@@ -491,7 +491,7 @@ classdef StageController < handle
                     end
                     
                     if obj.UseAppUI
-                        % Update the clocks with the new values
+                        % Refresh the clocks with the new values
                         obj.app.refreshOperationClock();
                     end
                     
@@ -509,8 +509,8 @@ classdef StageController < handle
                                 / (obj.RampUpRate / 60));
                             
                             if obj.UseAppUI
-                                % Update the staging info displayed on the UI
-                                obj.app.updateStagingInfo(stageCounter, 'Ramping up to End Temp');
+                                % Refresh the staging info displayed on the UI
+                                obj.app.refreshStagingInfo(stageCounter, 'Ramping up to End Temp');
                                 
                             end
                             
@@ -532,8 +532,8 @@ classdef StageController < handle
                             % the Ramp Up Rate is a negative or zero value
                             
                             if obj.UseAppUI
-                                % Update the staging info displayed on the UI
-                                obj.app.updateStagingInfo(stageCounter, 'Heating to End Temp');
+                                % Refresh the staging info displayed on the UI
+                                obj.app.refreshStagingInfo(stageCounter, 'Heating to End Temp');
                                 
                             end
                             
@@ -564,8 +564,8 @@ classdef StageController < handle
                                 / (-obj.RampUpRate / 60));
                             
                             if obj.UseAppUI
-                                % Update the staging info displayed on the UI
-                                obj.app.updateStagingInfo(stageCounter, 'Ramping down to End Temp');
+                                % Refresh the staging info displayed on the UI
+                                obj.app.refreshStagingInfo(stageCounter, 'Ramping down to End Temp');
                                 
                             end
                             
@@ -587,8 +587,8 @@ classdef StageController < handle
                             % positive or zero value
                             
                             if obj.UseAppUI
-                                % Update the staging info displayed on the UI
-                                obj.app.updateStagingInfo(stageCounter, 'Cooling to End Temp');
+                                % Refresh the staging info displayed on the UI
+                                obj.app.refreshStagingInfo(stageCounter, 'Cooling to End Temp');
                                 
                             end
                             
@@ -626,7 +626,7 @@ classdef StageController < handle
                     
                     
                     if obj.UseAppUI
-                        % Update the clocks with the new values
+                        % Refresh the clocks with the new values
                         obj.app.refreshOperationClock();
                         
                     end
@@ -642,8 +642,8 @@ classdef StageController < handle
                         obj.EstimatedStageDuration  = obj.HoldTime;
                         
                         if obj.UseAppUI
-                            % Update the staging info displayed on the UI
-                            obj.app.updateStagingInfo(stageCounter, 'Holding at End Temp');
+                            % Refresh the staging info displayed on the UI
+                            obj.app.refreshStagingInfo(stageCounter, 'Holding at End Temp');
                             
                         end
                         
@@ -673,7 +673,7 @@ classdef StageController < handle
                     end
                     
                     if obj.UseAppUI
-                        % Update the clocks with the new values
+                        % Refresh the clocks with the new values
                         obj.app.refreshOperationClock();
                         
                     end
@@ -698,17 +698,17 @@ classdef StageController < handle
                 if obj.UseAppUI
                     obj.app.DataSaveStatus = false;
                     
-                    % Update the UI on the Operation Tab
+                    % Refresh the UI on the Operation Tab
                     obj.app.refreshOperationUI();
                     
-                    % Update the clock
+                    % Refresh the clock
                     obj.app.refreshOperationClock();
                     
-                    % Update the data plots on the Operation Tab
+                    % Refresh the data plots on the Operation Tab
                     obj.app.refreshOperationPlots();
                     
-                    % Update the UI on the Maintenance Tab
-                    obj.app.refreshMaintenaceUI();
+                    % Refresh the UI on the Maintenance Tab
+                    obj.app.refreshMaintenanceUI();
                     
                 end
                 
@@ -733,17 +733,17 @@ classdef StageController < handle
                     if obj.UseAppUI
                         obj.app.DataSaveStatus = false;
                         
-                        % Update the UI on the Operation Tab
+                        % Refresh the UI on the Operation Tab
                         obj.app.refreshOperationUI();
                         
-                        % Update the clock
+                        % Refresh the clock
                         obj.app.refreshOperationClock();
                         
-                        % Update the data plots on the Operation Tab
+                        % Refresh the data plots on the Operation Tab
                         obj.app.refreshOperationPlots();
                         
-                        % Update the UI on the Maintenance Tab
-                        obj.app.refreshMaintenaceUI();
+                        % Refresh the UI on the Maintenance Tab
+                        obj.app.refreshMaintenanceUI();
                         
                     end
                 catch
@@ -904,7 +904,7 @@ classdef StageController < handle
             %experimentLiveDataAnalysis
             
             if obj.UseAppUI
-                % Update the clocks with the new values
+                % Refresh the clocks with the new values
                 obj.app.refreshOperationClock();
                 
             end
@@ -977,16 +977,16 @@ classdef StageController < handle
             obj.liveData.LatestPWMDutyCycle_Samp = newDutyCycle_Samp;
             
             
-            % Update the PWM duty cycle values of pulse generators using
+            % Refresh the PWM duty cycle values of pulse generators using
             % the newly calculated values
             obj.daqBox.updatePWMDutyCycle(newDutyCycle_Ref, newDutyCycle_Samp);
             
             
             if obj.UseAppUI
-                % Update the clocks with the new values
+                % Refresh the clocks with the new values
                 obj.app.refreshOperationClock();
                 
-                % Update the data plots
+                % Refresh the data plots
                 obj.app.refreshOperationPlots();
             end
         end

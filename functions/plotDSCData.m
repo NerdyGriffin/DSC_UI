@@ -28,7 +28,7 @@ cla(uiAxesSamples)
 hold(uiAxesDifferential, 'on')
 hold(uiAxesSamples, 'on')
 
-% Update the plots
+% Redraw the plots
 switch XAxisData
     case 'Time'
         % Plot the data as Heat Flow Rate vs. Time

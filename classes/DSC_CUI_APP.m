@@ -137,7 +137,7 @@ classdef DSC_CUI_APP < handle
             
             message = 'Creating Live Data Object...';
             s = s + 1;
-            % Update the cuiWaitbar progress and label
+            % Refresh the cuiWaitbar progress and label
             cuiWaitbar(s/n,message);
             % Create a new DSCData object
             app.liveData = app.stageController.createLiveData;
@@ -145,7 +145,7 @@ classdef DSC_CUI_APP < handle
             
             message = 'Creating Analysis Data Object...';
             s = s + 1;
-            % Update the cuiWaitbar progress and label
+            % Refresh the cuiWaitbar progress and label
             cuiWaitbar(s/n,message);
             % Create a new DSCData object
             app.analysisData = DSCData;
@@ -153,7 +153,7 @@ classdef DSC_CUI_APP < handle
             
             message = 'Creating Plot Axes...';
             s = s + 1;
-            % Update the cuiWaitbar progress and label
+            % Refresh the cuiWaitbar progress and label
             cuiWaitbar(s/n,message);
             % Create the figure windows and plot axes
             app.UIFigure = figure(42);
@@ -170,7 +170,7 @@ classdef DSC_CUI_APP < handle
             
             message = 'Creating Animated Lines...';
             s = s + 1;
-            % Update the cuiWaitbar progress and label
+            % Refresh the cuiWaitbar progress and label
             cuiWaitbar(s/n,message);
             % Create the animatedline objects
             app.DifferentialLine = animatedline(app.UIAxesDifferential, 'Color', 'blue', 'LineStyle', '-');
@@ -183,7 +183,7 @@ classdef DSC_CUI_APP < handle
             legend(app.UIAxesSamples, 'Reference Sample', 'Test Sample', 'Location', 'best')
             
             
-            % Update the cuiWaitbar progress and label
+            % Refresh the cuiWaitbar progress and label
             cuiWaitbar(1,'App is now Ready');
             
             pause(0.5)
@@ -395,7 +395,7 @@ classdef DSC_CUI_APP < handle
             clearpoints(app.RefSampleLine)
             clearpoints(app.TestSampleLine)
             
-            % Update the plots
+            % Refresh the plots
             switch app.XAxisUnits
                 case 'Time'
                     % Plot the data as Heat Flow Rate vs. Time
@@ -493,11 +493,11 @@ classdef DSC_CUI_APP < handle
             % Do nothing
         end
         
-        function updateStagingInfo(varargin)
+        function refreshStagingInfo(varargin)
             % Do nothing
         end
         
-        function updateStagingTable(varargin)
+        function refreshStagingTable(varargin)
             % Do nothing
         end
         
@@ -517,7 +517,7 @@ classdef DSC_CUI_APP < handle
             % Do nothing
         end
         
-        function refreshMaintenaceUI(varargin)
+        function refreshMaintenanceUI(varargin)
             % Do nothing
         end
     end
