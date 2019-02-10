@@ -1,4 +1,4 @@
-% DSC: UI and control systems for prototype DSC system
+% DSC_UI: UI and control systems for prototype DSC system
 %     Copyright (C) 2019  Christian Kunis
 % 
 %     This program is free software: you can redistribute it and/or modify
@@ -360,7 +360,7 @@ classdef DSC_CUI_APP < handle
             
             app.ExperimentLock = false;
             
-            app.updateOperationUI();
+            app.refreshOperationUI();
         end
         
         function stopPWM(app)
@@ -374,7 +374,7 @@ classdef DSC_CUI_APP < handle
             end
         end
         
-        function updateOperationClock(app, givenSerialDate, varargin)
+        function refreshOperationClock(app, givenSerialDate, varargin)
             disp(' ')
             disp('Total Elapsed Time:')
             if nargin > 1
@@ -389,7 +389,7 @@ classdef DSC_CUI_APP < handle
             fprintf('%f seconds\n', elapsedTime)
         end
         
-        function updateOperationPlots(app)
+        function refreshOperationPlots(app)
             clearpoints(app.DifferentialLine)
             clearpoints(app.ZeroLine)
             clearpoints(app.RefSampleLine)
@@ -489,7 +489,7 @@ classdef DSC_CUI_APP < handle
     end
     
     methods (Static)
-        function updateOperationUI(varargin)
+        function refreshOperationUI(varargin)
             % Do nothing
         end
         
@@ -501,23 +501,23 @@ classdef DSC_CUI_APP < handle
             % Do nothing
         end
         
-        function updateOperationUnits(varargin)
+        function refreshOperationUnits(varargin)
             % Do nothing
         end
         
-        function updateOperationGauges(varargin)
+        function refreshOperationGauges(varargin)
             % Do nothing
         end
         
-        function updateAnalysisUI(varargin)
+        function refreshAnalysisUI(varargin)
             % Do nothing
         end
         
-        function updateAnalysisPlot(varargin)
+        function refreshAnalysisPlot(varargin)
             % Do nothing
         end
         
-        function updateMaintenanceUI(varargin)
+        function refreshMaintenaceUI(varargin)
             % Do nothing
         end
     end

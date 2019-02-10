@@ -1,4 +1,4 @@
-% DSC: UI and control systems for prototype DSC system
+% DSC_UI: UI and control systems for prototype DSC system
 %     Copyright (C) 2019  Christian Kunis
 % 
 %     This program is free software: you can redistribute it and/or modify
@@ -37,7 +37,7 @@ for n = 3:-1:0
                 cd ..
         end
     else
-        error("The current working directory is not within the 'DSC' folder")
+        error("The current working directory is not within the 'DSC_UI' folder")
     end
 end
 

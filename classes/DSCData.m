@@ -1,4 +1,4 @@
-% DSC: UI and control systems for prototype DSC system
+% DSC_UI: UI and control systems for prototype DSC system
 %     Copyright (C) 2019  Christian Kunis
 % 
 %     This program is free software: you can redistribute it and/or modify
@@ -647,7 +647,12 @@ classdef DSCData < handle
                     S = load(dataFullPath);
                     
                     if ~isfield(S, 'dscData')
-                        error('The selected .mat file does not contain a DSCData object.')
+                        warning('The selected .mat file does not contain a DSCData object.')
+                        
+                        dataLoadStatus = false;
+                        
+                        return
+                        
                     end
                     
                     % Get each of the properties from the temporary struct
@@ -672,9 +677,9 @@ classdef DSCData < handle
             end
         end
         
-        function dataLoadStatus = loadDataFile(obj,...
+        function dataLoadStatus = loadXlsxFile(obj,...
                 fileName, filePath, varargin)
-            %loadDataFile
+            %loadXlsxFile
             %   Read the values from a selected xlsx data file and store
             %   them in the appropriate properties
             
@@ -777,9 +782,9 @@ classdef DSCData < handle
             end
         end
         
-        function dataSaveStatus = saveDataFile(obj,...
+        function dataSaveStatus = saveXlsxFile(obj,...
                 fileName, filePath, varargin)
-            %saveDataFile
+            %saveXlsxFile
             %   Save the measured data from a DSC experiment to a .xlsx
             %   file
             
