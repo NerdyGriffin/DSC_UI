@@ -30,7 +30,7 @@ for n = 3:-1:0
     if n > 0
         [~, currentDirectory] = fileparts(pwd);
         switch currentDirectory
-            case 'DSC_UI'
+            case {'DSC_UI', 'DSC_UI-master'}
                 addpath(genpath('.'))
                 break
             otherwise
