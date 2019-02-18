@@ -1,1 +1,5 @@
+# MATLAB backup files
 *.asv
+
+# VSCode configuration files
+.vscode
