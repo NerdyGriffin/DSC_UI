@@ -887,6 +887,25 @@ classdef DAQBox < handle
             histogram(t)
             xlabel("Temperature (\circC)")
         end
+        
+        function delete(obj)
+            %Object Destructor Method
+            % This is run automatically when an object of this class is deleted
+            
+            % Attempt to stop the trigger
+            try
+                obj.stopTrigger();
+            catch
+                warning('Failed to stop trigger before DAQBox object was deleted.')
+            end
+            
+            % Attempt to stop the heating coil PWM output
+            try
+                obj.stopPWM();
+            catch
+                warning('Failed to stop PWM output before DAQBox object was deleted.')
+            end
+        end
     end
     
     methods (Access = private)
