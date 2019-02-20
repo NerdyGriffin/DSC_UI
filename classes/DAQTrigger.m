@@ -184,8 +184,10 @@ classdef DAQTrigger < handle
                     delete(obj.TriggerTimer)
                 catch ME
                     warning('failed to delete')
+                    % Force the experiment to stop in the event of a
+                    % timer error
+                    startController.forceStop();
                     rethrow(ME)
-                    % Do nothing in the event of an error
                 end
                 
                 % Create a new timer object if DAQ hardware is not present
@@ -226,7 +228,11 @@ classdef DAQTrigger < handle
                 try
                     delete(obj.TriggerTimer)
                 catch
-                    % Do nothing in the event of an error
+                    warning('failed to delete')
+                    % Force the experiment to stop in the event of a
+                    % timer error
+                    startController.forceStop();
+                    rethrow(ME)
                 end
                 
                 % Create a new timer object if DAQ hardware is not present
@@ -267,7 +273,11 @@ classdef DAQTrigger < handle
                 try
                     delete(obj.TriggerTimer)
                 catch
-                    % Do nothing in the event of an error
+                    warning('failed to delete')
+                    % Force the experiment to stop in the event of a
+                    % timer error
+                    startController.forceStop();
+                    rethrow(ME)
                 end
                 
                 % Create a new timer object if DAQ hardware is not present
@@ -290,7 +300,6 @@ classdef DAQTrigger < handle
             
             obj.TriggerSemaphore.wait();
             
-            disp('Done waiting for trigger') %DEBUG MESSAGE
         end
         
         function stop(obj)
@@ -331,7 +340,18 @@ classdef DAQTrigger < handle
             
             obj.Running = 'off';
             
-            disp('Trigger stopped') %DEBUG MESSAGE
+        end
+        
+        function delete(obj)
+            %Object Destructor Method
+            % This is run automatically when an object of this class is deleted
+            
+            % Attempt to stop the trigger
+            try
+                obj.stop();
+            catch
+                warning('Failed to stop trigger before DAQTrigger object was deleted.')
+            end
         end
     end
 end

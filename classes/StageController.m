@@ -480,7 +480,6 @@ classdef StageController < handle
 
                     % Wait for trigger to be stopped
                     obj.waitForTrigger();
-                    disp('StageController.m, line 446. This text should only print once the single target heating stops')
 
 
                     % Force the loop to skip to the next iteration if the user
@@ -1086,7 +1085,24 @@ classdef StageController < handle
             %Object Destructor Method
             % This is run automatically when an object of this class is deleted
 
-            % IMPLEMENT THIS STUFF ASAP
+            % Attempt to stop the experiment if it is running
+            if obj.ExperimentInProgress
+                obj.forceStop();
+            end
+            
+            try
+                % Stop the autosave timer
+                obj.stopAutosaveTimer();
+            catch
+                warning('Failed to stop autosave timer before StageController object was deleted.')
+            end
+
+            % Attempt to perform an autosave before deleting the object
+            try
+                obj.performAutosave();
+            catch
+                warning('Failed to save before StageController object was deleted.')
+            end
         end
     end
 end
