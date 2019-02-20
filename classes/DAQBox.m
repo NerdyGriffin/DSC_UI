@@ -878,6 +878,15 @@ classdef DAQBox < handle
             obj.daqTrigger.stop();
         end
         
+        function recalculateHeatFlow(obj, dscData)
+            %recalculateData
+            %   Recalculate the Heat Flow values using the sample mass
+            %   values stored in the SampleData objects and the CurrentData
+            
+            % Call the recalculateHeatFlow method from the DSCData ojbject
+            dscData.recalculateHeatFlow(obj.HEATING_COIL_VOLTAGE);
+        end
+        
         function plotSimulatedTempDistribution(obj)
             t = [];
             for i=1:1e6
@@ -890,7 +899,7 @@ classdef DAQBox < handle
         
         function delete(obj)
             %Object Destructor Method
-            % This is run automatically when an object of this class is deleted
+            %   This is run automatically when an object of this class is deleted
             
             % Attempt to stop the trigger
             try
