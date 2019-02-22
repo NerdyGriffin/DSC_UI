@@ -28,7 +28,7 @@ To run the Graphical User Interface (GUI), run the file classes/DSC_GUI_APP.mlap
 
 --------Command-Line UI Instructions--------
 
-Note: The CUI is not yet full implemented. It is recommended that you use the GUI for any and all testing or experiments.
+WARNING: The CUI is not yet full implemented. It is recommended that you use the GUI for any and all testing or experiments.
 
 To run the Command-Line User Interface (CUI), type Run_DSC_CUI in the MATLAB command window
 
