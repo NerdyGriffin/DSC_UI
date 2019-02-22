@@ -304,7 +304,7 @@ classdef StageController < handle
             end
             
             [newStartTemp, newRampUpRate, newEndTemp, newHoldTime]...
-                = checkStageBounds(newStartTemp, newRampUpRate, newEndTemp, newHoldTime);
+                = obj.checkStageBounds(newStartTemp, newRampUpRate, newEndTemp, newHoldTime);
             
             % Insert the new stage parameters at the given stage number
             obj.TemperatureControlStaging(newStageNumber, 1) = newStageNumber;
@@ -326,7 +326,7 @@ classdef StageController < handle
             %   array
             
             [newStartTemp, newRampUpRate, newEndTemp, newHoldTime]...
-                = checkStageBounds(newStartTemp, newRampUpRate, newEndTemp, newHoldTime);
+                = obj.checkStageBounds(newStartTemp, newRampUpRate, newEndTemp, newHoldTime);
             
             % Insert the new stage parameters at the given stage number
             obj.TemperatureControlStaging(stageNumber, 1) = stageNumber;
@@ -1083,22 +1083,40 @@ classdef StageController < handle
             % Check whether the ramp up rate agrees with the start temp and end temp
             if startTemp == endTemp
                 rampUpRate = 0;
-                msgbox('The Ramp Up Rate has been set to 0 C/min because the End Temp is equal to the Start Temp')
+                msgbox({'the Ramp Up Rate has been set to 0 C/min';...
+                    'because the End Temp is equal to the Start Temp'})
                 
-            elseif (startTemp > endTemp && rampUpRate > 0)
-                rampUpRate = -rampUpRate;
-                msgbox('The Ramp Up Rate has been made negative because the End Temp is less than the Start Temp')
+            elseif endTemp > startTemp
+                if rampUpRate == 0
+                    rampUpRate = 1;
+                    msgbox({'the Ramp Up Rate has been set to 1 C/min because it cannot be 0 C/min';...
+                        'if the End Temp is greater than the Start Temp'})
+                    
+                elseif rampUpRate < 0
+                    rampUpRate = -rampUpRate;
+                    msgbox({'the Ramp Up Rate has been made positive';...
+                        'because the End Temp is greater than the Start Temp'})
+                end
                 
-            elseif (startTemp < endTemp && rampUpRate < 0)
-                rampUpRate = -rampUpRate;
-                msgbox('The Ramp Up Rate has been made positive because the End Temp is greater than the Start Temp')
+            elseif endTemp < startTemp
+                if rampUpRate == 0
+                    rampUpRate = -1;
+                    msgbox({'the Ramp Up Rate has been set to -1 C/min because it cannot be 0 C/min';...
+                        'if the End Temp is less than the Start Temp'})
+                    
+                elseif rampUpRate > 0
+                    rampUpRate = -rampUpRate;
+                    msgbox({'the Ramp Up Rate has been made negative';...
+                        'because the End Temp is less than the Start Temp'})
+                    
+                end
                 
             end
             
             % Check whether the hold time is a positive value
             if holdTime < 0
                 holdTime = 0;
-                msgbox('The Hold Time has been made zero because it was negative')
+                msgbox('the Hold Time has been made zero because it was negative')
                 
             end
         end
