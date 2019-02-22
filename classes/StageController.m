@@ -1031,7 +1031,7 @@ classdef StageController < handle
             %performAutosave
             %   Save a backup of the app, daqBox, and liveData objects as a
             %   .mat file
-            
+
             % Try to autosave the DAQBox object
             try
                 % Assign the current DAQBox object to a temporary variable
@@ -1072,7 +1072,7 @@ classdef StageController < handle
             if obj.ExperimentInProgress
                 obj.forceStop();
             end
-            
+
             try
                 % Stop the autosave timer
                 obj.stopAutosaveTimer();
