@@ -1032,27 +1032,10 @@ classdef StageController < handle
             %   Save a backup of the app, daqBox, and liveData objects as a
             %   .mat file
 
-            % Try to autosave the app object
-            try
-                % Assign the current app object to a temporary variable
-                app = obj.app;
-
-                % Save the temporary variable to a .mat file
-                save('./autosave/autosave_app.mat', 'app')
-
-            catch ME
-                % If an autosave error occurs while an experiment is running,
-                % rethrow the error
-                if obj.ExperimentInProgress
-                    rethrow(ME)
-                end
-            end
-
             % Try to autosave the DAQBox object
             try
                 % Assign the current DAQBox object to a temporary variable
                 daqBox = obj.daqBox;
-
                 % Save the temporary variable to a .mat file
                 save('./autosave/autosave_daqBox.mat', 'daqBox')
 
@@ -1089,7 +1072,7 @@ classdef StageController < handle
             if obj.ExperimentInProgress
                 obj.forceStop();
             end
-            
+
             try
                 % Stop the autosave timer
                 obj.stopAutosaveTimer();
