@@ -956,9 +956,12 @@ classdef DAQBox < handle
     
     methods
         function plotSimulatedTempDistribution(obj)
-            t = [];
+            %plotSimulatedTempDistribution
+            %   Plot a histogram of the simulated temperature error
+            %   distrubtion
+            t = zeros(1,1e6);
             for i=1:1e6
-                t(end+1) = randn * obj.SIMULATED_TEMP_SPREAD_COEFFICIENT...
+                t(i) = randn * obj.SIMULATED_TEMP_SPREAD_COEFFICIENT...
                     + obj.SIMULATED_TEMP_COOLING_CONSTANT;
             end
             histogram(t)
