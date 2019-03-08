@@ -27,8 +27,11 @@ classdef DAQTrigger < handle
     properties
         device = []
         
+        % Boolean variable indicating whether to interact with a physical
+        % DAQ Box (true) or simulate the hardware (false).
         UseDAQHardware logical = false
         
+        % Boolean variable indicating whether the trigger is running
         Running = 'off'
         
         TriggerSemaphore Semaphore
@@ -39,9 +42,10 @@ classdef DAQTrigger < handle
         TriggerTimer timer
         TimerExecutionMode = 'fixedRate'
         TimerPeriod = 0.2
-        
-        % daq.ni.Session objects
-        
+    end
+    
+    % daq.ni.Session objects
+    properties
         % The session for sending trigger connection signals at regular
         % intervals
         TriggerSession daq.ni.Session
@@ -49,9 +53,10 @@ classdef DAQTrigger < handle
         TriggerOutputChannel
         
         TriggerConnection
-        
-        
-        
+    end
+    
+    % Trigger Properties
+    properties
         % The time in seconds between executions of the trigger
         TriggerPeriod = 0.2;
         
