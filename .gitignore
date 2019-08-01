@@ -1,3 +1,6 @@
+# DSC autosave files
+autosave/autosave*
+
 # MATLAB backup files
 *.asv
 
