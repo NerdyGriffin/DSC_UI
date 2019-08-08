@@ -447,6 +447,13 @@ classdef StageController < handle
                     obj.createLiveData();
                 end
                 
+                % Attempt to pass DSCData object to the DAQBox object
+                try
+                    obj.daqBox.liveData = obj.liveData;
+                catch
+                    error('Failed to pass live data to the DAQBox object')
+                end
+                
                 
                 % Measure and record the start time of the experiment
                 obj.liveData.ExpStartSerialDate...

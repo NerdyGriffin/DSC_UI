@@ -31,6 +31,10 @@ classdef DAQBox < handle
         % regular intervals
         daqTrigger DAQTrigger
         
+        % An object of the DSCData class which is responsible to storing
+        % and maintaining data while an experiment is running
+        liveData DSCData
+        
         % Boolean variable indicating whether to interact with a physical
         % DAQ Box (true) or simulate the hardware (false).
         UseDAQHardware logical = false
@@ -126,12 +130,12 @@ classdef DAQBox < handle
         DEVICE_ID = 'Dev1';
         
         % The channel ID's for each sensor
-        CHANNEL_ID_TEMP_REF = 'ai5';
-        CHANNEL_ID_TEMP_SAMP = 'ai6';
-        CHANNEL_ID_CURRENT_REF = 'ai3';
-        CHANNEL_ID_CURRENT_SAMP = 'ai4';
-        CHANNEL_ID_HEATING_COIL_REF = 'ctr0';
-        CHANNEL_ID_HEATING_COIL_SAMP = 'ctr1';
+        CHANNEL_ID_TEMP_REF = 'ai6'; %'ai5';
+        CHANNEL_ID_TEMP_SAMP = 'ai3'; %'ai6';
+        CHANNEL_ID_CURRENT_REF = 'ai5'; %'ai3';
+        CHANNEL_ID_CURRENT_SAMP = 'ai4'; %'ai4';
+        CHANNEL_ID_HEATING_COIL_REF = 'ctr1';
+        CHANNEL_ID_HEATING_COIL_SAMP = 'ctr0';
         
         % The scan rate used during sensor readings
         SCAN_RATE = 62500;
@@ -450,6 +454,10 @@ classdef DAQBox < handle
                 obj.InputSession.Rate = obj.SCAN_RATE;
                 
                 obj.InputSession.DurationInSeconds = obj.INPUT_DURATION_IN_SECONDS;
+                
+                % Add a listener for background data acquisition
+                obj.lh_DataAvailable = addlistener(obj.InputSession,...
+                    'DataAvaliable', {@storeLiveData, obj});
                 
                 obj.UseDAQHardware = true;
                 
@@ -1052,4 +1060,12 @@ classdef DAQBox < handle
             
         end
     end
+end
+
+%--------------------------------------------------------------------------
+% The following functions are the listener callback functions for the
+% background data acquisition
+
+function storeLiveData(src, event, daqBox)
+    
 end
