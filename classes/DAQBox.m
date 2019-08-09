@@ -130,12 +130,12 @@ classdef DAQBox < handle
         DEVICE_ID = 'Dev1';
         
         % The channel ID's for each sensor
-        CHANNEL_ID_TEMP_REF = 'ai6'; %'ai5';
-        CHANNEL_ID_TEMP_SAMP = 'ai3'; %'ai6';
-        CHANNEL_ID_CURRENT_REF = 'ai5'; %'ai3';
-        CHANNEL_ID_CURRENT_SAMP = 'ai4'; %'ai4';
-        CHANNEL_ID_HEATING_COIL_REF = 'ctr1';
-        CHANNEL_ID_HEATING_COIL_SAMP = 'ctr0';
+        CHANNEL_ID_TEMP_REF = 'ai3'; %'ai5';
+        CHANNEL_ID_TEMP_SAMP = 'ai6'; %'ai6';
+        CHANNEL_ID_CURRENT_REF = 'ai4'; %'ai3';
+        CHANNEL_ID_CURRENT_SAMP = 'ai5'; %'ai4';
+        CHANNEL_ID_HEATING_COIL_REF = 'ctr0';
+        CHANNEL_ID_HEATING_COIL_SAMP = 'ctr1';
         
         % The scan rate used during sensor readings
         SCAN_RATE = 62500;
