@@ -455,9 +455,7 @@ classdef DAQBox < handle
                 
                 obj.InputSession.DurationInSeconds = obj.INPUT_DURATION_IN_SECONDS;
                 
-                % Add a listener for background data acquisition
-                obj.lh_DataAvailable = addlistener(obj.InputSession,...
-                    'DataAvaliable', {@storeLiveData, obj});
+                obj.InputSession.IsContinuous = true;
                 
                 obj.UseDAQHardware = true;
                 
@@ -661,13 +659,28 @@ classdef DAQBox < handle
     methods
         function [serialDate, tempReading_Ref, tempReading_Samp,...
                 currentReading_Ref, currentReading_Samp]...
-                = takeMeasurement(obj)
-            %takeMeasurement
-            %   Take temperature and power readings from the input channels
+                = getBackgroundData(obj, varargin)
+            %getBackgroundData
+            %   Get temperature and power readings from the background data
+            %   acquisition
             if obj.UseDAQHardware
-                % Read the input data from the session
-                [data, ~, serialDate]...
-                    = startForeground(obj.InputSession);
+                if nargin > 0
+                    % Get the raw data of the time stamps
+                    rawTimeStamps = event.TimeStamps;
+                    
+                    % Calculate the average of the time stamps
+                    serialDate = mean(rawTimeStamps);
+                    
+                    % Get the data from the listener event
+                    data = event.Data;
+                    
+                else
+                    % Read the input data from the session
+                    [data, serialDate]...
+                        = inputSingleScan(obj.InputSession);
+                    
+                end
+                
                 
                 % Organize the raw data into separate vectors for each
                 % sensor
@@ -734,8 +747,8 @@ classdef DAQBox < handle
             if obj.UseDAQHardware
                 try
                     % Read the input data from the session
-                    [~, ~, serialDate]...
-                        = startForeground(obj.InputSession);
+                    [~, serialDate]...
+                        = inputSingleScan(obj.InputSession);
                 catch ME
                     warning('An error occured while trying to read the serial date from the DAQ Box')
                     rethrow(ME)
@@ -912,41 +925,120 @@ classdef DAQBox < handle
         end
     end
     
-    % DAQTrigger Interface Methods
+    % Data Listener Interface Methods
     methods
         function startSingleTargetHeating(obj, stageController)
             %startSingleTargetHeating
-            %   Configure the trigger to perform single target heating
+            %   Configure the listener to perform single target heating
             
-            obj.daqTrigger.startSingleTargetHeating(stageController)
+            if obj.UseDAQHardware
+                % Delete any existing listeners
+                try
+                    delete(obj.lh_DataAvailable)
+                catch
+                    warning('Failed to delete listener')
+                    % Force the experiment to stop in the event of an error
+                    stageController.forceStop();
+                    rethrow(ME)
+                end
+                
+                obj.lh_DataAvailable = addlistener(obj.InputSession,...
+                    'DataAvailable',...
+                    @(src, event) singleTargetDataFcn(src, event, stageController))
+                
+                obj.InputSession.startBackground()
+                
+            else
+                obj.daqTrigger.startSingleTargetHeating(stageController)
+                
+            end
         end
         
         function startRampUpHeating(obj, stageController)
             %startRampUpHeating
-            %   Configure the trigger to perform ramp up heating
+            %   Configure the listener to perform ramp up heating
             
-            obj.daqTrigger.startRampUpHeating(stageController)
+            if obj.UseDAQHardware
+                % Delete any existing listeners
+                try
+                    delete(obj.lh_DataAvailable)
+                catch
+                    warning('Failed to delete listener')
+                    % Force the experiment to stop in the event of an error
+                    stageController.forceStop();
+                    rethrow(ME)
+                end
+                
+                obj.lh_DataAvailable = addlistener(obj.InputSession,...
+                    'DataAvailable',...
+                    @(src, event) rampUpDataFcn(src, event, stageController))
+                
+                obj.InputSession.startBackground()
+                
+            else
+                obj.daqTrigger.startRampUpHeating(stageController)
+                
+            end
         end
         
         function startHoldTempHeating(obj, stageController)
             %startHoldTempHeating
-            %   Configure the trigger to perform hold temp heating
+            %   Configure the listener to perform hold temp heating
             
-            obj.daqTrigger.startHoldTempHeating(stageController)
+            if obj.UseDAQHardware
+                % Delete any existing listeners
+                try
+                    delete(obj.lh_DataAvailable)
+                catch
+                    warning('Failed to delete listener')
+                    % Force the experiment to stop in the event of an error
+                    stageController.forceStop();
+                    rethrow(ME)
+                end
+                
+                obj.lh_DataAvailable = addlistener(obj.InputSession,...
+                    'DataAvailable',...
+                    @(src, event) holdTempDataFcn(src, event, stageController))
+                
+                obj.InputSession.startBackground()
+                
+            else
+                obj.daqTrigger.startHoldTempHeating(stageController)
+                
+            end
         end
         
-        function waitForTrigger(obj)
-            %waitForTrigger
-            %   Wait for the trigger to be stopped
+        function waitForDAQ(obj)
+            %waitForDAQ
+            %   Wait for the background data acquisition to be stopped
             
-            obj.daqTrigger.waitForTrigger();
+            if obj.UseDAQHardware
+                obj.InputSession.wait();
+                
+            else
+                obj.daqTrigger.waitForTrigger();
+                
+            end
         end
         
-        function stopTrigger(obj)
-            %stopTrigger
-            %   Stop the daqTrigger
+        function stopDAQ(obj)
+            %stopDAQ
+            %   Stop the background data aquisition
             
-            obj.daqTrigger.stop();
+            if obj.UseDAQHardware
+                obj.InputSession.stop();
+                
+                % Attempt to delete the listener
+                try
+                    delete(lh_DataAvailable);
+                catch
+                    warning('Failed to delete listener after stopping the background data acquisition.')
+                end
+                
+            else
+                obj.daqTrigger.stop();
+                
+            end
         end
     end
     
@@ -984,11 +1076,11 @@ classdef DAQBox < handle
             %   This is run automatically when an object of this class is
             %   deleted
             
-            % Attempt to stop the trigger
+            % Attempt to stop the background data acquisition
             try
-                obj.stopTrigger();
+                obj.stopDAQ();
             catch
-                warning('Failed to stop trigger before DAQBox object was deleted.')
+                warning('Failed to stop background data acquisition before DAQBox object was deleted.')
             end
             
             % Attempt to stop the heating coil PWM output
@@ -1066,6 +1158,20 @@ end
 % The following functions are the listener callback functions for the
 % background data acquisition
 
-function storeLiveData(src, event, daqBox)
-    
+function singleTargetDataFcn(src, event, stageController)
+%singleTargetDataFcn
+%   The DataFcn callback for single target heating
+stageController.singleTargetHeating(src, event);
+end
+
+function rampUpDataFcn(src, event, stageController)
+%rampUpDataFcn
+%   The DataFcn callback for ramp up heating
+stageController.rampUpHeating(src, event);
+end
+
+function holdTempDataFcn(src, event, stageController)
+%holdTempDataFcn
+%   The DataFcn callback for hold temp heating
+stageController.holdTempHeating(src, event);
 end
