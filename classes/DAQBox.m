@@ -26,11 +26,6 @@ classdef DAQBox < handle
     properties
         device = []
         
-        % An event listener to perform calulations and store the
-        % measurement data every time there is data available from the
-        % background data acquisition
-        lh_DataAvailable
-        
         % An object of the DAQTrigger class which represents the DAQ
         % triggers, which are used to trigger the data acquisition at
         % regular intervals
@@ -39,6 +34,13 @@ classdef DAQBox < handle
         % An object of the DSCData class which is responsible to storing
         % and maintaining data while an experiment is running
         liveData DSCData
+        
+        % An event listener to perform calulations and store the
+        % measurement data every time there is data available from the
+        % background data acquisition
+        lh_DataAvailable
+        
+        daqSemaphore Semaphore
         
         % Boolean variable indicating whether to interact with a physical
         % DAQ Box (true) or simulate the hardware (false).
@@ -146,7 +148,7 @@ classdef DAQBox < handle
         SCAN_RATE = 62500;
         
         % The duration in seconds of the sensor readings
-        INPUT_DURATION_IN_SECONDS = 21600;
+        INPUT_DURATION_IN_SECONDS = 60;
         
         % The duration in seconds of the PWM outputs (if not manually
         % stopped)
@@ -321,6 +323,10 @@ classdef DAQBox < handle
             % Attempt to close the waitbar
             try close(f); catch, end
             
+            obj.daqSemaphore = Semaphore;
+            obj.daqSemaphore.lock();
+            obj.daqSemaphore.release();
+            
             disp(' ')
             disp(' ')
             disp(' ')
@@ -460,7 +466,7 @@ classdef DAQBox < handle
                 
                 obj.InputSession.DurationInSeconds = obj.INPUT_DURATION_IN_SECONDS;
                 
-                %obj.InputSession.IsContinuous = false;
+                obj.InputSession.IsContinuous = true;
                 
                 obj.lh_DataAvailable = addlistener(obj.InputSession,...
                     'DataAvailable',...
@@ -786,7 +792,7 @@ classdef DAQBox < handle
                     end
                     
                     try
-                        obj.OutputSession.startBackground
+                        obj.OutputSession.startBackground()
                     catch
                         warning('An error occured while attempting to start the PWM. Retrying...')
                         err_count = err_count + 1;
@@ -988,6 +994,8 @@ classdef DAQBox < handle
                 
                 obj.InputSession.startBackground()
                 
+                obj.daqSemaphore.lock();
+                
             else
                 obj.daqTrigger.startRampUpHeating(stageController)
                 
@@ -1017,6 +1025,8 @@ classdef DAQBox < handle
                 
                 obj.InputSession.startBackground()
                 
+                obj.daqSemaphore.lock();
+                
             else
                 obj.daqTrigger.startHoldTempHeating(stageController)
                 
@@ -1028,7 +1038,7 @@ classdef DAQBox < handle
             %   Wait for the background data acquisition to be stopped
             
             if obj.UseDAQHardware
-                obj.InputSession.wait();
+                obj.daqSemaphore.wait();
                 
             else
                 obj.daqTrigger.waitForTrigger();
@@ -1051,6 +1061,8 @@ classdef DAQBox < handle
                 catch
                     warning('Failed to delete listener after stopping the background data acquisition.')
                 end
+                
+                obj.daqSemaphore.release();
                 
             else
                 obj.daqTrigger.stop();
