@@ -26,6 +26,11 @@ classdef DAQBox < handle
     properties
         device = []
         
+        % An event listener to perform calulations and store the
+        % measurement data every time there is data available from the
+        % background data acquisition
+        lh_DataAvailable
+        
         % An object of the DAQTrigger class which represents the DAQ
         % triggers, which are used to trigger the data acquisition at
         % regular intervals
@@ -141,11 +146,11 @@ classdef DAQBox < handle
         SCAN_RATE = 62500;
         
         % The duration in seconds of the sensor readings
-        INPUT_DURATION_IN_SECONDS = 0.1;
+        INPUT_DURATION_IN_SECONDS = 21600;
         
         % The duration in seconds of the PWM outputs (if not manually
         % stopped)
-        OUTPUT_DURATION_IN_SECONDS = 2;
+        OUTPUT_DURATION_IN_SECONDS = 60;
         
         % The minimum duty cycle allowed for both PWM channels
         PWM_MIN_DUTY_CYCLE = 1e-3;
@@ -455,7 +460,11 @@ classdef DAQBox < handle
                 
                 obj.InputSession.DurationInSeconds = obj.INPUT_DURATION_IN_SECONDS;
                 
-                obj.InputSession.IsContinuous = true;
+                %obj.InputSession.IsContinuous = false;
+                
+                obj.lh_DataAvailable = addlistener(obj.InputSession,...
+                    'DataAvailable',...
+                    @(src,event) disp('listener triggered outside of experiment staging'));
                 
                 obj.UseDAQHardware = true;
                 
@@ -659,12 +668,12 @@ classdef DAQBox < handle
     methods
         function [serialDate, tempReading_Ref, tempReading_Samp,...
                 currentReading_Ref, currentReading_Samp]...
-                = getBackgroundData(obj, varargin)
+                = getBackgroundData(obj, event)
             %getBackgroundData
             %   Get temperature and power readings from the background data
             %   acquisition
             if obj.UseDAQHardware
-                if nargin > 0
+                if event ~= 'single'
                     % Get the raw data of the time stamps
                     rawTimeStamps = event.TimeStamps;
                     
@@ -934,8 +943,10 @@ classdef DAQBox < handle
             if obj.UseDAQHardware
                 % Delete any existing listeners
                 try
-                    delete(obj.lh_DataAvailable)
-                catch
+                    if isvalid(obj.lh_DataAvailable)
+                        delete(obj.lh_DataAvailable)
+                    end
+                catch ME
                     warning('Failed to delete listener')
                     % Force the experiment to stop in the event of an error
                     stageController.forceStop();
@@ -961,8 +972,10 @@ classdef DAQBox < handle
             if obj.UseDAQHardware
                 % Delete any existing listeners
                 try
-                    delete(obj.lh_DataAvailable)
-                catch
+                    if isvalid(obj.lh_DataAvailable)
+                        delete(obj.lh_DataAvailable)
+                    end
+                catch ME
                     warning('Failed to delete listener')
                     % Force the experiment to stop in the event of an error
                     stageController.forceStop();
@@ -988,8 +1001,10 @@ classdef DAQBox < handle
             if obj.UseDAQHardware
                 % Delete any existing listeners
                 try
-                    delete(obj.lh_DataAvailable)
-                catch
+                    if isvalid(obj.lh_DataAvailable)
+                        delete(obj.lh_DataAvailable)
+                    end
+                catch ME
                     warning('Failed to delete listener')
                     % Force the experiment to stop in the event of an error
                     stageController.forceStop();
@@ -1030,7 +1045,9 @@ classdef DAQBox < handle
                 
                 % Attempt to delete the listener
                 try
-                    delete(lh_DataAvailable);
+                    if isvalid(obj.lh_DataAvailable)
+                        delete(obj.lh_DataAvailable)
+                    end
                 catch
                     warning('Failed to delete listener after stopping the background data acquisition.')
                 end

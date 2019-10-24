@@ -36,7 +36,7 @@ classdef DAQTrigger < handle
         
         TriggerSemaphore Semaphore
         
-        StopTriggerInProgress = false
+        StopTimerInProgress = false
         
         % MATLAB timer class object
         TriggerTimer timer
@@ -131,7 +131,7 @@ classdef DAQTrigger < handle
             obj.TriggerTimer = timer(...
                 'ExecutionMode', obj.TimerExecutionMode, ...
                 'Period', obj.TimerPeriod, ...
-                'TimerFcn', {@singleTargetTimerFcn, stageController});
+                'TimerFcn', {@singleTargetTimerFcn, obj, stageController});
             
             % Start the timer object
             start(obj.TriggerTimer)
@@ -149,7 +149,7 @@ classdef DAQTrigger < handle
             % Delete any existing timers
             try
                 delete(obj.TriggerTimer)
-            catch
+            catch ME
                 warning('failed to delete')
                 % Force the experiment to stop in the event of a
                 % timer error
@@ -161,7 +161,7 @@ classdef DAQTrigger < handle
             obj.TriggerTimer = timer(...
                 'ExecutionMode', obj.TimerExecutionMode, ...
                 'Period', obj.TimerPeriod, ...
-                'TimerFcn', {@rampUpTimerFcn, stageController});
+                'TimerFcn', {@rampUpTimerFcn, obj, stageController});
             
             % Start the timer object
             start(obj.TriggerTimer)
@@ -179,7 +179,7 @@ classdef DAQTrigger < handle
             % Delete any existing timers
             try
                 delete(obj.TriggerTimer)
-            catch
+            catch ME
                 warning('failed to delete')
                 % Force the experiment to stop in the event of a
                 % timer error
@@ -191,7 +191,7 @@ classdef DAQTrigger < handle
             obj.TriggerTimer = timer(...
                 'ExecutionMode', obj.TimerExecutionMode, ...
                 'Period', obj.TimerPeriod, ...
-                'TimerFcn', {@holdTempTimerFcn, stageController});
+                'TimerFcn', {@holdTempTimerFcn, obj, stageController});
             
             % Start the timer object
             start(obj.TriggerTimer)
@@ -212,6 +212,8 @@ classdef DAQTrigger < handle
             %   Stop running the current trigger
             % Stop the trigger timer object if DAQ hardware
             % is not present
+            obj.StopTimerInProgress = true;
+            
             for i=1:10
                 try
                     stop(obj.TriggerTimer)
@@ -225,6 +227,8 @@ classdef DAQTrigger < handle
                     end
                 end
             end
+            
+            obj.StopTimerInProgress = false;
             
             obj.TriggerSemaphore.release();
             
@@ -251,21 +255,38 @@ end
 % trigger timer object, which is used to trigger the procedure when DAQ
 % hardware is not present
 
-function singleTargetTimerFcn(~, event, stageController)
+function singleTargetTimerFcn(obj, event, daqTrigger, stageController)
 %singleTarget_TimerFcn
 %   The TimerFcn callback for single target heating
-stageController.singleTargetHeating(event);
+StopTimerInProgress = daqTrigger.StopTimerInProgress;
+
+if StopTimerInProgress
+    obj.stop();
+else
+    stageController.singleTargetHeating(event);
+end
 end
 
-function rampUpTimerFcn(~, event, stageController)
+function rampUpTimerFcn(~, event, daqTrigger, stageController)
 %rampUp_TimerFcn
 %   The TimerFcn callback for ramp up heating
-stageController.rampUpHeating(event);
+StopTimerInProgress = daqTrigger.StopTimerInProgress;
+
+if StopTimerInProgress
+    obj.stop();
+else
+    stageController.rampUpHeating(event);
+end
 end
 
-function holdTempTimerFcn(~, event, stageController)
+function holdTempTimerFcn(~, event, daqTrigger, stageController)
 %holdTemp_TimerFcn
 %   The TimerFcn callback for hold temp heating
-stageController.holdTempHeating(event);
-end
+StopTimerInProgress = daqTrigger.StopTimerInProgress;
 
+if StopTimerInProgress
+    obj.stop();
+else
+    stageController.holdTempHeating(event);
+end
+end

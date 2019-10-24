@@ -473,6 +473,8 @@ classdef StageController < handle
                 obj.startAutosaveTimer();
                 
                 
+                disp('Experiment started')
+                
                 % Iterate through each given control staging cycle
                 for stageCounter = 1:obj.NumberOfStages
                     
@@ -979,8 +981,6 @@ classdef StageController < handle
                 obj.app.refreshOperationClock();
                 
             end
-            disp('TargetTemp:')
-            disp(obj.TargetTemp)
             
             
             % Store the latest Target Temp in the DSCData object

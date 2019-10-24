@@ -31,12 +31,12 @@ end
 
 waitbarLength = 60;
 
-disp(' ')
-disp(' ')
-disp(' ')
-disp(' ')
-disp(' ')
-disp(' ')
+%disp(' ')
+%disp(' ')
+%disp(' ')
+%disp(' ')
+%disp(' ')
+%disp(' ')
 disp(' ')
 disp(' ')
 fprintf('[')
