@@ -153,7 +153,6 @@ classdef DAQBox < handle
         CHANNEL_ID_HEATING_COIL_SAMP = 'ctr1';
         
         % The scan rate used during sensor readings
-        SCAN_RATE = 62500;
         
         % The duration in seconds of the clock reading
         CLOCK_NUMBER_OF_SCANS = 2;
@@ -754,7 +753,7 @@ classdef DAQBox < handle
                     rawTimeStamps = event.TimeStamps;
                     
                     % Calculate the average of the time stamps
-                    serialDate = mean(rawTimeStamps);
+                    serialDate = event.TriggerTime + mean(rawTimeStamps);
                     
                     % Get the data from the listener event
                     data = event.Data;
@@ -831,25 +830,30 @@ classdef DAQBox < handle
             
             if obj.UseDAQHardware
                 try
-                    % Read the input data from the input session
+                    % Read the input data from the clock session
                     [~, serialDate]...
-                        = inputSingleScan(obj.InputSession);
+                        = inputSingleScan(obj.ClockSession);
                 catch
                     try
+                        obj.InputSession.stop();
+                        
                         % Read the input data from the clock session
                         [~, serialDate]...
-                            = inputSingleScan(obj.ClockSession);
-                    catch
-                        warning('An error occured while trying to read the serial date from the DAQ Box')
+                            = inputSingleScan(obj.InputSession);
                         
-                        serialDate = datenum(datetime);
+                        obj.InputSession.startBackground();
+                        
+                    catch ME
+                        warning('An error occured while trying to read the serial date from the DAQ Box')
+                        rethrow(ME)
                     end
                 end
-                
             else
                 serialDate = datenum(datetime);
                 
             end
+            
+            fprintf('\nserialDate = %f\n', serialDate)
         end
     end
     

@@ -976,6 +976,12 @@ classdef StageController < handle
         function experimentLiveDataAnalysis(obj, event)
             %experimentLiveDataAnalysis
             
+            if obj.UseAppUI
+                % Refresh the clocks with the new values
+                obj.app.refreshOperationClock();
+            end
+            
+            
             % Store the latest Target Temp in the DSCData object
             obj.liveData.LatestTargetTemp = obj.TargetTemp;
             
@@ -1048,7 +1054,7 @@ classdef StageController < handle
             
             if obj.UseAppUI
                 % Refresh the clocks with the new values
-                obj.app.refreshOperationClock(latestSerialDate);
+                obj.app.refreshOperationClock();
                 
                 % Refresh the data plots
                 obj.app.refreshOperationPlots();
