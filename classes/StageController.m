@@ -835,6 +835,7 @@ classdef StageController < handle
             obj.ForceStop = true;
             
             obj.stopDAQ();
+            obj.stopPWM();
             
         end
         
