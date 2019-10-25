@@ -550,7 +550,7 @@ classdef StageController < handle
                     obj.liveData.LatestStageSerialDate = latestStageSerialDate;
                     
                     % Start single target heating
-                    obj.daqBox.startSingleTargetHeating(obj)
+                    obj.daqBox.startSingleTargetHeating(obj);
                     
                     % Wait for background data acquisition to be stopped
                     obj.waitForDAQ();
@@ -849,7 +849,7 @@ classdef StageController < handle
             
         end
         
-        function singleTargetHeating(obj, event, varargin)
+        function singleTargetHeating(obj, event)
             %singleTargetHeating
             %   Dynamically controls the power output in order to heat the
             %   samples until they reach the target temperature
@@ -882,7 +882,7 @@ classdef StageController < handle
             end
         end
         
-        function rampUpHeating(obj, event, varargin)
+        function rampUpHeating(obj, event)
             % Experiment loop that dynamically controls the power output in
             % order to make the sample temperatures equal to the target
             % temperature, while also ramping up the target temperature
@@ -939,7 +939,7 @@ classdef StageController < handle
             end
         end
         
-        function holdTempHeating(obj, event, varargin)
+        function holdTempHeating(obj, event)
             % Experiment loop that dynamically controls the power output in
             % order to make the hold the sample temperatures at the target
             % temperature over the duration of the given hold time
@@ -975,13 +975,6 @@ classdef StageController < handle
         
         function experimentLiveDataAnalysis(obj, event)
             %experimentLiveDataAnalysis
-            
-            if obj.UseAppUI
-                % Refresh the clocks with the new values
-                obj.app.refreshOperationClock();
-                
-            end
-            
             
             % Store the latest Target Temp in the DSCData object
             obj.liveData.LatestTargetTemp = obj.TargetTemp;
@@ -1055,7 +1048,7 @@ classdef StageController < handle
             
             if obj.UseAppUI
                 % Refresh the clocks with the new values
-                obj.app.refreshOperationClock();
+                obj.app.refreshOperationClock(latestSerialDate);
                 
                 % Refresh the data plots
                 obj.app.refreshOperationPlots();
@@ -1137,6 +1130,8 @@ classdef StageController < handle
                 'ExecutionMode', obj.AutosaveTimerExecutionMode, ...
                 'Period', obj.AutosavePeriod, ...
                 'TimerFcn', {@autosaveTimerFcn, obj});
+            
+            pause(0.1);
             
             % Start the timer object
             start(obj.AutosaveTimer)

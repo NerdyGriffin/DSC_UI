@@ -55,11 +55,17 @@ classdef DAQBox < handle
     % daq.ni.Session objects
     properties
         
+        % The session for measuring the time independent of data
+        % acquisition
+        ClockSession daq.ni.Session
+        
         % The session for reading temperature and power data
         InputSession daq.ni.Session
         
         % The session for controlling the power output to the heating coils
         OutputSession daq.ni.Session
+        
+        ClockChannel
         
         CurrentChannel_Ref
         CurrentChannel_Samp
@@ -99,7 +105,8 @@ classdef DAQBox < handle
         
         MaxTempLimit = 300
         
-        % Status of whether the current system config has been saved to a file
+        % Status of whether the current system config has been saved to a
+        % file
         ConfigSaveStatus logical = false
     end
     
@@ -137,6 +144,7 @@ classdef DAQBox < handle
         DEVICE_ID = 'Dev1';
         
         % The channel ID's for each sensor
+        CHANNEL_ID_CLOCK = 'ai0';
         CHANNEL_ID_TEMP_REF = 'ai3'; %'ai5';
         CHANNEL_ID_TEMP_SAMP = 'ai6'; %'ai6';
         CHANNEL_ID_CURRENT_REF = 'ai4'; %'ai3';
@@ -146,6 +154,9 @@ classdef DAQBox < handle
         
         % The scan rate used during sensor readings
         SCAN_RATE = 62500;
+        
+        % The duration in seconds of the clock reading
+        CLOCK_NUMBER_OF_SCANS = 2;
         
         % The duration in seconds of the sensor readings
         INPUT_DURATION_IN_SECONDS = 60;
@@ -204,7 +215,7 @@ classdef DAQBox < handle
             updatepath();
             
             s = 0;
-            n = 6;
+            n = 7;
             
             % Create a waitbar
             f = waitbar(s/n,'Please wait...');
@@ -238,6 +249,21 @@ classdef DAQBox < handle
                     obj.UseDAQHardware = true;
                 end
             end
+            
+            
+            message = 'Creating Clock Session...';
+            try
+                s = s + 1;
+                % Attempt to update the waitbar progress and label
+                waitbar(s/n,f,message);
+                % Update the cuiWaitbar progress and label
+                cuiWaitbar(s/n,message);
+            catch
+                % Recreate the waitbar if was closed by the user
+                f = waitbar(s/n,message);
+                cuiWaitbar(s/n,message);
+            end
+            obj.createClockSession();
             
             
             message = 'Creating Input Session...';
@@ -394,6 +420,50 @@ classdef DAQBox < handle
     
     % daq.createSession Methods
     methods
+        function obj = createClockSession(obj)
+            %createClockSession
+            %   Creates and configures the session that is used to take
+            %   measurements of the current time independently of the
+            %   background data acquistion
+            
+            if isempty(obj.device)
+                % Delete the session object if no DAQ devices are found
+                delete(obj.ClockSession)
+                
+                obj.UseDAQHardware = false;
+                
+                % Inform the user that no devices were detected
+                fprintf('\nTo allow for UI testing, time measurements will be made using the datetime function\n')
+                
+            else
+                % Release any existing sessions
+                try
+                    release(obj.ClockSession)
+                catch
+                    % Do nothing in the event of an error
+                end
+                
+                fprintf('\nCreating clock session...\n')
+                % Create the session for the input measurements
+                obj.ClockSession = daq.createSession('Ni');
+                disp('Clock session was successfully created')
+                
+                fprintf('\nConfiguring clock session channel...\n')
+                % Add an analog input channel whose triggerTime will be
+                % used for clock measurements
+                tempChannel = addAnalogInputChannel(obj.ClockSession,...
+                    obj.DEVICE_ID, obj.CHANNEL_ID_CLOCK, 'Voltage');
+                tempChannel.TerminalConfig = 'SingleEnded';
+                tempChannel.Name = 'Empty Channel: Time measurements';
+                disp('Created: analog input channel for taking time measurements')
+                
+                obj.ClockSession.NumberOfScans = obj.CLOCK_NUMBER_OF_SCANS;
+                
+                obj.UseDAQHardware = true;
+                
+            end
+        end
+        
         function obj = createInputSession(obj)
             %createInputSession
             %   Creates and configures the session that is used to take
@@ -679,7 +749,7 @@ classdef DAQBox < handle
             %   Get temperature and power readings from the background data
             %   acquisition
             if obj.UseDAQHardware
-                if event ~= 'single'
+                if ~isa(event, 'char')
                     % Get the raw data of the time stamps
                     rawTimeStamps = event.TimeStamps;
                     
@@ -761,12 +831,19 @@ classdef DAQBox < handle
             
             if obj.UseDAQHardware
                 try
-                    % Read the input data from the session
+                    % Read the input data from the input session
                     [~, serialDate]...
                         = inputSingleScan(obj.InputSession);
-                catch ME
-                    warning('An error occured while trying to read the serial date from the DAQ Box')
-                    rethrow(ME)
+                catch
+                    try
+                        % Read the input data from the clock session
+                        [~, serialDate]...
+                            = inputSingleScan(obj.ClockSession);
+                    catch
+                        warning('An error occured while trying to read the serial date from the DAQ Box')
+                        
+                        serialDate = datenum(datetime);
+                    end
                 end
                 
             else
@@ -961,9 +1038,11 @@ classdef DAQBox < handle
                 
                 obj.lh_DataAvailable = addlistener(obj.InputSession,...
                     'DataAvailable',...
-                    @(src, event) singleTargetDataFcn(src, event, stageController))
+                    @(src, event) singleTargetDataFcn(src, event, stageController));
                 
-                obj.InputSession.startBackground()
+                obj.InputSession.startBackground();
+                
+                obj.daqSemaphore.lock();
                 
             else
                 obj.daqTrigger.startSingleTargetHeating(stageController)
@@ -990,9 +1069,9 @@ classdef DAQBox < handle
                 
                 obj.lh_DataAvailable = addlistener(obj.InputSession,...
                     'DataAvailable',...
-                    @(src, event) rampUpDataFcn(src, event, stageController))
+                    @(src, event) rampUpDataFcn(src, event, stageController));
                 
-                obj.InputSession.startBackground()
+                obj.InputSession.startBackground();
                 
                 obj.daqSemaphore.lock();
                 
@@ -1021,9 +1100,9 @@ classdef DAQBox < handle
                 
                 obj.lh_DataAvailable = addlistener(obj.InputSession,...
                     'DataAvailable',...
-                    @(src, event) holdTempDataFcn(src, event, stageController))
+                    @(src, event) holdTempDataFcn(src, event, stageController));
                 
-                obj.InputSession.startBackground()
+                obj.InputSession.startBackground();
                 
                 obj.daqSemaphore.lock();
                 
@@ -1036,6 +1115,8 @@ classdef DAQBox < handle
         function waitForDAQ(obj)
             %waitForDAQ
             %   Wait for the background data acquisition to be stopped
+            
+            pause(0.1);
             
             if obj.UseDAQHardware
                 obj.daqSemaphore.wait();
@@ -1187,20 +1268,20 @@ end
 % The following functions are the listener callback functions for the
 % background data acquisition
 
-function singleTargetDataFcn(src, event, stageController)
+function singleTargetDataFcn(~, event, stageController)
 %singleTargetDataFcn
 %   The DataFcn callback for single target heating
-stageController.singleTargetHeating(src, event);
+stageController.singleTargetHeating(event);
 end
 
-function rampUpDataFcn(src, event, stageController)
+function rampUpDataFcn(~, event, stageController)
 %rampUpDataFcn
 %   The DataFcn callback for ramp up heating
-stageController.rampUpHeating(src, event);
+stageController.rampUpHeating(event);
 end
 
-function holdTempDataFcn(src, event, stageController)
+function holdTempDataFcn(~, event, stageController)
 %holdTempDataFcn
 %   The DataFcn callback for hold temp heating
-stageController.holdTempHeating(src, event);
+stageController.holdTempHeating(event);
 end
