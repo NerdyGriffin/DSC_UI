@@ -456,15 +456,15 @@ classdef StageController < handle
                 
                 
                 % Measure and record the start time of the experiment
-                obj.liveData.ExpStartSerialDate...
-                    = obj.daqBox.getCurrentSerialDate;
+                expStartSerialDate = obj.daqBox.getCurrentSerialDate;
+                obj.liveData.ExpStartSerialDate = expStartSerialDate;
                 
                 % Initialize the EstimatedStageDuration to an empty array
                 obj.EstimatedStageDuration = [];
                 
                 if obj.UseAppUI
                     % Refresh the clocks with the new values
-                    obj.app.refreshOperationClock();
+                    obj.app.refreshOperationClock(expStartSerialDate);
                     
                 end
                 
@@ -561,11 +561,6 @@ classdef StageController < handle
                     if obj.ForceSkipStage
                         obj.stopDAQ();
                         continue
-                    end
-                    
-                    if obj.UseAppUI
-                        % Refresh the clocks with the new values
-                        obj.app.refreshOperationClock();
                     end
                     
                     
@@ -697,14 +692,6 @@ classdef StageController < handle
                     end
                     
                     
-                    
-                    if obj.UseAppUI
-                        % Refresh the clocks with the new values
-                        obj.app.refreshOperationClock();
-                        
-                    end
-                    
-                    
                     % Run the Hold Temp Loop if there is a specified HoldTime
                     % value
                     if obj.HoldTime > 0
@@ -744,12 +731,18 @@ classdef StageController < handle
                         obj.stopDAQ();
                         continue
                     end
-                    
-                    if obj.UseAppUI
-                        % Refresh the clocks with the new values
-                        obj.app.refreshOperationClock();
-                        
-                    end
+                end
+                
+                % Stop the background input measurement and the PWM output
+                try
+                    obj.stopDAQ();
+                catch ME
+                    warning('Failed to stop background input measurement at end of experiment')
+                end
+                try
+                    obj.stopPWM();
+                catch ME
+                    warning('Failed to stop PWM output at end of experiment')
                 end
                 
                 
@@ -873,7 +866,7 @@ classdef StageController < handle
             obj.experimentLiveDataAnalysis(event);
             
             % Refresh the display
-            drawnow limitrate nocallbacks
+            drawnow limitrate
             
             % Compare the sample temperatures to the target temperature
             if (abs(obj.liveData.LatestTempError_Ref) < obj.MINIMUM_ACCEPTABLE_ERROR)...
@@ -929,7 +922,7 @@ classdef StageController < handle
             obj.experimentLiveDataAnalysis(event);
             
             % Refresh the display
-            drawnow limitrate nocallbacks
+            drawnow limitrate
             
             % Compare the sample temperatures to the end temperature
             if (obj.TargetTemp == obj.EndTemp)...
@@ -962,7 +955,7 @@ classdef StageController < handle
             obj.experimentLiveDataAnalysis(event);
             
             % Refresh the display
-            drawnow limitrate nocallbacks
+            drawnow limitrate
             
             elapsedStageTime...
                 = date2sec(obj.daqBox.getCurrentSerialDate()...
@@ -976,12 +969,6 @@ classdef StageController < handle
         
         function experimentLiveDataAnalysis(obj, event)
             %experimentLiveDataAnalysis
-            
-            if obj.UseAppUI
-                % Refresh the clocks with the new values
-                obj.app.refreshOperationClock();
-            end
-            
             
             % Store the latest Target Temp in the DSCData object
             obj.liveData.LatestTargetTemp = obj.TargetTemp;
@@ -1055,7 +1042,7 @@ classdef StageController < handle
             
             if obj.UseAppUI
                 % Refresh the clocks with the new values
-                obj.app.refreshOperationClock();
+                obj.app.refreshOperationClock(latestSerialDate);
                 
                 % Refresh the data plots
                 obj.app.refreshOperationPlots();

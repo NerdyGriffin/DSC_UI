@@ -55,10 +55,6 @@ classdef DAQBox < handle
     % daq.ni.Session objects
     properties
         
-        % The session for measuring the time independent of data
-        % acquisition
-        ClockSession daq.ni.Session
-        
         % The session for reading temperature and power data
         InputSession daq.ni.Session
         
@@ -215,7 +211,7 @@ classdef DAQBox < handle
             updatepath();
             
             s = 0;
-            n = 7;
+            n = 6;
             
             % Create a waitbar
             f = waitbar(s/n,'Please wait...');
@@ -249,21 +245,6 @@ classdef DAQBox < handle
                     obj.UseDAQHardware = true;
                 end
             end
-            
-            
-            message = 'Creating Clock Session...';
-            try
-                s = s + 1;
-                % Attempt to update the waitbar progress and label
-                waitbar(s/n,f,message);
-                % Update the cuiWaitbar progress and label
-                cuiWaitbar(s/n,message);
-            catch
-                % Recreate the waitbar if was closed by the user
-                f = waitbar(s/n,message);
-                cuiWaitbar(s/n,message);
-            end
-            obj.createClockSession();
             
             
             message = 'Creating Input Session...';
@@ -420,50 +401,6 @@ classdef DAQBox < handle
     
     % daq.createSession Methods
     methods
-        function obj = createClockSession(obj)
-            %createClockSession
-            %   Creates and configures the session that is used to take
-            %   measurements of the current time independently of the
-            %   background data acquistion
-            
-            if isempty(obj.device)
-                % Delete the session object if no DAQ devices are found
-                delete(obj.ClockSession)
-                
-                obj.UseDAQHardware = false;
-                
-                % Inform the user that no devices were detected
-                fprintf('\nTo allow for UI testing, time measurements will be made using the datetime function\n')
-                
-            else
-                % Release any existing sessions
-                try
-                    release(obj.ClockSession)
-                catch
-                    % Do nothing in the event of an error
-                end
-                
-                fprintf('\nCreating clock session...\n')
-                % Create the session for the input measurements
-                obj.ClockSession = daq.createSession('Ni');
-                disp('Clock session was successfully created')
-                
-                fprintf('\nConfiguring clock session channel...\n')
-                % Add an analog input channel whose triggerTime will be
-                % used for clock measurements
-                tempChannel = addAnalogInputChannel(obj.ClockSession,...
-                    obj.DEVICE_ID, obj.CHANNEL_ID_CLOCK, 'Voltage');
-                tempChannel.TerminalConfig = 'SingleEnded';
-                tempChannel.Name = 'Empty Channel: Time measurements';
-                disp('Created: analog input channel for taking time measurements')
-                
-                obj.ClockSession.NumberOfScans = obj.CLOCK_NUMBER_OF_SCANS;
-                
-                obj.UseDAQHardware = true;
-                
-            end
-        end
-        
         function obj = createInputSession(obj)
             %createInputSession
             %   Creates and configures the session that is used to take
@@ -842,10 +779,10 @@ classdef DAQBox < handle
             
             if obj.UseDAQHardware
                 try
-                    % Read the input data from the clock session
+                    % Read the input data from the input session
                     [~, serialDate]...
-                        = inputSingleScan(obj.ClockSession);
-                    msgbox('did clock')
+                        = inputSingleScan(obj.InputSession);
+                    msgbox('did not need restart for time')
                 catch
                     try
                         obj.InputSession.stop();
@@ -853,7 +790,7 @@ classdef DAQBox < handle
                         % Read the input data from the clock session
                         [~, serialDate]...
                             = inputSingleScan(obj.InputSession);
-                        disp('did intput')
+                        disp('restarted background for time measurement')
                         obj.InputSession.startBackground();
                         
                     catch ME
