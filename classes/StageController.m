@@ -1222,7 +1222,7 @@ classdef StageController < handle
             
             % Attempt to perform an autosave before deleting the object
             try
-                obj.performAutosave(~,~);
+                obj.performAutosave([],[]);
             catch
                 warning('Failed to save before StageController object was deleted.')
             end
