@@ -61,8 +61,6 @@ classdef DAQBox < handle
         % The session for controlling the power output to the heating coils
         OutputSession daq.ni.Session
         
-        ClockChannel
-        
         CurrentChannel_Ref
         CurrentChannel_Samp
         
@@ -140,7 +138,6 @@ classdef DAQBox < handle
         DEVICE_ID = 'Dev1';
         
         % The channel ID's for each sensor
-        CHANNEL_ID_CLOCK = 'ai0';
         CHANNEL_ID_TEMP_REF = 'ai3'; %'ai5';
         CHANNEL_ID_TEMP_SAMP = 'ai6'; %'ai6';
         CHANNEL_ID_CURRENT_REF = 'ai4'; %'ai3';
@@ -150,9 +147,6 @@ classdef DAQBox < handle
         
         % The scan rate used during sensor readings
         SCAN_RATE = 62500;
-        
-        % The duration in seconds of the clock reading
-        CLOCK_NUMBER_OF_SCANS = 2;
         
         % The duration in seconds of the sensor readings
         INPUT_DURATION_IN_SECONDS = 60;
@@ -787,7 +781,7 @@ classdef DAQBox < handle
                     try
                         obj.InputSession.stop();
                         
-                        % Read the input data from the clock session
+                        % Read the input data from the input session
                         [~, serialDate]...
                             = inputSingleScan(obj.InputSession);
                         disp('restarted background for time measurement')
