@@ -726,7 +726,7 @@ classdef DSCData < handle
                     obj.PWMDutyCycleData_Ref = dataArray(:,13);
                     obj.PWMDutyCycleData_Samp = dataArray(:,14);
                     
-                    serialDateArray = xlsread(dataFullPath, 'P:Q')
+                    serialDateArray = xlsread(dataFullPath, 'P:Q');
                     
                     % Separate the serial date values into the appropriate
                     % variables
@@ -783,7 +783,7 @@ classdef DSCData < handle
                     dscData = obj;
                     
                     % Save a .mat file
-                    save(dataFullPath, 'dscData')
+                    save(dataFullPath, 'dscData');
                     
                     dataSaveStatus = true;
             end
@@ -919,7 +919,7 @@ classdef DSCData < handle
                     
                     % Write the data to the desired .xlsx file
                     [dataSaveStatus, message] = xlswrite(dataFullPath, outputCellArray);
-                    if ~isempty(message)
+                    if (~isempty(message) && (length(message) > 0))
                         disp(message)
                     end
             end

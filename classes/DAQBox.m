@@ -126,10 +126,10 @@ classdef DAQBox < handle
         DEFAULT_CONFIG = './config/defaultConfig.cfg';
         
         % The file path for loading new config files
-        CONFIG_LOAD_PATH = './config/*.cgf';
+        CONFIG_LOAD_PATH = './config/*.cfg';
         
         % The file path for saving new config files
-        CONFIG_SAVE_PATH = './config/newConfig.cgf';
+        CONFIG_SAVE_PATH = './config/newConfig';
         
         CONFIG_XL_RANGE = 'B2:B10';
         
@@ -651,8 +651,8 @@ classdef DAQBox < handle
                 rawCurrentData_Samp = data(:,4);
                 
                 % Calculate the average of the measured input values
-                rawTempAvg_Ref = mean(rawTempData_Ref);
-                rawTempAvg_Samp = mean(rawTempData_Samp);
+                rawTempAvg_Ref = mean(rawTempData_Ref)
+                rawTempAvg_Samp = mean(rawTempData_Samp)
                 rawCurrentAvg_Ref = mean(rawCurrentData_Ref);
                 rawCurrentAvg_Samp = mean(rawCurrentData_Samp);
                 
