@@ -204,7 +204,7 @@ classdef DAQBox < handle
             updatepath();
             
             % Declare a nested helper function
-            function [s, n, f] = refreshWaitbar(s, n, f, message))
+            function [s, n, f] = refreshWaitbar(s, n, f, message)
                 try
                     s = s + 1;
                     % Attempt to update the waitbar progress and label

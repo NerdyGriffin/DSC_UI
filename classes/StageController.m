@@ -858,6 +858,12 @@ classdef StageController < handle
             %   Dynamically controls the power output in order to heat the
             %   samples until they reach the target temperature
             
+            % Run the live data analysis
+            obj.experimentLiveDataAnalysis(event);
+            
+            % Refresh the display
+            drawnow limitrate
+            
             % Force the function to end if requested by the user
             if obj.ForceStop
                 disp('Force stop attempted')
@@ -871,12 +877,6 @@ classdef StageController < handle
                 obj.stopDAQ();
                 return
             end
-            
-            % Run the live data analysis
-            obj.experimentLiveDataAnalysis(event);
-            
-            % Refresh the display
-            drawnow limitrate
             
             % Compare the sample temperatures to the target temperature
             if (abs(obj.liveData.LatestTempError_Ref) < obj.MINIMUM_ACCEPTABLE_ERROR)...
