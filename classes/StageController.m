@@ -401,6 +401,13 @@ classdef StageController < handle
             obj.daqBox.stopDAQ();
         end
         
+        function stopPWM(obj)
+            %stopPWM
+            %   Stop the PWM output to the heaters
+            
+            obj.daqBox.stopPWM();
+        end
+        
         function runExperimentStaging(obj)
             % Run the DSC experiment staging loops
             
@@ -846,8 +853,8 @@ classdef StageController < handle
             
         end
         
-        function singleTargetHeating(obj, event)
-            %singleTargetHeating
+        function singleTargetDataFcn(obj, src, event)
+            %singleTargetDataFcn
             %   Dynamically controls the power output in order to heat the
             %   samples until they reach the target temperature
             
@@ -879,11 +886,18 @@ classdef StageController < handle
             end
         end
         
-        function rampUpHeating(obj, event)
-            % Experiment loop that dynamically controls the power output in
+        function rampUpDataFcn(obj, src, event)
+            % Experiment {loop} that dynamically controls the power output in
             % order to make the sample temperatures equal to the target
             % temperature, while also ramping up the target temperature
             % over time at a given rate.
+            
+            % Run the live data analysis
+            obj.experimentLiveDataAnalysis(event);
+            
+            % Refresh the display
+            drawnow limitrate
+            
             
             % Force the function to end if requested by the user
             if obj.ForceStop
@@ -921,12 +935,6 @@ classdef StageController < handle
                 end
             end
             
-            % Run the live data analysis
-            obj.experimentLiveDataAnalysis(event);
-            
-            % Refresh the display
-            drawnow limitrate
-            
             % Compare the sample temperatures to the end temperature
             if (obj.TargetTemp == obj.EndTemp)...
                     && (abs(obj.liveData.LatestTempError_Ref) < obj.MINIMUM_ACCEPTABLE_ERROR) ...
@@ -936,7 +944,7 @@ classdef StageController < handle
             end
         end
         
-        function holdTempHeating(obj, event)
+        function holdTempDataFcn(obj, src, event)
             % Experiment loop that dynamically controls the power output in
             % order to make the hold the sample temperatures at the target
             % temperature over the duration of the given hold time

@@ -985,16 +985,15 @@ classdef DAQBox < handle
                 switch heatingType
                     case 'singleTarget'
                         obj.lh_DataAvailable = addlistener(obj.InputSession,...
-                            'DataAvailable', @obj.singleTargetDataFcn;
+                            'DataAvailable', @stageController.singleTargetDataFcn);
                     case 'rampUp'
                         obj.lh_DataAvailable = addlistener(obj.InputSession,...
-                            'DataAvailable', @obj.rampUpDataFcn;
+                            'DataAvailable', @stageController.rampUpDataFcn);
                     case 'holdTemp'
                         obj.lh_DataAvailable = addlistener(obj.InputSession,...
-                            'DataAvailable', @obj.holdTempDataFcn;
+                            'DataAvailable', @stageController.holdTempDataFcn);
                     otherwise
-                        errorMessage = sprintf('Invalid heatingType = %s', heatingType);
-                        error(errorMessage)
+                        error('Invalid heatingType = %s', heatingType)
                 end
                 
                 obj.InputSession.startBackground();
@@ -1010,99 +1009,6 @@ classdef DAQBox < handle
                     case 'holdTemp'
                         obj.daqTrigger.startHoldTempHeating(stageController)
                 end
-            end
-        end
-        
-        function startSingleTargetHeating(obj, stageController)
-            %startSingleTargetHeating
-            %   Configure the listener to perform single target heating
-            
-            if obj.UseDAQHardware
-                % Delete any existing listeners
-                try
-                    if isvalid(obj.lh_DataAvailable)
-                        delete(obj.lh_DataAvailable)
-                    end
-                catch ME
-                    warning('Failed to delete listener')
-                    % Force the experiment to stop in the event of an error
-                    stageController.forceStop();
-                    rethrow(ME)
-                end
-                
-                obj.lh_DataAvailable = addlistener(obj.InputSession,...
-                    'DataAvailable',...
-                    @(src, event) singleTargetDataFcn(src, event, stageController));
-                
-                obj.InputSession.startBackground();
-                
-                obj.daqSemaphore.lock();
-                
-            else
-                obj.daqTrigger.startSingleTargetHeating(stageController)
-                
-            end
-        end
-        
-        function startRampUpHeating(obj, stageController)
-            %startRampUpHeating
-            %   Configure the listener to perform ramp up heating
-            
-            if obj.UseDAQHardware
-                % Delete any existing listeners
-                try
-                    if isvalid(obj.lh_DataAvailable)
-                        delete(obj.lh_DataAvailable)
-                    end
-                catch ME
-                    warning('Failed to delete listener')
-                    % Force the experiment to stop in the event of an error
-                    stageController.forceStop();
-                    rethrow(ME)
-                end
-                
-                obj.lh_DataAvailable = addlistener(obj.InputSession,...
-                    'DataAvailable',...
-                    @(src, event) rampUpDataFcn(src, event, stageController));
-                
-                obj.InputSession.startBackground();
-                
-                obj.daqSemaphore.lock();
-                
-            else
-                obj.daqTrigger.startRampUpHeating(stageController)
-                
-            end
-        end
-        
-        function startHoldTempHeating(obj, stageController)
-            %startHoldTempHeating
-            %   Configure the listener to perform hold temp heating
-            
-            if obj.UseDAQHardware
-                % Delete any existing listeners
-                try
-                    if isvalid(obj.lh_DataAvailable)
-                        delete(obj.lh_DataAvailable)
-                    end
-                catch ME
-                    warning('Failed to delete listener')
-                    % Force the experiment to stop in the event of an error
-                    stageController.forceStop();
-                    rethrow(ME)
-                end
-                
-                obj.lh_DataAvailable = addlistener(obj.InputSession,...
-                    'DataAvailable',...
-                    @(src, event) holdTempDataFcn(src, event, stageController));
-                
-                obj.InputSession.startBackground();
-                
-                obj.daqSemaphore.lock();
-                
-            else
-                obj.daqTrigger.startHoldTempHeating(stageController)
-                
             end
         end
         
@@ -1143,27 +1049,6 @@ classdef DAQBox < handle
                 obj.daqTrigger.stop();
                 
             end
-        end
-    end
-    
-    % DataAvailable callback methods
-    methods
-        function singleTargetDataFcn(obj, src, event)
-            %singleTargetDataFcn
-            %   The DataFcn callback for single target heating
-            obj.stageController.singleTargetHeating(event);
-        end
-            
-        function rampUpDataFcn(obj, src, event)
-            %rampUpDataFcn
-            %   The DataFcn callback for ramp up heating
-            obj.stageController.rampUpHeating(event);
-        end
-            
-        function holdTempDataFcn(obj, src, event)
-            %holdTempDataFcn
-            %   The DataFcn callback for hold temp heating
-            obj.stageController.holdTempHeating(event);
         end
     end
     
@@ -1283,20 +1168,22 @@ end
 % The following functions are the listener callback functions for the
 % background data acquisition
 
-function singleTargetDataFcn(~, event, stageController)
+% TODO: Remove these callbacks and make the daqTrigger use the callbacks in
+% the stage controller class directly
+function singleTargetDataFcn(src, event, stageController)
 %singleTargetDataFcn
 %   The DataFcn callback for single target heating
-stageController.singleTargetHeating(event);
+stageController.singleTargetDataFcn(src, event);
 end
 
-function rampUpDataFcn(~, event, stageController)
+function rampUpDataFcn(src, event, stageController)
 %rampUpDataFcn
 %   The DataFcn callback for ramp up heating
-stageController.rampUpHeating(event);
+stageController.rampUpDataFcn(src, event);
 end
 
-function holdTempDataFcn(~, event, stageController)
+function holdTempDataFcn(src, event, stageController)
 %holdTempDataFcn
 %   The DataFcn callback for hold temp heating
-stageController.holdTempHeating(event);
+stageController.holdTempDataFcn(src, event);
 end
