@@ -833,6 +833,7 @@ classdef StageController < handle
         function forceStop(obj)
             %forceStop
             %   Force the experiment staging to stop
+            warning('Force stop attempted')
             
             obj.ForceSkipStage = true;
             obj.ForceStop = true;
@@ -866,7 +867,6 @@ classdef StageController < handle
             
             % Force the function to end if requested by the user
             if obj.ForceStop
-                disp('Force stop attempted')
                 obj.stopDAQ();
                 return
             end
@@ -1136,6 +1136,10 @@ classdef StageController < handle
                 'Period', obj.AutosavePeriod, ...
                 'TimerFcn', @obj.performAutosave);
             
+            if ~exist('./autosave', 'dir')
+                mkdir('./autosave')
+            end
+            
             pause(0.1);
             
             % Start the timer object
@@ -1218,21 +1222,10 @@ classdef StageController < handle
             
             % Attempt to perform an autosave before deleting the object
             try
-                obj.performAutosave();
+                obj.performAutosave(~,~);
             catch
                 warning('Failed to save before StageController object was deleted.')
             end
         end
     end
-end
-
-%--------------------------------------------------------------------------
-% The following functions are the TimerFcn callback functions for the
-% autosave timer object, which is used automatically save backups of the
-% app, daqBox, and liveData objects at regular invertervals
-
-function autosaveTimerFcn(~, ~, stageController)
-%autosaveTimerFcn
-%   The TimerFcn callback for performing an autosave
-stageController.performAutosave();
 end

@@ -313,8 +313,7 @@ classdef DAQBox < handle
         function set.PWMDutyCycle_Ref(obj, newPWMDutyCycle_Ref)
             if newPWMDutyCycle_Ref > obj.PWM_MAX_DUTY_CYCLE
                 obj.HeatingCoilPWMChannel_Ref.DutyCycle = obj.PWM_MAX_DUTY_CYCLE;
-                warning(['Attempted to set invalid PWM duty cycle\n...'
-                    '  newPWMDutyCycle_Ref = %f'], newPWMDutyCycle_Ref)
+                
             elseif newPWMDutyCycle_Ref < obj.PWM_MIN_DUTY_CYCLE
                 obj.HeatingCoilPWMChannel_Ref.DutyCycle = obj.PWM_MIN_DUTY_CYCLE;
                 
@@ -327,8 +326,7 @@ classdef DAQBox < handle
         function set.PWMDutyCycle_Samp(obj, newPWMDutyCycle_Samp)
             if newPWMDutyCycle_Samp > obj.PWM_MAX_DUTY_CYCLE
                 obj.HeatingCoilPWMChannel_Samp.DutyCycle = obj.PWM_MAX_DUTY_CYCLE;
-                warning(['Attempted to set invalid PWM duty cycle\n...'
-                    '  newPWMDutyCycle_Samp = %f'], newPWMDutyCycle_Samp)
+                
             elseif newPWMDutyCycle_Samp < obj.PWM_MIN_DUTY_CYCLE
                 obj.HeatingCoilPWMChannel_Samp.DutyCycle = obj.PWM_MIN_DUTY_CYCLE;
                 
@@ -712,7 +710,6 @@ classdef DAQBox < handle
                     % Read the input data from the input session
                     [~, serialDate]...
                         = inputSingleScan(obj.InputSession);
-                    msgbox('did not need restart for time')
                 catch
                     try
                         obj.InputSession.stop();
@@ -757,9 +754,6 @@ classdef DAQBox < handle
                         err_count = err_count + 1;
                     end
                 end
-                
-                disp('PWM has been started')
-                
             end
         end
         
@@ -768,7 +762,6 @@ classdef DAQBox < handle
             %   Stop generating the PWM outputs
             
             if obj.UseDAQHardware
-                disp('Attempting to stop PWM')
                 if obj.OutputSession.IsRunning
                     err_count = 0;
                     for try_count = 0:obj.MAX_PWM_ATTEMPTS
@@ -783,8 +776,6 @@ classdef DAQBox < handle
                             err_count = err_count + 1;
                         end
                     end
-                    
-                    disp('PWM has been stopped')
                 end
             end
         end
