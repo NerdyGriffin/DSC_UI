@@ -1134,7 +1134,7 @@ classdef StageController < handle
             obj.AutosaveTimer = timer(...
                 'ExecutionMode', obj.AutosaveTimerExecutionMode, ...
                 'Period', obj.AutosavePeriod, ...
-                'TimerFcn', {@autosaveTimerFcn, obj});
+                'TimerFcn', @obj.performAutosave);
             
             pause(0.1);
             
@@ -1163,7 +1163,7 @@ classdef StageController < handle
             end
         end
         
-        function performAutosave(obj)
+        function performAutosave(obj, src, event)
             %performAutosave
             %   Save a backup of the app, daqBox, and liveData objects as a
             %   .mat file
