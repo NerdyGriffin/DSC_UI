@@ -550,7 +550,9 @@ classdef StageController < handle
                     obj.liveData.LatestStageSerialDate = latestStageSerialDate;
                     
                     % Start single target heating
-                    obj.daqBox.startSingleTargetHeating(obj);
+                    obj.daqBox.startHeating(obj, 'singleTarget');
+                    
+                    % TODO: Put everything from the if to this line in a helper function called setupSingleTarget
                     
                     % Wait for background data acquisition to be stopped
                     obj.waitForDAQ();
@@ -563,7 +565,7 @@ classdef StageController < handle
                         continue
                     end
                     
-                    
+                    % TODO: Put this whole nested if in a helper function called setupRampUp
                     if obj.EndTemp > obj.StartTemp
                         if obj.RampUpRate > 0
                             % Run the Ramp Up loop if the End Temp is greater
@@ -592,7 +594,7 @@ classdef StageController < handle
                             obj.liveData.LatestStageSerialDate = latestStageSerialDate;
                             
                             % Start ramp up heating
-                            obj.daqBox.startRampUpHeating(obj)
+                            obj.daqBox.startHeating(obj, 'rampUp');
                             
                         else
                             % Heat the samples until they reach the End Temp if
@@ -615,7 +617,7 @@ classdef StageController < handle
                             obj.liveData.LatestStageSerialDate = latestStageSerialDate;
                             
                             % Start single target heating
-                            obj.daqBox.startRampUpHeating(obj)
+                            obj.daqBox.startHeating(obj, 'singleTarget');
                             
                         end
                         
@@ -647,7 +649,7 @@ classdef StageController < handle
                             obj.liveData.LatestStageSerialDate = latestStageSerialDate;
                             
                             % Start ramp up heating
-                            obj.daqBox.startRampUpHeating(obj)
+                            obj.daqBox.startHeating(obj, 'rampUp');
                             
                         else
                             % Allow the samples to cool if the End Temp is less
@@ -670,7 +672,7 @@ classdef StageController < handle
                             obj.liveData.LatestStageSerialDate = latestStageSerialDate;
                             
                             % Start single target heating
-                            obj.daqBox.startSingleTargetHeating(obj)
+                            obj.daqBox.startHeating(obj, 'singleTarget');
                             
                         end
                         
@@ -678,6 +680,7 @@ classdef StageController < handle
                         % Proceed to the holdTemp function if the End Temp is
                         % equal to the Start Temp
                         
+                        % i.e. Do nothing
                     end
                     
                     % Wait for background data acquisition to be stopped
@@ -717,9 +720,9 @@ classdef StageController < handle
                         obj.liveData.LatestStageSerialDate = latestStageSerialDate;
                         
                         % Start single target heating
-                        obj.daqBox.startHoldTempHeating(obj)
+                        obj.daqBox.startHeating(obj, 'holdTemp');
                         
-                    end
+                    end % TODO: Put this if statement in a helper function called setupHoldTemp
                     
                     % Wait for background data acquisition to be stopped
                     obj.waitForDAQ();
