@@ -614,6 +614,7 @@ classdef DAQBox < handle
             %   Get temperature and power readings from the background data
             %   acquisition
             if obj.UseDAQHardware
+                % TODO: Move the contents of this if into a separate function called getSingleScanData()
                 if ~isa(event, 'char')
                     % Get the raw data of the time stamps
                     rawTimeStamps = event.TimeStamps;
