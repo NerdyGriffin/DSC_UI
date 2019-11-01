@@ -387,18 +387,25 @@ classdef StageController < handle
             daqBox = obj.daqBox;
         end
         
-        function waitForTrigger(obj)
-            %waitForTrigger
-            %   Wait for the trigger to be stopped
+        function waitForDAQ(obj)
+            %waitForDAQ
+            %   Wait for the backgroud data acquisition to be stopped
             
-            obj.daqBox.waitForTrigger();
+            obj.daqBox.waitForDAQ();
         end
         
-        function stopTrigger(obj)
-            %stopTrigger
-            %   Stop the trigger
+        function stopDAQ(obj)
+            %stopDAQ
+            %   Stop the background data aquisition
             
-            obj.daqBox.stopTrigger();
+            obj.daqBox.stopDAQ();
+        end
+        
+        function stopPWM(obj)
+            %stopPWM
+            %   Stop the PWM output to the heaters
+            
+            obj.daqBox.stopPWM();
         end
         
         function runExperimentStaging(obj)
@@ -447,17 +454,24 @@ classdef StageController < handle
                     obj.createLiveData();
                 end
                 
+                % Attempt to pass DSCData object to the DAQBox object
+                try
+                    obj.daqBox.liveData = obj.liveData;
+                catch
+                    error('Failed to pass live data to the DAQBox object')
+                end
+                
                 
                 % Measure and record the start time of the experiment
-                obj.liveData.ExpStartSerialDate...
-                    = obj.daqBox.getCurrentSerialDate;
+                expStartSerialDate = obj.daqBox.getCurrentSerialDate;
+                obj.liveData.ExpStartSerialDate = expStartSerialDate;
                 
                 % Initialize the EstimatedStageDuration to an empty array
                 obj.EstimatedStageDuration = [];
                 
                 if obj.UseAppUI
                     % Refresh the clocks with the new values
-                    obj.app.refreshOperationClock();
+                    obj.app.refreshOperationClock(expStartSerialDate);
                     
                 end
                 
@@ -466,12 +480,14 @@ classdef StageController < handle
                 obj.startAutosaveTimer();
                 
                 
+                disp('Experiment started')
+                
                 % Iterate through each given control staging cycle
                 for stageCounter = 1:obj.NumberOfStages
                     
                     % Force the loop to end if requested by the user
                     if obj.ForceStop
-                        obj.stopTrigger();
+                        obj.stopDAQ();
                         continue
                         
                     else
@@ -481,7 +497,7 @@ classdef StageController < handle
                         % Force the loop to skip to the next iteration if the
                         % user requested to skip the stage
                         if obj.ForceSkipStage
-                            obj.stopTrigger();
+                            obj.stopDAQ();
                             continue
                         end
                     end
@@ -490,7 +506,7 @@ classdef StageController < handle
                     % Take an initial reading of the temperatures and power
                     [latestSerialDate, latestTemp_Ref, latestTemp_Samp,...
                         latestCurrent_Ref, latestCurrent_Samp]...
-                        = obj.daqBox.takeMeasurement();
+                        = obj.daqBox.getBackgroundData('single');
                     
                     % Initialize the TargetTemp to zero
                     obj.TargetTemp = 0;
@@ -541,25 +557,22 @@ classdef StageController < handle
                     obj.liveData.LatestStageSerialDate = latestStageSerialDate;
                     
                     % Start single target heating
-                    obj.daqBox.startSingleTargetHeating(obj)
+                    obj.daqBox.startHeating(obj, 'singleTarget');
                     
-                    % Wait for trigger to be stopped
-                    obj.waitForTrigger();
+                    % TODO: Put everything from the if to this line in a helper function called setupSingleTarget
+                    
+                    % Wait for background data acquisition to be stopped
+                    obj.waitForDAQ();
                     
                     
                     % Force the loop to skip to the next iteration if the user
                     % requested to skip the stage
                     if obj.ForceSkipStage
-                        obj.stopTrigger();
+                        obj.stopDAQ();
                         continue
                     end
                     
-                    if obj.UseAppUI
-                        % Refresh the clocks with the new values
-                        obj.app.refreshOperationClock();
-                    end
-                    
-                    
+                    % TODO: Put this whole nested if in a helper function called setupRampUp
                     if obj.EndTemp > obj.StartTemp
                         if obj.RampUpRate > 0
                             % Run the Ramp Up loop if the End Temp is greater
@@ -588,7 +601,7 @@ classdef StageController < handle
                             obj.liveData.LatestStageSerialDate = latestStageSerialDate;
                             
                             % Start ramp up heating
-                            obj.daqBox.startRampUpHeating(obj)
+                            obj.daqBox.startHeating(obj, 'rampUp');
                             
                         else
                             % Heat the samples until they reach the End Temp if
@@ -611,7 +624,7 @@ classdef StageController < handle
                             obj.liveData.LatestStageSerialDate = latestStageSerialDate;
                             
                             % Start single target heating
-                            obj.daqBox.startRampUpHeating(obj)
+                            obj.daqBox.startHeating(obj, 'singleTarget');
                             
                         end
                         
@@ -643,7 +656,7 @@ classdef StageController < handle
                             obj.liveData.LatestStageSerialDate = latestStageSerialDate;
                             
                             % Start ramp up heating
-                            obj.daqBox.startRampUpHeating(obj)
+                            obj.daqBox.startHeating(obj, 'rampUp');
                             
                         else
                             % Allow the samples to cool if the End Temp is less
@@ -666,7 +679,7 @@ classdef StageController < handle
                             obj.liveData.LatestStageSerialDate = latestStageSerialDate;
                             
                             % Start single target heating
-                            obj.daqBox.startSingleTargetHeating(obj)
+                            obj.daqBox.startHeating(obj, 'singleTarget');
                             
                         end
                         
@@ -674,25 +687,18 @@ classdef StageController < handle
                         % Proceed to the holdTemp function if the End Temp is
                         % equal to the Start Temp
                         
+                        % i.e. Do nothing
                     end
                     
-                    % Wait for trigger to be stopped
-                    obj.waitForTrigger();
+                    % Wait for background data acquisition to be stopped
+                    obj.waitForDAQ();
                     
                     
                     % Force the loop to skip to the next iteration if the user
                     % requested to skip the stage
                     if obj.ForceSkipStage
-                        obj.stopTrigger();
+                        obj.stopDAQ();
                         continue
-                    end
-                    
-                    
-                    
-                    if obj.UseAppUI
-                        % Refresh the clocks with the new values
-                        obj.app.refreshOperationClock();
-                        
                     end
                     
                     
@@ -721,26 +727,32 @@ classdef StageController < handle
                         obj.liveData.LatestStageSerialDate = latestStageSerialDate;
                         
                         % Start single target heating
-                        obj.daqBox.startHoldTempHeating(obj)
+                        obj.daqBox.startHeating(obj, 'holdTemp');
                         
-                    end
+                    end % TODO: Put this if statement in a helper function called setupHoldTemp
                     
-                    % Wait for trigger to be stopped
-                    obj.waitForTrigger();
+                    % Wait for background data acquisition to be stopped
+                    obj.waitForDAQ();
                     
                     
                     % Force the loop to skip to the next iteration if the user
                     % requested to skip the stage
                     if obj.ForceSkipStage
-                        obj.stopTrigger();
+                        obj.stopDAQ();
                         continue
                     end
-                    
-                    if obj.UseAppUI
-                        % Refresh the clocks with the new values
-                        obj.app.refreshOperationClock();
-                        
-                    end
+                end
+                
+                % Stop the background input measurement and the PWM output
+                try
+                    obj.stopDAQ();
+                catch ME
+                    warning('Failed to stop background input measurement at end of experiment')
+                end
+                try
+                    obj.stopPWM();
+                catch ME
+                    warning('Failed to stop PWM output at end of experiment')
                 end
                 
                 
@@ -780,10 +792,10 @@ classdef StageController < handle
                 obj.ExperimentInProgress = false;
                 
                 try
-                    % Stop the DAQ Box trigger
-                    obj.stopTrigger();
+                    % Stop the background data acquisition
+                    obj.stopDAQ();
                 catch
-                    warning('Could not stop trigger')
+                    warning('Could not stop background data acquisition')
                 end
                 
                 try
@@ -821,11 +833,13 @@ classdef StageController < handle
         function forceStop(obj)
             %forceStop
             %   Force the experiment staging to stop
+            warning('Force stop attempted')
             
             obj.ForceSkipStage = true;
             obj.ForceStop = true;
             
-            obj.stopTrigger();
+            obj.stopDAQ();
+            obj.stopPWM();
             
         end
         
@@ -836,59 +850,65 @@ classdef StageController < handle
             
             obj.ForceSkipStage = true;
             
-            obj.stopTrigger();
+            obj.stopDAQ();
             
         end
         
-        function singleTargetHeating(obj, varargin)
-            %singleTargetHeating
+        function singleTargetDataFcn(obj, src, event)
+            %singleTargetDataFcn
             %   Dynamically controls the power output in order to heat the
             %   samples until they reach the target temperature
             
+            % Run the live data analysis
+            obj.experimentLiveDataAnalysis(event);
+            
+            % Refresh the display
+            drawnow limitrate
+            
             % Force the function to end if requested by the user
             if obj.ForceStop
-                disp('Force stop attempted')
-                obj.stopTrigger();
+                obj.stopDAQ();
                 return
             end
             
             % Force the function to end if the user requested to skip the
             % stage
             if obj.ForceSkipStage
-                obj.stopTrigger();
+                obj.stopDAQ();
                 return
             end
-            
-            % Run the live data analysis
-            obj.experimentLiveDataAnalysis();
-            
-            % Refresh the display
-            drawnow limitrate nocallbacks
             
             % Compare the sample temperatures to the target temperature
             if (abs(obj.liveData.LatestTempError_Ref) < obj.MINIMUM_ACCEPTABLE_ERROR)...
                     && (abs(obj.liveData.LatestTempError_Samp) < obj.MINIMUM_ACCEPTABLE_ERROR)
-                obj.stopTrigger();
+                obj.stopDAQ();
                 return
             end
         end
         
-        function rampUpHeating(obj, varargin)
-            % Experiment loop that dynamically controls the power output in
+        function rampUpDataFcn(obj, src, event)
+            % Experiment {loop} that dynamically controls the power output in
             % order to make the sample temperatures equal to the target
             % temperature, while also ramping up the target temperature
             % over time at a given rate.
             
+            % Run the live data analysis
+            obj.experimentLiveDataAnalysis(event);
+            
+            % Refresh the display
+            drawnow limitrate
+            
+            
             % Force the function to end if requested by the user
             if obj.ForceStop
-                obj.stopTrigger();
+                obj.stopDAQ();
                 return
             end
             
             % Force the function to end if the user requested to skip the
             % stage
             if obj.ForceSkipStage
-                obj.stopTrigger();
+                obj.stopDAQ();
                 return
             end
             
@@ -915,66 +935,51 @@ classdef StageController < handle
                 end
             end
             
-            % Run the live data analysis
-            obj.experimentLiveDataAnalysis();
-            
-            % Refresh the display
-            drawnow limitrate nocallbacks
-            
             % Compare the sample temperatures to the end temperature
             if (obj.TargetTemp == obj.EndTemp)...
                     && (abs(obj.liveData.LatestTempError_Ref) < obj.MINIMUM_ACCEPTABLE_ERROR) ...
                     && (abs(obj.liveData.LatestTempError_Samp) < obj.MINIMUM_ACCEPTABLE_ERROR)
-                obj.stopTrigger();
+                obj.stopDAQ();
                 return
             end
         end
         
-        function holdTempHeating(obj, varargin)
+        function holdTempDataFcn(obj, src, event)
             % Experiment loop that dynamically controls the power output in
             % order to make the hold the sample temperatures at the target
             % temperature over the duration of the given hold time
             
             % Force the function to end if requested by the user
             if obj.ForceStop
-                obj.stopTrigger();
+                obj.stopDAQ();
                 return
             end
             
             % Force the function to end if the user requested to skip the
             % stage
             if obj.ForceSkipStage
-                obj.stopTrigger();
+                obj.stopDAQ();
                 return
             end
             
             % Run the live data analysis
-            obj.experimentLiveDataAnalysis();
+            obj.experimentLiveDataAnalysis(event);
             
             % Refresh the display
-            drawnow limitrate nocallbacks
+            drawnow limitrate
             
             elapsedStageTime...
                 = date2sec(obj.daqBox.getCurrentSerialDate()...
                 - obj.liveData.LatestStageSerialDate);
             
             if elapsedStageTime > obj.HoldTime
-                obj.stopTrigger();
+                obj.stopDAQ();
                 return
             end
         end
         
-        function experimentLiveDataAnalysis(obj)
+        function experimentLiveDataAnalysis(obj, event)
             %experimentLiveDataAnalysis
-            
-            if obj.UseAppUI
-                % Refresh the clocks with the new values
-                obj.app.refreshOperationClock();
-                
-            end
-            disp('TargetTemp:')
-            disp(obj.TargetTemp)
-            
             
             % Store the latest Target Temp in the DSCData object
             obj.liveData.LatestTargetTemp = obj.TargetTemp;
@@ -983,7 +988,7 @@ classdef StageController < handle
             % Take the temperature and current readings
             [latestSerialDate, latestTemp_Ref, latestTemp_Samp,...
                 latestCurrent_Ref, latestCurrent_Samp]...
-                = obj.daqBox.takeMeasurement();
+                = obj.daqBox.getBackgroundData(event);
             
             if isempty(latestSerialDate)
                 error('latestSerialDate is empty')
@@ -1048,7 +1053,7 @@ classdef StageController < handle
             
             if obj.UseAppUI
                 % Refresh the clocks with the new values
-                obj.app.refreshOperationClock();
+                obj.app.refreshOperationClock(latestSerialDate);
                 
                 % Refresh the data plots
                 obj.app.refreshOperationPlots();
@@ -1129,7 +1134,13 @@ classdef StageController < handle
             obj.AutosaveTimer = timer(...
                 'ExecutionMode', obj.AutosaveTimerExecutionMode, ...
                 'Period', obj.AutosavePeriod, ...
-                'TimerFcn', {@autosaveTimerFcn, obj});
+                'TimerFcn', @obj.performAutosave);
+            
+            if ~exist('./autosave', 'dir')
+                mkdir('./autosave')
+            end
+            
+            pause(0.1);
             
             % Start the timer object
             start(obj.AutosaveTimer)
@@ -1156,11 +1167,11 @@ classdef StageController < handle
             end
         end
         
-        function performAutosave(obj)
+        function performAutosave(obj, src, event)
             %performAutosave
             %   Save a backup of the app, daqBox, and liveData objects as a
             %   .mat file
-
+            
             % Try to autosave the DAQBox object
             try
                 % Assign the current DAQBox object to a temporary variable
@@ -1201,7 +1212,7 @@ classdef StageController < handle
             if obj.ExperimentInProgress
                 obj.forceStop();
             end
-
+            
             try
                 % Stop the autosave timer
                 obj.stopAutosaveTimer();
@@ -1211,21 +1222,10 @@ classdef StageController < handle
             
             % Attempt to perform an autosave before deleting the object
             try
-                obj.performAutosave();
+                obj.performAutosave([],[]);
             catch
                 warning('Failed to save before StageController object was deleted.')
             end
         end
     end
-end
-
-%--------------------------------------------------------------------------
-% The following functions are the TimerFcn callback functions for the
-% autosave timer object, which is used automatically save backups of the
-% app, daqBox, and liveData objects at regular invertervals
-
-function autosaveTimerFcn(~, ~, stageController)
-%autosaveTimerFcn
-%   The TimerFcn callback for performing an autosave
-stageController.performAutosave();
 end

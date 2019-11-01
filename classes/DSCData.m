@@ -1,19 +1,19 @@
 % DSC_UI: UI and control systems for prototype DSC system
 %     Copyright (C) 2019  Christian Kunis
-% 
+%
 %     This program is free software: you can redistribute it and/or modify
 %     it under the terms of the GNU General Public License as published by
 %     the Free Software Foundation, either version 3 of the License, or
 %     (at your option) any later version.
-% 
+%
 %     This program is distributed in the hope that it will be useful,
 %     but WITHOUT ANY WARRANTY; without even the implied warranty of
 %     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 %     GNU General Public License for more details.
-% 
+%
 %     You should have received a copy of the GNU General Public License
 %     along with this program. If not, see <https://www.gnu.org/licenses/>.
-%     
+%
 %     You may contact the author at ckunis.contact@gmail.com
 
 classdef DSCData < handle
@@ -726,7 +726,7 @@ classdef DSCData < handle
                     obj.PWMDutyCycleData_Ref = dataArray(:,13);
                     obj.PWMDutyCycleData_Samp = dataArray(:,14);
                     
-                    serialDateArray = xlsread(dataFullPath, 'P:Q')
+                    serialDateArray = xlsread(dataFullPath, 'P:Q');
                     
                     % Separate the serial date values into the appropriate
                     % variables
@@ -783,7 +783,7 @@ classdef DSCData < handle
                     dscData = obj;
                     
                     % Save a .mat file
-                    save(dataFullPath, 'dscData')
+                    save(dataFullPath, 'dscData');
                     
                     dataSaveStatus = true;
             end
@@ -919,7 +919,7 @@ classdef DSCData < handle
                     
                     % Write the data to the desired .xlsx file
                     [dataSaveStatus, message] = xlswrite(dataFullPath, outputCellArray);
-                    if ~isempty(message)
+                    if (~isempty(message) && (length(message) > 0))
                         disp(message)
                     end
             end

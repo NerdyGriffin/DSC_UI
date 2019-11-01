@@ -1,19 +1,19 @@
 % DSC_UI: UI and control systems for prototype DSC system
 %     Copyright (C) 2019  Christian Kunis
-% 
+%
 %     This program is free software: you can redistribute it and/or modify
 %     it under the terms of the GNU General Public License as published by
 %     the Free Software Foundation, either version 3 of the License, or
 %     (at your option) any later version.
-% 
+%
 %     This program is distributed in the hope that it will be useful,
 %     but WITHOUT ANY WARRANTY; without even the implied warranty of
 %     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 %     GNU General Public License for more details.
-% 
+%
 %     You should have received a copy of the GNU General Public License
 %     along with this program. If not, see <https://www.gnu.org/licenses/>.
-%     
+%
 %     You may contact the author at ckunis.contact@gmail.com
 
 classdef DAQTrigger < handle
@@ -31,49 +31,12 @@ classdef DAQTrigger < handle
         % DAQ Box (true) or simulate the hardware (false).
         UseDAQHardware logical = false
         
-        % Boolean variable indicating whether the trigger is running
-        Running = 'off'
-        
         TriggerSemaphore Semaphore
-        
-        StopTriggerInProgress = false
         
         % MATLAB timer class object
         TriggerTimer timer
         TimerExecutionMode = 'fixedRate'
         TimerPeriod = 0.2
-    end
-    
-    % daq.ni.Session objects
-    properties
-        % The session for sending trigger connection signals at regular
-        % intervals
-        TriggerSession daq.ni.Session
-        
-        TriggerOutputChannel
-        
-        TriggerConnection
-    end
-    
-    % Trigger Properties
-    properties
-        % The time in seconds between executions of the trigger
-        TriggerPeriod = 0.2;
-        
-    end
-    
-    properties (Constant)
-        % The device ID of the DAQ Box
-        DEVICE_ID = 'Dev1';
-        
-        % The channel ID's for each sensor
-        CHANNEL_ID_TRIGGER = 'ctr2';
-        
-        % The PWM frequency of the PWM channels
-        PWM_FREQUENCY = 1e6;
-        
-        % The maximum number of seconds to wait for the trigger to stop
-        MAX_WAIT_TIMEOUT = 1e3;
     end
     
     methods
@@ -93,16 +56,16 @@ classdef DAQTrigger < handle
                 % sessions
                 fprintf('\nChecking for DAQ devices...\n')
                 obj.device = daq.getDevices;
-                if isempty(obj.device)
-                    disp('No DAQ devices have been detected.')
-                    obj.UseDAQHardware = false;
-                else
-                    disp('DAQ device found')
-                    obj.UseDAQHardware = true;
-                end
             end
             
-            obj.createTriggerSession();
+            if isempty(obj.device)
+                disp('No DAQ devices have been detected.')
+                obj.UseDAQHardware = false;
+            else
+                disp('DAQ device found')
+                obj.UseDAQHardware = true;
+                error('DAQTrigger should not be used when hardware is connected')
+            end
             
             obj.TriggerSemaphore = Semaphore;
             obj.TriggerSemaphore.lock();
@@ -110,193 +73,48 @@ classdef DAQTrigger < handle
             
         end
         
-        function obj = createTriggerSession(obj)
-            %createTriggerSession
-            %   Creates and configures the session that is used to trigger
-            %   data aquisition
-            
-            if true %isempty(obj.device)
-                % Delete the session object if no DAQ devices are found
-                delete(obj.TriggerSession)
-                
-                obj.UseDAQHardware = false;
-                
-                % Inform the user that no devices were detected
-                fprintf(['\nNo DAQ devices have been detected.\n'...
-                    'To allow for UI testing, MATLAB timer objects will be used to trigger the data acquisition\n'])
-            else
-                disp('DAQ device found')
-                
-                % Release any existing sessions
-                try
-                    release(obj.TriggerSession)
-                catch
-                    % Do nothing in the event of an error
-                end
-                
-                fprintf('\nCreating trigger session...\n')
-                % Create the session for the input measurements
-                obj.TriggerSession = daq.createSession('Ni');
-                disp('Trigger session was successfully created')
-                
-                fprintf('\nConfiguring trigger session channels...\n')
-                
-                %Add the counter output channel for the trigger connection
-                obj.TriggerOutputChannel = addCounterOutputChannel(obj.TriggerSession,...
-                    obj.DEVICE_ID, obj.CHANNEL_ID_TRIGGER, 'PulseGeneration');
-                obj.TriggerOutputChannel.Frequency = obj.PWM_FREQUENCY;
-                obj.TriggerOutputChannel.Name = 'DAQ Trigger Output';
-                obj.TriggerSession.IsContinuous = true;
-                disp('Created: counter output channel for DAQ trigger')
-                
-                fprintf('\nCreating trigger connection...\n')
-                % Create a trigger connection
-                
-                % TRIGGER CONNECTION CODE HERE TRIGGER CONNECTION CODE HERE
-                % TRIGGER CONNECTION CODE HERE
-                warning(['Trigger connection code is not yet implemented.\n'...
-                    'MATLAB timer objects will be used to trigger the data acquisition instead'])
-                
-                % CHANGE THE FOLLOWING LINE TO TRUE ONCE THE TRIGGER
-                % CONNECTION CODE IS IMPLEMENTED
-                obj.UseDAQHardware = false; %------------------------------
-                
-            end
-        end
-        
-        function startSingleTargetHeating(obj, stageController)
-            %startSingleTargetHeating
-            %   Configure the trigger to perform single target heating
+        function startHeating(obj, stageController, heatingType)
+            %startHeating
+            %   Configure the listener to perform the heating procedure
             
             obj.TriggerSemaphore.wait();
             obj.TriggerSemaphore.lock();
             
-            if obj.UseDAQHardware
-                % DAQ Box trigger connection stuff goes here
-                
-                % DAQ Box trigger connection stuff goes here
-                
-                % DAQ Box trigger connection stuff goes here
-                
-                % DAQ Box trigger connection stuff goes here
-                
-                % DAQ Box trigger connection stuff goes here
-                
-                
-            else
-                % Delete ay existing timers
-                try
-                    delete(obj.TriggerTimer)
-                catch ME
-                    warning('failed to delete')
-                    % Force the experiment to stop in the event of a
-                    % timer error
-                    startController.forceStop();
-                    rethrow(ME)
-                end
-                
-                % Create a new timer object if DAQ hardware is not present
-                obj.TriggerTimer = timer(...
-                    'ExecutionMode', obj.TimerExecutionMode, ...
-                    'Period', obj.TimerPeriod, ...
-                    'TimerFcn', {@singleTargetTimerFcn, stageController});
-                
-                % Start the timer object
-                start(obj.TriggerTimer)
-                
+            % Delete any existing timers
+            try
+                delete(obj.TriggerTimer)
+            catch ME
+                warning('Failed to delete TriggerTimer')
+                % Force the experiment to stop in the event of a
+                % timer error
+                stageController.forceStop();
+                rethrow(ME)
             end
             
-            obj.Running = 'on';
-        end
-        
-        function startRampUpHeating(obj, stageController)
-            %startRampUpHeating
-            %   Configure the trigger to perform ramp up heating
-            
-            obj.TriggerSemaphore.wait();
-            obj.TriggerSemaphore.lock();
-            
-            if obj.UseDAQHardware
-                % DAQ Box trigger connection stuff goes here
-                
-                % DAQ Box trigger connection stuff goes here
-                
-                % DAQ Box trigger connection stuff goes here
-                
-                % DAQ Box trigger connection stuff goes here
-                
-                % DAQ Box trigger connection stuff goes here
-                
-                
-            else
-                % Delete ay existing timers
-                try
-                    delete(obj.TriggerTimer)
-                catch
-                    warning('failed to delete')
-                    % Force the experiment to stop in the event of a
-                    % timer error
-                    startController.forceStop();
-                    rethrow(ME)
-                end
-                
-                % Create a new timer object if DAQ hardware is not present
-                obj.TriggerTimer = timer(...
-                    'ExecutionMode', obj.TimerExecutionMode, ...
-                    'Period', obj.TimerPeriod, ...
-                    'TimerFcn', {@rampUpTimerFcn, stageController});
-                
-                % Start the timer object
-                start(obj.TriggerTimer)
-                
+            % Create a new timer object using the callback corresponding to the
+            % heatingType
+            switch heatingType
+                case 'singleTarget'
+                    obj.TriggerTimer = timer(...
+                        'ExecutionMode', obj.TimerExecutionMode, ...
+                        'Period', obj.TimerPeriod, ...
+                        'TimerFcn', @stageController.singleTargetDataFcn);
+                case 'rampUp'
+                    obj.TriggerTimer = timer(...
+                        'ExecutionMode', obj.TimerExecutionMode, ...
+                        'Period', obj.TimerPeriod, ...
+                        'TimerFcn', @stageController.rampUpDataFcn);
+                case 'holdTemp'
+                    obj.TriggerTimer = timer(...
+                        'ExecutionMode', obj.TimerExecutionMode, ...
+                        'Period', obj.TimerPeriod, ...
+                        'TimerFcn', @stageController.holdTempDataFcn);
+                otherwise
+                    error('Invalid heatingType = %s', heatingType)
             end
             
-            obj.Running = 'on';
-        end
-        
-        function startHoldTempHeating(obj, stageController)
-            %startHoldTempHeating
-            %   Configure the trigger to perform hold temp heating
-            
-            obj.TriggerSemaphore.wait();
-            obj.TriggerSemaphore.lock();
-            
-            if obj.UseDAQHardware
-                % DAQ Box trigger connection stuff goes here
-                
-                % DAQ Box trigger connection stuff goes here
-                
-                % DAQ Box trigger connection stuff goes here
-                
-                % DAQ Box trigger connection stuff goes here
-                
-                % DAQ Box trigger connection stuff goes here
-                
-                
-            else
-                % Delete ay existing timers
-                try
-                    delete(obj.TriggerTimer)
-                catch
-                    warning('failed to delete')
-                    % Force the experiment to stop in the event of a
-                    % timer error
-                    startController.forceStop();
-                    rethrow(ME)
-                end
-                
-                % Create a new timer object if DAQ hardware is not present
-                obj.TriggerTimer = timer(...
-                    'ExecutionMode', obj.TimerExecutionMode, ...
-                    'Period', obj.TimerPeriod, ...
-                    'TimerFcn', {@holdTempTimerFcn, stageController});
-                
-                % Start the timer object
-                start(obj.TriggerTimer)
-                
-            end
-            
-            obj.Running = 'on';
+            % Start the timer object
+            start(obj.TriggerTimer)
         end
         
         function waitForTrigger(obj)
@@ -304,47 +122,26 @@ classdef DAQTrigger < handle
             %   Wait for the trigger to be stopped
             
             obj.TriggerSemaphore.wait();
-            
         end
         
         function stop(obj)
             %stop
             %   Stop running the current trigger
-            
-            if obj.UseDAQHardware
-                % DAQ Box trigger connection stuff goes here
-                
-                % DAQ Box trigger connection stuff goes here
-                
-                % DAQ Box trigger connection stuff goes here
-                
-                % DAQ Box trigger connection stuff goes here
-                
-                % DAQ Box trigger connection stuff goes here
-                
-                
-            else
-                % Stop the trigger timer object if DAQ hardware
-                % is not present
-                for i=1:10
-                    try
-                        stop(obj.TriggerTimer)
-                        delete(obj.TriggerTimer)
-                        break
-                    catch ME
-                        if isvalid(obj.TriggerTimer)
-                            if isequal(obj.TriggerTimer.Running, 'on')
-                                rethrow(ME)
-                            end
+            for i=1:10
+                try
+                    stop(obj.TriggerTimer)
+                    delete(obj.TriggerTimer)
+                    break
+                catch ME
+                    if isvalid(obj.TriggerTimer)
+                        if isequal(obj.TriggerTimer.Running, 'on')
+                            rethrow(ME)
                         end
                     end
                 end
             end
             
             obj.TriggerSemaphore.release();
-            
-            obj.Running = 'off';
-            
         end
         
         function delete(obj)
@@ -360,27 +157,3 @@ classdef DAQTrigger < handle
         end
     end
 end
-
-%--------------------------------------------------------------------------
-% The following functions are the TimerFcn callback functions for the
-% trigger timer object, which is used to trigger the procedure when DAQ
-% hardware is not present
-
-function singleTargetTimerFcn(~, ~, stageController)
-%singleTarget_TimerFcn
-%   The TimerFcn callback for single target heating
-stageController.singleTargetHeating();
-end
-
-function rampUpTimerFcn(~, ~, stageController)
-%rampUp_TimerFcn
-%   The TimerFcn callback for ramp up heating
-stageController.rampUpHeating();
-end
-
-function holdTempTimerFcn(~, ~, stageController)
-%holdTemp_TimerFcn
-%   The TimerFcn callback for hold temp heating
-stageController.holdTempHeating();
-end
-

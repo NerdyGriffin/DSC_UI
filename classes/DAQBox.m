@@ -31,6 +31,17 @@ classdef DAQBox < handle
         % regular intervals
         daqTrigger DAQTrigger
         
+        % An object of the DSCData class which is responsible to storing
+        % and maintaining data while an experiment is running
+        liveData DSCData
+        
+        % An event listener to perform calulations and store the
+        % measurement data every time there is data available from the
+        % background data acquisition
+        lh_DataAvailable
+        
+        daqSemaphore Semaphore
+        
         % Boolean variable indicating whether to interact with a physical
         % DAQ Box (true) or simulate the hardware (false).
         UseDAQHardware logical = false
@@ -88,7 +99,8 @@ classdef DAQBox < handle
         
         MaxTempLimit = 300
         
-        % Status of whether the current system config has been saved to a file
+        % Status of whether the current system config has been saved to a
+        % file
         ConfigSaveStatus logical = false
     end
     
@@ -104,7 +116,6 @@ classdef DAQBox < handle
     
     % Dependent Properties
     properties (Dependent)
-        PWMRunning
         PWMDutyCycle_Ref
         PWMDutyCycle_Samp
     end
@@ -115,10 +126,10 @@ classdef DAQBox < handle
         DEFAULT_CONFIG = './config/defaultConfig.cfg';
         
         % The file path for loading new config files
-        CONFIG_LOAD_PATH = './config/*.cgf';
+        CONFIG_LOAD_PATH = './config/*.cfg';
         
         % The file path for saving new config files
-        CONFIG_SAVE_PATH = './config/newConfig.cgf';
+        CONFIG_SAVE_PATH = './config/newConfig';
         
         CONFIG_XL_RANGE = 'B2:B10';
         
@@ -126,10 +137,10 @@ classdef DAQBox < handle
         DEVICE_ID = 'Dev1';
         
         % The channel ID's for each sensor
-        CHANNEL_ID_TEMP_REF = 'ai5';
-        CHANNEL_ID_TEMP_SAMP = 'ai6';
-        CHANNEL_ID_CURRENT_REF = 'ai3';
-        CHANNEL_ID_CURRENT_SAMP = 'ai4';
+        CHANNEL_ID_TEMP_REF = 'ai3'; %'ai5';
+        CHANNEL_ID_TEMP_SAMP = 'ai6'; %'ai6';
+        CHANNEL_ID_CURRENT_REF = 'ai4'; %'ai3';
+        CHANNEL_ID_CURRENT_SAMP = 'ai5'; %'ai4';
         CHANNEL_ID_HEATING_COIL_REF = 'ctr0';
         CHANNEL_ID_HEATING_COIL_SAMP = 'ctr1';
         
@@ -137,11 +148,11 @@ classdef DAQBox < handle
         SCAN_RATE = 62500;
         
         % The duration in seconds of the sensor readings
-        INPUT_DURATION_IN_SECONDS = 0.1;
+        INPUT_DURATION_IN_SECONDS = 60;
         
         % The duration in seconds of the PWM outputs (if not manually
         % stopped)
-        OUTPUT_DURATION_IN_SECONDS = 2;
+        OUTPUT_DURATION_IN_SECONDS = 60;
         
         % The minimum duty cycle allowed for both PWM channels
         PWM_MIN_DUTY_CYCLE = 1e-3;
@@ -192,6 +203,21 @@ classdef DAQBox < handle
             % Add the DSC subdirectories to the MATLAB search path
             updatepath();
             
+            % Declare a nested helper function
+            function [s, n, f] = refreshWaitbar(s, n, f, message)
+                try
+                    s = s + 1;
+                    % Attempt to update the waitbar progress and label
+                    waitbar(s/n,f,message);
+                    % Update the cuiWaitbar progress and label
+                    cuiWaitbar(s/n,message);
+                catch
+                    % Recreate the waitbar if was closed by the user
+                    f = waitbar(s/n,message);
+                    cuiWaitbar(s/n,message);
+                end
+            end
+            
             s = 0;
             n = 6;
             
@@ -201,19 +227,9 @@ classdef DAQBox < handle
             
             obj.UseDAQHardware = false;
             
-            
+            % Check whether a DAQ Box is connected to the computer
             message = 'Checking for DAQ devices...';
-            try
-                s = s + 1;
-                % Attempt to update the waitbar progress and label
-                waitbar(s/n,f,message);
-                % Update the cuiWaitbar progress and label
-                cuiWaitbar(s/n,message);
-            catch
-                % Recreate the waitbar if was closed by the user
-                f = waitbar(s/n,message);
-                cuiWaitbar(s/n,message);
-            end
+            [s, n, f] = refreshWaitbar(s, n, f, message);
             if isempty(obj.device)
                 % Check for DAQ devices before attempting to create
                 % sessions
@@ -228,89 +244,47 @@ classdef DAQBox < handle
                 end
             end
             
-            
+            % Create the daq.Session for measuring inputs from sensors
             message = 'Creating Input Session...';
-            try
-                s = s + 1;
-                % Attempt to update the waitbar progress and label
-                waitbar(s/n,f,message);
-                % Update the cuiWaitbar progress and label
-                cuiWaitbar(s/n,message);
-            catch
-                % Recreate the waitbar if was closed by the user
-                f = waitbar(s/n,message);
-                cuiWaitbar(s/n,message);
-            end
+            [s, n, f] = refreshWaitbar(s, n, f, message);
             obj.createInputSession();
             
-            
+            % Create the daq.Session for producing PWM output
             message = 'Creating Output Session...';
-            try
-                s = s + 1;
-                % Attempt to update the waitbar progress and label
-                waitbar(s/n,f,message);
-                % Update the cuiWaitbar progress and label
-                cuiWaitbar(s/n,message);
-            catch
-                % Recreate the waitbar if was closed by the user
-                f = waitbar(s/n,message);
-                cuiWaitbar(s/n,message);
-            end
+            [s, n, f] = refreshWaitbar(s, n, f, message);
             obj.createOutputSession();
             
-            
+            % Load the DAQ Box config file
             message = 'Loading Default DAQ Box Configuration...';
-            try
-                s = s + 1;
-                % Attempt to update the waitbar progress and label
-                waitbar(s/n,f,message);
-                % Update the cuiWaitbar progress and label
-                cuiWaitbar(s/n,message);
-            catch
-                % Recreate the waitbar if was closed by the user
-                f = waitbar(s/n,message);
-                cuiWaitbar(s/n,message);
-            end
+            [s, n, f] = refreshWaitbar(s, n, f, message);
             obj.loadConfigFile('default');
             
-            
-            message = 'Creating DAQ Trigger...';
-            try
+            % Only setup the DAQTrigger if hardware is NOT present
+            if obj.UseDAQHardware
                 s = s + 1;
-                % Attempt to update the waitbar progress and label
-                waitbar(s/n,f,message);
-                % Update the cuiWaitbar progress and label
-                cuiWaitbar(s/n,message);
-            catch
-                % Recreate the waitbar if was closed by the user
-                f = waitbar(s/n,message);
-                cuiWaitbar(s/n,message);
+            else
+                message = 'Creating DAQ Trigger...';
+                [s, n, f] = refreshWaitbar(s, n, f, message);
+                % Create the DAQTrigger object
+                obj.daqTrigger = DAQTrigger(obj.device);
             end
-            % Create the DAQTrigger object
-            obj.daqTrigger = DAQTrigger(obj.device);
             
-            
+            % Indicate to user that the setup is complete
             if obj.UseDAQHardware
                 message = 'DAQ Box configuration complete';
             else
                 message = 'Simulated DAQ Box is ready';
             end
-            try
-                s = s + 1;
-                % Attempt to update the waitbar progress and label
-                waitbar(s/n,f,message);
-                % Update the cuiWaitbar progress and label
-                cuiWaitbar(s/n,message);
-            catch
-                % Recreate the waitbar if was closed by the user
-                f = waitbar(1,message);
-                cuiWaitbar(1,message);
-            end
+            [s, n, f] = refreshWaitbar(s, n, f, message);
             
             pause(0.5)
             
             % Attempt to close the waitbar
             try close(f); catch, end
+            
+            obj.daqSemaphore = Semaphore;
+            obj.daqSemaphore.lock();
+            obj.daqSemaphore.release();
             
             disp(' ')
             disp(' ')
@@ -321,16 +295,6 @@ classdef DAQBox < handle
     
     % Dependant Properties Accessor Methods
     methods
-        function pwmRunning = get.PWMRunning(obj)
-            % Return the state of the "IsRunning" property from the
-            % OutputSession
-            if obj.UseDAQHardware
-                pwmRunning = obj.OutputSession.IsRunning;
-            else
-                pwmRunning = obj.IsRunningState;
-            end
-        end
-        
         function pwmDutyCycle_Ref = get.PWMDutyCycle_Ref(obj)
             % Return the PWM duty cycle currently set for the reference
             % sample heating coil output channel
@@ -346,10 +310,6 @@ classdef DAQBox < handle
     
     % Dependant Properties Mutator Methods
     methods
-        function set.PWMRunning(obj, pwmRunning)
-            obj.IsRunningState = pwmRunning;
-        end
-        
         function set.PWMDutyCycle_Ref(obj, newPWMDutyCycle_Ref)
             if newPWMDutyCycle_Ref > obj.PWM_MAX_DUTY_CYCLE
                 obj.HeatingCoilPWMChannel_Ref.DutyCycle = obj.PWM_MAX_DUTY_CYCLE;
@@ -384,21 +344,14 @@ classdef DAQBox < handle
             %   Creates and configures the session that is used to take
             %   measurements from the temperature and power sensors
             
-            if isempty(obj.device)
-                % Delete the session object if no DAQ devices are found
-                delete(obj.InputSession)
-                
-                obj.UseDAQHardware = false;
-                
-                % Inform the user that no devices were detected
-                fprintf('\nTo allow for UI testing, temperature and power data will be simulated\n')
-                
-            else
+            if obj.UseDAQHardware
                 % Release any existing sessions
                 try
                     release(obj.InputSession)
                 catch
-                    % Do nothing in the event of an error
+                    if isvalid(obj.InputSession)
+                        warning('Failed to release existing InputSession')
+                    end
                 end
                 
                 fprintf('\nCreating input session...\n')
@@ -451,8 +404,17 @@ classdef DAQBox < handle
                 
                 obj.InputSession.DurationInSeconds = obj.INPUT_DURATION_IN_SECONDS;
                 
-                obj.UseDAQHardware = true;
+                obj.InputSession.IsContinuous = true;
                 
+                obj.lh_DataAvailable = addlistener(obj.InputSession,...
+                    'DataAvailable',...
+                    @(src,event) warning('listener triggered outside of experiment staging'));
+            else
+                % Delete the session object if no DAQ devices are found
+                delete(obj.InputSession)
+                
+                % Inform the user that no devices were detected
+                fprintf('\nTo allow for UI testing, temperature and power data will be simulated\n')
             end
         end
         
@@ -461,21 +423,14 @@ classdef DAQBox < handle
             %   Creates and configures the session that is used to send
             %   outputs to the heating coils via PWM pulse generation
             
-            if isempty(obj.device)
-                % Delete the session object if no DAQ devices are found
-                delete(obj.OutputSession)
-                
-                obj.UseDAQHardware = false;
-                
-                % Inform the user that no devices were detected
-                fprintf('\nTo allow for UI testing, PWM outputs will be simulated\n')
-                
-            else
+            if obj.UseDAQHardware
                 % Release any existing sessions
                 try
                     release(obj.OutputSession)
                 catch
-                    % Do nothing in the event of an error
+                    if isvalid(obj.OutputSession)
+                        warning('Failed to release existing OutputSession')
+                    end
                 end
                 
                 fprintf('\nCreating output session...\n')
@@ -504,17 +459,18 @@ classdef DAQBox < handle
                 disp('Created: counter output channel for test sample heating coil')
                 
                 obj.OutputSession.DurationInSeconds = obj.OUTPUT_DURATION_IN_SECONDS;
+            else
+                % Delete the session object if no DAQ devices are found
+                delete(obj.OutputSession)
                 
-                obj.UseDAQHardware = true;
-                
+                % Inform the user that no devices were detected
+                fprintf('\nTo allow for UI testing, PWM outputs will be simulated\n')
             end
-            
         end
     end
     
     % Config File Load/Save Methods
     methods
-        
         function configLoadStatus = loadConfigFile(obj, loadPreset, varargin)
             %loadConfigFile
             %   Read the values from a selected config file and store them
@@ -653,13 +609,40 @@ classdef DAQBox < handle
     methods
         function [serialDate, tempReading_Ref, tempReading_Samp,...
                 currentReading_Ref, currentReading_Samp]...
-                = takeMeasurement(obj)
-            %takeMeasurement
-            %   Take temperature and power readings from the input channels
+                = getBackgroundData(obj, event)
+            %getBackgroundData
+            %   Get temperature and power readings from the background data
+            %   acquisition
             if obj.UseDAQHardware
-                % Read the input data from the session
-                [data, ~, serialDate]...
-                    = startForeground(obj.InputSession);
+                % TODO: Move the contents of this if into a separate function called getSingleScanData()
+                if ~isa(event, 'char')
+                    % Get the raw data of the time stamps
+                    rawTimeStamps = event.TimeStamps;
+                    
+                    % Calculate the average of the time stamps
+                    serialDate = event.TriggerTime + mean(rawTimeStamps);
+                    
+                    % Get the data from the listener event
+                    data = event.Data;
+                    
+                else
+                    try
+                    % Read the input data from the session
+                    [data, serialDate]...
+                        = inputSingleScan(obj.InputSession);
+                    catch
+                        try
+                            pause(0.1)
+                            % Read the input data from the session
+                    [data, serialDate]...
+                        = inputSingleScan(obj.InputSession);
+                        catch ME
+                            warning('An error occured while trying to read the input data from the DAQ Box')
+                        rethrow(ME)
+                        end
+                    end
+                end
+                
                 
                 % Organize the raw data into separate vectors for each
                 % sensor
@@ -669,8 +652,8 @@ classdef DAQBox < handle
                 rawCurrentData_Samp = data(:,4);
                 
                 % Calculate the average of the measured input values
-                rawTempAvg_Ref = mean(rawTempData_Ref);
-                rawTempAvg_Samp = mean(rawTempData_Samp);
+                rawTempAvg_Ref = mean(rawTempData_Ref)
+                rawTempAvg_Samp = mean(rawTempData_Samp)
                 rawCurrentAvg_Ref = mean(rawCurrentData_Ref);
                 rawCurrentAvg_Samp = mean(rawCurrentData_Samp);
                 
@@ -725,14 +708,24 @@ classdef DAQBox < handle
             
             if obj.UseDAQHardware
                 try
-                    % Read the input data from the session
-                    [~, ~, serialDate]...
-                        = startForeground(obj.InputSession);
-                catch ME
-                    warning('An error occured while trying to read the serial date from the DAQ Box')
-                    rethrow(ME)
+                    % Read the input data from the input session
+                    [~, serialDate]...
+                        = inputSingleScan(obj.InputSession);
+                catch
+                    try
+                        obj.InputSession.stop();
+                        
+                        % Read the input data from the input session
+                        [~, serialDate]...
+                            = inputSingleScan(obj.InputSession);
+                        disp('restarted background for time measurement')
+                        obj.InputSession.startBackground();
+                        
+                    catch ME
+                        warning('An error occured while trying to read the serial date from the DAQ Box')
+                        rethrow(ME)
+                    end
                 end
-                
             else
                 serialDate = datenum(datetime);
                 
@@ -756,17 +749,12 @@ classdef DAQBox < handle
                     end
                     
                     try
-                        obj.OutputSession.startBackground
+                        obj.OutputSession.startBackground()
                     catch
                         warning('An error occured while attempting to start the PWM. Retrying...')
                         err_count = err_count + 1;
                     end
                 end
-                
-                obj.PWMRunning = true;
-                
-                disp('PWM has been started')
-                
             end
         end
         
@@ -775,8 +763,7 @@ classdef DAQBox < handle
             %   Stop generating the PWM outputs
             
             if obj.UseDAQHardware
-                disp('Attempting to stop PWM')
-                if obj.PWMRunning
+                if obj.OutputSession.IsRunning
                     err_count = 0;
                     for try_count = 0:obj.MAX_PWM_ATTEMPTS
                         if try_count ~= err_count
@@ -790,10 +777,6 @@ classdef DAQBox < handle
                             err_count = err_count + 1;
                         end
                     end
-                    
-                    obj.PWMRunning = false;
-                    
-                    disp('PWM has been stopped')
                 end
             end
         end
@@ -904,41 +887,85 @@ classdef DAQBox < handle
         end
     end
     
-    % DAQTrigger Interface Methods
+    % Data Listener Interface Methods
     methods
-        function startSingleTargetHeating(obj, stageController)
-            %startSingleTargetHeating
-            %   Configure the trigger to perform single target heating
+        function startHeating(obj, stageController, heatingType)
+            %startHeating
+            %   Configure the listener to perform the heating procedure
             
-            obj.daqTrigger.startSingleTargetHeating(stageController)
+            if obj.UseDAQHardware
+                % Delete any existing listeners
+                try
+                    if isvalid(obj.lh_DataAvailable)
+                        delete(obj.lh_DataAvailable)
+                    end
+                catch ME
+                    warning('Failed to delete listener')
+                    % Force the experiment to stop in the event of an error
+                    stageController.forceStop();
+                    rethrow(ME)
+                end
+                
+                switch heatingType
+                    case 'singleTarget'
+                        obj.lh_DataAvailable = addlistener(obj.InputSession,...
+                            'DataAvailable', @stageController.singleTargetDataFcn);
+                    case 'rampUp'
+                        obj.lh_DataAvailable = addlistener(obj.InputSession,...
+                            'DataAvailable', @stageController.rampUpDataFcn);
+                    case 'holdTemp'
+                        obj.lh_DataAvailable = addlistener(obj.InputSession,...
+                            'DataAvailable', @stageController.holdTempDataFcn);
+                    otherwise
+                        error('Invalid heatingType = %s', heatingType)
+                end
+                
+                obj.InputSession.startBackground();
+                
+                obj.daqSemaphore.lock();
+                
+            else
+                obj.daqTrigger.startHeating(stageController, heatingType)
+            end
         end
         
-        function startRampUpHeating(obj, stageController)
-            %startRampUpHeating
-            %   Configure the trigger to perform ramp up heating
+        function waitForDAQ(obj)
+            %waitForDAQ
+            %   Wait for the background data acquisition to be stopped
             
-            obj.daqTrigger.startRampUpHeating(stageController)
+            pause(0.1);
+            
+            if obj.UseDAQHardware
+                obj.daqSemaphore.wait();
+                
+            else
+                obj.daqTrigger.waitForTrigger();
+                
+            end
         end
         
-        function startHoldTempHeating(obj, stageController)
-            %startHoldTempHeating
-            %   Configure the trigger to perform hold temp heating
+        function stopDAQ(obj)
+            %stopDAQ
+            %   Stop the background data aquisition
             
-            obj.daqTrigger.startHoldTempHeating(stageController)
-        end
-        
-        function waitForTrigger(obj)
-            %waitForTrigger
-            %   Wait for the trigger to be stopped
-            
-            obj.daqTrigger.waitForTrigger();
-        end
-        
-        function stopTrigger(obj)
-            %stopTrigger
-            %   Stop the daqTrigger
-            
-            obj.daqTrigger.stop();
+            if obj.UseDAQHardware
+                obj.InputSession.stop();
+                
+                % Attempt to delete the listener
+                try
+                    if isvalid(obj.lh_DataAvailable)
+                        delete(obj.lh_DataAvailable)
+                    end
+                catch
+                    warning('Failed to delete listener after stopping the background data acquisition.')
+                end
+                
+                obj.daqSemaphore.release();
+                
+            else
+                obj.daqTrigger.stop();
+                
+            end
         end
     end
     
@@ -976,11 +1003,11 @@ classdef DAQBox < handle
             %   This is run automatically when an object of this class is
             %   deleted
             
-            % Attempt to stop the trigger
+            % Attempt to stop the background data acquisition
             try
-                obj.stopTrigger();
+                obj.stopDAQ();
             catch
-                warning('Failed to stop trigger before DAQBox object was deleted.')
+                warning('Failed to stop background data acquisition before DAQBox object was deleted.')
             end
             
             % Attempt to stop the heating coil PWM output
