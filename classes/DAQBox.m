@@ -614,83 +614,57 @@ classdef DAQBox < handle
             %   Get temperature and power readings from the background data
             %   acquisition
             if obj.UseDAQHardware
-                % TODO: Move the contents of this if into a separate function called getSingleScanData()
-                if ~isa(event, 'char')
-                    % Get the raw data of the time stamps
-                    rawTimeStamps = event.TimeStamps;
-                    
-                    % Calculate the average of the time stamps
-                    serialDate = event.TriggerTime + mean(rawTimeStamps);
-                    
-                    % Get the data from the listener event
-                    data = event.Data;
-                    
-                else
+                % Get the raw data of the time stamps
+                rawTimeStamps = event.TimeStamps;
+                
+                % Calculate the average of the time stamps
+                serialDate = event.TriggerTime + mean(rawTimeStamps);
+                
+                % Get the data from the listener event
+                data = event.Data;
+                
+                % Convert the raw voltage data into the corresponding
+                % temperature and current units
+                [tempReading_Ref, tempReading_Samp,...
+                currentReading_Ref, currentReading_Samp]...
+                = extractDaqData(data);
+                
+            else
+                % Simulate the input values if a DAQ Box is not connected
+                [serialDate, tempReading_Ref, tempReading_Samp,...
+                    currentReading_Ref, currentReading_Samp]...
+                    = obj.simulateInput();
+                
+            end
+        end
+        
+        function [serialDate, tempReading_Ref, tempReading_Samp,...
+            currentReading_Ref, currentReading_Samp]...
+            = getSingleScanData(obj)
+            %getSingleScanData
+            %   Get temperature and power readings from a single scan
+            if obj.UseDAQHardware
+                try
+                % Read the input data from the session
+                [data, serialDate]...
+                    = inputSingleScan(obj.InputSession);
+                catch
                     try
-                    % Read the input data from the session
-                    [data, serialDate]...
-                        = inputSingleScan(obj.InputSession);
-                    catch
-                        try
-                            pause(0.1)
-                            % Read the input data from the session
-                    [data, serialDate]...
-                        = inputSingleScan(obj.InputSession);
-                        catch ME
-                            warning('An error occured while trying to read the input data from the DAQ Box')
-                        rethrow(ME)
-                        end
+                        pause(0.1)
+                        % Read the input data from the session
+                [data, serialDate]...
+                    = inputSingleScan(obj.InputSession);
+                    catch ME
+                        warning('An error occured while trying to read the input data from the DAQ Box')
+                    rethrow(ME)
                     end
                 end
                 
-                
-                % Organize the raw data into separate vectors for each
-                % sensor
-                rawTempData_Ref = data(:,1);
-                rawTempData_Samp = data(:,2);
-                rawCurrentData_Ref = data(:,3);
-                rawCurrentData_Samp = data(:,4);
-                
-                % Calculate the average of the measured input values
-                rawTempAvg_Ref = mean(rawTempData_Ref)
-                rawTempAvg_Samp = mean(rawTempData_Samp)
-                rawCurrentAvg_Ref = mean(rawCurrentData_Ref);
-                rawCurrentAvg_Samp = mean(rawCurrentData_Samp);
-                
-                % Convert the average voltage from the raw temp data to the
-                % equivalent temperature in degrees Celsius
-                switch obj.TempSensorSelection
-                    case 'Thermocouple'
-                        tempReading_Ref = (...
-                            (rawTempAvg_Ref + obj.AMPLIFIER_VOLTAGE_OFFSET)...
-                            ./ obj.AMPLIFIER_CONVERSION_FACTOR)...
-                            + obj.TempCalibrationOffset_Ref;
-                        
-                        tempReading_Samp = (...
-                            (rawTempAvg_Samp + obj.AMPLIFIER_VOLTAGE_OFFSET)...
-                            ./ obj.AMPLIFIER_CONVERSION_FACTOR)...
-                            + obj.TempCalibrationOffset_Samp;
-                        
-                    case 'RTD' % NOT IMPLEMENTED
-                        tempReading_Ref = rawTempAvg_Ref...
-                            + obj.TempCalibrationOffset_Ref;
-                        
-                        tempReading_Samp = rawTempAvg_Samp...
-                            + obj.TempCalibrationOffset_Samp;
-                end
-                
-                % Convert the average voltage from the raw power data to
-                % the equivalent power in Watts
-                currentReading_Ref =...
-                    (rawCurrentAvg_Ref ./ obj.CURRENT_SENSOR_SENS)...
-                    + obj.CurrentCalibrationOffset_Ref;
-                
-                currentReading_Samp =...
-                    (rawCurrentAvg_Samp ./ obj.CURRENT_SENSOR_SENS)...
-                    + obj.CurrentCalibrationOffset_Samp;
-                
-                % Release the daq hardware when done
-                %obj.InputSession.release;
+                % Convert the raw voltage data into the corresponding
+                % temperature and current units
+                [tempReading_Ref, tempReading_Samp,...
+                currentReading_Ref, currentReading_Samp]...
+                = extractDaqData(data);
                 
             else
                 % Simulate the input values if a DAQ Box is not connected
@@ -730,6 +704,66 @@ classdef DAQBox < handle
                 serialDate = datenum(datetime);
                 
             end
+        end
+    end
+    
+    % Private Data Measurement Helper Methods
+    methods (Access = private)
+        function [tempReading_Ref, tempReading_Samp,...
+            currentReading_Ref, currentReading_Samp]...
+            = extractDaqData(obj, data)
+            %extractEventData
+            %   Compute the averages of the raw voltage data and convert these
+            %   into the corresponding temperature or current units
+            
+            % Organize the raw data into separate vectors for each
+            % sensor
+            rawTempData_Ref = data(:,1);
+            rawTempData_Samp = data(:,2);
+            rawCurrentData_Ref = data(:,3);
+            rawCurrentData_Samp = data(:,4);
+            
+            % Calculate the average of the measured input values
+            rawTempAvg_Ref = mean(rawTempData_Ref);
+            rawTempAvg_Samp = mean(rawTempData_Samp);
+            rawCurrentAvg_Ref = mean(rawCurrentData_Ref);
+            rawCurrentAvg_Samp = mean(rawCurrentData_Samp);
+            
+            % Convert the average voltage from the raw temp data to the
+            % equivalent temperature in degrees Celsius
+            switch obj.TempSensorSelection
+                case 'Thermocouple'
+                    tempReading_Ref = (...
+                        (rawTempAvg_Ref + obj.AMPLIFIER_VOLTAGE_OFFSET)...
+                        ./ obj.AMPLIFIER_CONVERSION_FACTOR)...
+                        + obj.TempCalibrationOffset_Ref;
+                    
+                    tempReading_Samp = (...
+                        (rawTempAvg_Samp + obj.AMPLIFIER_VOLTAGE_OFFSET)...
+                        ./ obj.AMPLIFIER_CONVERSION_FACTOR)...
+                        + obj.TempCalibrationOffset_Samp;
+                    
+                case 'RTD' % NOT IMPLEMENTED
+                    tempReading_Ref = rawTempAvg_Ref...
+                        + obj.TempCalibrationOffset_Ref;
+                    
+                    tempReading_Samp = rawTempAvg_Samp...
+                        + obj.TempCalibrationOffset_Samp;
+            end
+            
+            % Convert the average voltage from the raw power data to
+            % the equivalent power in Watts
+            currentReading_Ref =...
+                (rawCurrentAvg_Ref ./ obj.CURRENT_SENSOR_SENS)...
+                + obj.CurrentCalibrationOffset_Ref;
+            
+            currentReading_Samp =...
+                (rawCurrentAvg_Samp ./ obj.CURRENT_SENSOR_SENS)...
+                + obj.CurrentCalibrationOffset_Samp;
+            
+            % Release the daq hardware when done
+            %obj.InputSession.release;
+            
         end
     end
     
