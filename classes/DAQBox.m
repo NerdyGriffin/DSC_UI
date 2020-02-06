@@ -617,8 +617,9 @@ classdef DAQBox < handle
                 % Get the raw data of the time stamps
                 rawTimeStamps = event.TimeStamps;
                 
-                % Calculate the average of the time stamps
-                serialDate = event.TriggerTime + mean(rawTimeStamps);
+                % Calculate the serial date from the average of the time
+                % stamps
+                serialDate = event.TriggerTime + sec2date(mean(rawTimeStamps));
                 
                 % Get the data from the listener event
                 data = event.Data;

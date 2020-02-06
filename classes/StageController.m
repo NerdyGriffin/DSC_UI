@@ -527,39 +527,8 @@ classdef StageController < handle
                     obj.StageCounter = stageCounter;
                     
                     
-                    if obj.StartTemp > latestTemp_Ref || obj.StartTemp > latestTemp_Samp
-                        % Heat the samples until they reach the Start temp if
-                        % the Start Temp is great than the Current Temp
-                        
-                        if obj.UseAppUI
-                            % Refresh the staging info displayed on the UI
-                            obj.app.refreshStagingInfo(stageCounter, 'Heating to Start Temp');
-                        end
-                        
-                    else
-                        % Allow the samples to cool if the Start Temp is less
-                        % than the Current Temp
-                        
-                        if obj.UseAppUI
-                            % Refresh the staging info displayed on the UI
-                            obj.app.refreshStagingInfo(stageCounter, 'Cooling to Start Temp');
-                        end
-                        
-                    end
-                    
-                    % Set the target temp to the start temp
-                    obj.TargetTemp = obj.StartTemp;
-                    
-                    % Measure the start time of the current stage
-                    latestStageSerialDate = obj.daqBox.getCurrentSerialDate();
-                    
-                    % Record the latest stage serial date
-                    obj.liveData.LatestStageSerialDate = latestStageSerialDate;
-                    
-                    % Start single target heating
-                    obj.daqBox.startHeating(obj, 'singleTarget');
-                    
-                    % TODO: Put everything from the if to this line in a helper function called setupSingleTarget
+                    % Heat the samples to the specified start temperature
+                    obj.setupSingleTarget(latestTemp_Ref, latestTemp_Samp);
                     
                     % Wait for background data acquisition to be stopped
                     obj.waitForDAQ();
@@ -572,123 +541,9 @@ classdef StageController < handle
                         continue
                     end
                     
-                    % TODO: Put this whole nested if in a helper function called setupRampUp
-                    if obj.EndTemp > obj.StartTemp
-                        if obj.RampUpRate > 0
-                            % Run the Ramp Up loop if the End Temp is greater
-                            % than the Start Temp and the Ramp Up Rate is a
-                            % positive, non-zero value
-                            
-                            % Estimate the total duration for the current stage
-                            obj.EstimatedStageDuration...
-                                = obj.HoldTime...
-                                + ((obj.EndTemp - obj.StartTemp)...
-                                / (obj.RampUpRate / 60));
-                            
-                            if obj.UseAppUI
-                                % Refresh the staging info displayed on the UI
-                                obj.app.refreshStagingInfo(stageCounter, 'Ramping up to End Temp');
-                                
-                            end
-                            
-                            % Initialize the TargetTemp to zero
-                            obj.TargetTemp = 0;
-                            
-                            % Measure the start time of the current stage
-                            latestStageSerialDate = obj.daqBox.getCurrentSerialDate();
-                            
-                            % Record the latest stage serial date
-                            obj.liveData.LatestStageSerialDate = latestStageSerialDate;
-                            
-                            % Start ramp up heating
-                            obj.daqBox.startHeating(obj, 'rampUp');
-                            
-                        else
-                            % Heat the samples until they reach the End Temp if
-                            % the End Temp is greater than the Start Temp and
-                            % the Ramp Up Rate is a negative or zero value
-                            
-                            if obj.UseAppUI
-                                % Refresh the staging info displayed on the UI
-                                obj.app.refreshStagingInfo(stageCounter, 'Heating to End Temp');
-                                
-                            end
-                            
-                            % Set the target temp to the start temp
-                            obj.TargetTemp = obj.EndTemp;
-                            
-                            % Measure the start time of the current stage
-                            latestStageSerialDate = obj.daqBox.getCurrentSerialDate();
-                            
-                            % Record the latest stage serial date
-                            obj.liveData.LatestStageSerialDate = latestStageSerialDate;
-                            
-                            % Start single target heating
-                            obj.daqBox.startHeating(obj, 'singleTarget');
-                            
-                        end
-                        
-                    elseif obj.EndTemp < obj.StartTemp
-                        if obj.RampUpRate < 0
-                            % Run the Ramp Up loop if the End Temp is less than
-                            % the Start Temp and the Ramp Up Rate is a
-                            % negative, non-zero value
-                            
-                            % Estimate the total duration for the current stage
-                            obj.EstimatedStageDuration...
-                                = obj.HoldTime...
-                                + ((obj.StartTemp - obj.EndTemp)...
-                                / (-obj.RampUpRate / 60));
-                            
-                            if obj.UseAppUI
-                                % Refresh the staging info displayed on the UI
-                                obj.app.refreshStagingInfo(stageCounter, 'Ramping down to End Temp');
-                                
-                            end
-                            
-                            % Initialize the TargetTemp to zero
-                            obj.TargetTemp = 0;
-                            
-                            % Measure the start time of the current stage
-                            latestStageSerialDate = obj.daqBox.getCurrentSerialDate();
-                            
-                            % Record the latest stage serial date
-                            obj.liveData.LatestStageSerialDate = latestStageSerialDate;
-                            
-                            % Start ramp up heating
-                            obj.daqBox.startHeating(obj, 'rampUp');
-                            
-                        else
-                            % Allow the samples to cool if the End Temp is less
-                            % than the Start Temp and the Ramp Up Rate is a
-                            % positive or zero value
-                            
-                            if obj.UseAppUI
-                                % Refresh the staging info displayed on the UI
-                                obj.app.refreshStagingInfo(stageCounter, 'Cooling to End Temp');
-                                
-                            end
-                            
-                            % Set the target temp to the start temp
-                            obj.TargetTemp = obj.StartTemp;
-                            
-                            % Measure the start time of the current stage
-                            latestStageSerialDate = obj.daqBox.getCurrentSerialDate();
-                            
-                            % Record the latest stage serial date
-                            obj.liveData.LatestStageSerialDate = latestStageSerialDate;
-                            
-                            % Start single target heating
-                            obj.daqBox.startHeating(obj, 'singleTarget');
-                            
-                        end
-                        
-                    else
-                        % Proceed to the holdTemp function if the End Temp is
-                        % equal to the Start Temp
-                        
-                        % i.e. Do nothing
-                    end
+                    % Ramp up the temperature from the start temperature to the
+                    % end temperature at the given ramp up rate
+                    obj.setupRampUp();
                     
                     % Wait for background data acquisition to be stopped
                     obj.waitForDAQ();
@@ -701,35 +556,9 @@ classdef StageController < handle
                         continue
                     end
                     
-                    
-                    % Run the Hold Temp Loop if there is a specified HoldTime
-                    % value
-                    if obj.HoldTime > 0
-                        % Run the Hold Temp loop if a valid HoldTime value is
-                        % given
-                        
-                        % Estimate the total duration for the current stage
-                        obj.EstimatedStageDuration  = obj.HoldTime;
-                        
-                        if obj.UseAppUI
-                            % Refresh the staging info displayed on the UI
-                            obj.app.refreshStagingInfo(stageCounter, 'Holding at End Temp');
-                            
-                        end
-                        
-                        % Set the target temp to the start temp
-                        obj.TargetTemp = obj.EndTemp;
-                        
-                        % Measure the start time of the current stage
-                        latestStageSerialDate = obj.daqBox.getCurrentSerialDate();
-                        
-                        % Record the latest stage serial date
-                        obj.liveData.LatestStageSerialDate = latestStageSerialDate;
-                        
-                        % Start single target heating
-                        obj.daqBox.startHeating(obj, 'holdTemp');
-                        
-                    end % TODO: Put this if statement in a helper function called setupHoldTemp
+                    % Hold the samples at a constant end temperature for the
+                    % duration specified by HoldTime
+                    obj.setupHoldTemp
                     
                     % Wait for background data acquisition to be stopped
                     obj.waitForDAQ();
@@ -918,7 +747,7 @@ classdef StageController < handle
                 if obj.TargetTemp < obj.EndTemp
                     obj.TargetTemp = obj.StartTemp...
                         + (obj.RampUpRate / 60)...
-                        * date2sec(obj.daqBox.getCurrentSerialDate()...
+                        * date2sec(obj.liveData.LatestSerialDate...
                         - obj.liveData.LatestStageSerialDate);
                 else
                     obj.TargetTemp = obj.EndTemp;
@@ -928,7 +757,7 @@ classdef StageController < handle
                 if obj.TargetTemp > obj.EndTemp
                     obj.TargetTemp = obj.StartTemp...
                         + (obj.RampUpRate / 60)...
-                        * date2sec(obj.daqBox.getCurrentSerialDate()...
+                        * date2sec(obj.liveData.LatestSerialDate...
                         - obj.liveData.LatestStageSerialDate);
                 else
                     obj.TargetTemp = obj.EndTemp;
@@ -969,7 +798,7 @@ classdef StageController < handle
             drawnow limitrate
             
             elapsedStageTime...
-                = date2sec(obj.daqBox.getCurrentSerialDate()...
+                = date2sec(obj.liveData.LatestSerialDate...
                 - obj.liveData.LatestStageSerialDate);
             
             if elapsedStageTime > obj.HoldTime
@@ -1004,7 +833,12 @@ classdef StageController < handle
             
             
             % Store the current elapsed time value in the DSCData object
-            obj.liveData.LatestSerialDate = latestSerialDate;
+            obj.liveData.LatestSerialDate = latestSerialDate; 
+            
+            disp('test')
+            
+            disp(datestr(latestSerialDate))
+            disp(latestSerialDate)
             
             % Store the latest temperature readings in the DSCData object
             obj.liveData.LatestTemp_Ref = latestTemp_Ref;
@@ -1122,6 +956,140 @@ classdef StageController < handle
             if holdTime < 0
                 holdTime = 0;
                 msgbox('the Hold Time has been made zero because it was negative')
+                
+            end
+        end
+        
+        function setupSingleTarget(obj, latestTemp_Ref, latestTemp_Samp)
+            %setupSingleTarget
+            %   Initialize the appropriate variables for single target heating
+            %   then start the heating
+            
+            if (obj.StartTemp > latestTemp_Ref) || (obj.StartTemp > latestTemp_Samp)
+                % Heat the samples until they reach the Start temp if
+                % the Start Temp is great than the Current Temp
+                
+                if obj.UseAppUI
+                    % Refresh the staging info displayed on the UI
+                    obj.app.refreshStagingInfo(obj.StageCounter, 'Heating to Start Temp');
+                end
+                
+            else
+                % Allow the samples to cool if the Start Temp is less
+                % than the Current Temp
+                
+                if obj.UseAppUI
+                    % Refresh the staging info displayed on the UI
+                    obj.app.refreshStagingInfo(obj.StageCounter, 'Cooling to Start Temp');
+                end
+                
+            end
+            
+            % Set the target temp to the start temp
+            obj.TargetTemp = obj.StartTemp;
+            
+            % Measure the start time of the current stage
+            latestStageSerialDate = obj.daqBox.getCurrentSerialDate();
+            
+            % Record the latest stage serial date
+            obj.liveData.LatestStageSerialDate = latestStageSerialDate;
+            
+            % Start single target heating
+            obj.daqBox.startHeating(obj, 'singleTarget');
+            
+        end
+        
+        function setupRampUp(obj)
+            %setupRampUp
+            %   Initialize the appropriate variables for ramp up heating
+            %   then start the heating
+            
+            if obj.EndTemp == obj.StartTemp
+                % Proceed to the holdTemp function if the End Temp is
+                % equal to the Start Temp
+                
+                % i.e. Do nothing
+            else
+                if obj.RampUpRate == 0
+                    if obj.EndTemp > obj.StartTemp
+                        displayInfo = 'Heating to End Temp';
+                    else
+                        displayInfo = 'Cooling to End Temp';
+                    end
+                    
+                    % Set the target temp to the end temp
+                    obj.TargetTemp = obj.EndTemp;
+                    
+                else
+                    % Estimate the total duration for the current stage
+                    obj.EstimatedStageDuration...
+                        = obj.HoldTime...
+                        + (abs(obj.EndTemp - obj.StartTemp)...
+                        / (abs(obj.RampUpRate) / 60));
+                    
+                    if obj.EndTemp > obj.StartTemp
+                        displayInfo = 'Ramping up the End Temp';
+                    else
+                        displayInfo = 'Ramping down to End Temp';
+                    end
+                    
+                    % Initialize the TargetTemp to zero
+                    obj.TargetTemp = 0;
+                end
+                
+                if obj.UseAppUI
+                    % Refresh the staging info displayed on the UI
+                    obj.app.refreshStagingInfo(obj.StageCounter, displayInfo);
+                end
+                
+                % Measure the start time of the current stage
+                latestStageSerialDate = obj.daqBox.getCurrentSerialDate();
+                                
+                % Record the latest stage serial date
+                obj.liveData.LatestStageSerialDate = latestStageSerialDate;
+                
+                if obj.RampUpRate == 0
+                    % Start single target heating
+                    obj.daqBox.startHeating(obj, 'singleTarget');
+                else
+                    % Start ramp up heating
+                    obj.daqBox.startHeating(obj, 'rampUp');
+                end
+            end
+        end
+        
+        function setupHoldTemp(obj)
+            %setupHoldTemp
+            %   Initialize the appropriate variables for holding the samples at
+            %   the end temperature for a given amount of time,
+            %   then start the heating
+            
+            % Run the Hold Temp Loop if there is a specified HoldTime
+            % value
+            if obj.HoldTime > 0
+                % Run the Hold Temp loop if a valid HoldTime value is
+                % given
+                
+                % Estimate the total duration for the current stage
+                obj.EstimatedStageDuration  = obj.HoldTime;
+                
+                if obj.UseAppUI
+                    % Refresh the staging info displayed on the UI
+                    obj.app.refreshStagingInfo(stageCounter, 'Holding at End Temp');
+                    
+                end
+                
+                % Set the target temp to the start temp
+                obj.TargetTemp = obj.EndTemp;
+                
+                % Measure the start time of the current stage
+                latestStageSerialDate = obj.daqBox.getCurrentSerialDate();
+                
+                % Record the latest stage serial date
+                obj.liveData.LatestStageSerialDate = latestStageSerialDate;
+                
+                % Start single target heating
+                obj.daqBox.startHeating(obj, 'holdTemp');
                 
             end
         end

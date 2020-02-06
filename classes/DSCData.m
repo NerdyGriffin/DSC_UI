@@ -254,8 +254,7 @@ classdef DSCData < handle
             %   Return the latest recorded elapsed time, measures as the
             %   number of seconds since the experiment start time
             
-            latestTime = date2sec(...
-                obj.LatestSerialDate - obj.ExpStartSerialDate);
+            latestTime = date2sec(obj.LatestSerialDate);
         end
         
         function timeData = get.TimeData(obj)
