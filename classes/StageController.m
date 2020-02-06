@@ -506,7 +506,7 @@ classdef StageController < handle
                     % Take an initial reading of the temperatures and power
                     [latestSerialDate, latestTemp_Ref, latestTemp_Samp,...
                         latestCurrent_Ref, latestCurrent_Samp]...
-                        = obj.daqBox.getBackgroundData('single');
+                        = obj.daqBox.getSingleScanData();
                     
                     % Initialize the TargetTemp to zero
                     obj.TargetTemp = 0;
