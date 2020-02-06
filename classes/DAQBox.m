@@ -627,7 +627,7 @@ classdef DAQBox < handle
                 % temperature and current units
                 [tempReading_Ref, tempReading_Samp,...
                 currentReading_Ref, currentReading_Samp]...
-                = extractDaqData(data);
+                = obj.extractDaqData(data);
                 
             else
                 % Simulate the input values if a DAQ Box is not connected
@@ -664,7 +664,7 @@ classdef DAQBox < handle
                 % temperature and current units
                 [tempReading_Ref, tempReading_Samp,...
                 currentReading_Ref, currentReading_Samp]...
-                = extractDaqData(data);
+                = obj.extractDaqData(data);
                 
             else
                 % Simulate the input values if a DAQ Box is not connected
