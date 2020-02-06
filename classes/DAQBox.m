@@ -627,8 +627,8 @@ classdef DAQBox < handle
                 % Convert the raw voltage data into the corresponding
                 % temperature and current units
                 [tempReading_Ref, tempReading_Samp,...
-                currentReading_Ref, currentReading_Samp]...
-                = obj.extractDaqData(data);
+                    currentReading_Ref, currentReading_Samp]...
+                    = obj.extractDaqData(data);
                 
             else
                 % Simulate the input values if a DAQ Box is not connected
@@ -640,32 +640,32 @@ classdef DAQBox < handle
         end
         
         function [serialDate, tempReading_Ref, tempReading_Samp,...
-            currentReading_Ref, currentReading_Samp]...
-            = getSingleScanData(obj)
+                currentReading_Ref, currentReading_Samp]...
+                = getSingleScanData(obj)
             %getSingleScanData
             %   Get temperature and power readings from a single scan
             if obj.UseDAQHardware
                 try
-                % Read the input data from the session
-                [data, serialDate]...
-                    = inputSingleScan(obj.InputSession);
+                    % Read the input data from the session
+                    [data, serialDate]...
+                        = inputSingleScan(obj.InputSession);
                 catch
                     try
                         pause(0.1)
                         % Read the input data from the session
-                [data, serialDate]...
-                    = inputSingleScan(obj.InputSession);
+                        [data, serialDate]...
+                            = inputSingleScan(obj.InputSession);
                     catch ME
                         warning('An error occured while trying to read the input data from the DAQ Box')
-                    rethrow(ME)
+                        rethrow(ME)
                     end
                 end
                 
                 % Convert the raw voltage data into the corresponding
                 % temperature and current units
                 [tempReading_Ref, tempReading_Samp,...
-                currentReading_Ref, currentReading_Samp]...
-                = obj.extractDaqData(data);
+                    currentReading_Ref, currentReading_Samp]...
+                    = obj.extractDaqData(data);
                 
             else
                 % Simulate the input values if a DAQ Box is not connected
@@ -711,8 +711,8 @@ classdef DAQBox < handle
     % Private Data Measurement Helper Methods
     methods (Access = private)
         function [tempReading_Ref, tempReading_Samp,...
-            currentReading_Ref, currentReading_Samp]...
-            = extractDaqData(obj, data)
+                currentReading_Ref, currentReading_Samp]...
+                = extractDaqData(obj, data)
             %extractEventData
             %   Compute the averages of the raw voltage data and convert these
             %   into the corresponding temperature or current units

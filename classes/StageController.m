@@ -833,7 +833,7 @@ classdef StageController < handle
             
             
             % Store the current elapsed time value in the DSCData object
-            obj.liveData.LatestSerialDate = latestSerialDate; 
+            obj.liveData.LatestSerialDate = latestSerialDate;
             
             % Store the latest temperature readings in the DSCData object
             obj.liveData.LatestTemp_Ref = latestTemp_Ref;
@@ -1039,7 +1039,7 @@ classdef StageController < handle
                 
                 % Measure the start time of the current stage
                 latestStageSerialDate = obj.daqBox.getCurrentSerialDate();
-                                
+                
                 % Record the latest stage serial date
                 obj.liveData.LatestStageSerialDate = latestStageSerialDate;
                 
