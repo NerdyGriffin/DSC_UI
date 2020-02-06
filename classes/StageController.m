@@ -835,11 +835,6 @@ classdef StageController < handle
             % Store the current elapsed time value in the DSCData object
             obj.liveData.LatestSerialDate = latestSerialDate; 
             
-            disp('test')
-            
-            disp(datestr(latestSerialDate))
-            disp(latestSerialDate)
-            
             % Store the latest temperature readings in the DSCData object
             obj.liveData.LatestTemp_Ref = latestTemp_Ref;
             obj.liveData.LatestTemp_Samp = latestTemp_Samp;
