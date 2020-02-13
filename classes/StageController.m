@@ -64,7 +64,7 @@ classdef StageController < handle
         AutosaveTimerExecutionMode = 'fixedRate'
         
         % The time in seconds between executions of the autosave function
-        AutosavePeriod = 60
+        AutosavePeriod = 120
         
         StageCounter
         
@@ -691,9 +691,6 @@ classdef StageController < handle
             % Run the live data analysis
             obj.experimentLiveDataAnalysis(event);
             
-            % Refresh the display
-            drawnow limitrate
-            
             % Force the function to end if requested by the user
             if obj.ForceStop
                 obj.stopDAQ();
@@ -706,6 +703,7 @@ classdef StageController < handle
                 obj.stopDAQ();
                 return
             end
+            
             
             % Compare the sample temperatures to the target temperature
             if (abs(obj.liveData.LatestTempError_Ref) < obj.MINIMUM_ACCEPTABLE_ERROR)...
@@ -723,10 +721,6 @@ classdef StageController < handle
             
             % Run the live data analysis
             obj.experimentLiveDataAnalysis(event);
-            
-            % Refresh the display
-            drawnow limitrate
-            
             
             % Force the function to end if requested by the user
             if obj.ForceStop
@@ -778,6 +772,9 @@ classdef StageController < handle
             % order to make the hold the sample temperatures at the target
             % temperature over the duration of the given hold time
             
+            % Run the live data analysis
+            obj.experimentLiveDataAnalysis(event);
+            
             % Force the function to end if requested by the user
             if obj.ForceStop
                 obj.stopDAQ();
@@ -791,11 +788,6 @@ classdef StageController < handle
                 return
             end
             
-            % Run the live data analysis
-            obj.experimentLiveDataAnalysis(event);
-            
-            % Refresh the display
-            drawnow limitrate
             
             elapsedStageTime...
                 = date2sec(obj.liveData.LatestSerialDate...
@@ -1091,7 +1083,7 @@ classdef StageController < handle
         
         function startAutosaveTimer(obj)
             %startAutosaveTimer
-            %   Put description here
+            %   TODO: Put description here
             
             % Create a new timer object for performing the autosave
             obj.AutosaveTimer = timer(...
@@ -1112,7 +1104,7 @@ classdef StageController < handle
         
         function stopAutosaveTimer(obj)
             %stopAutosaveTimer
-            %   Put description here
+            %   TODO: Put description here
             
             % Stop the trigger timer object
             for i=1:10 % Retry up to 10 times if timer fails to stop
@@ -1138,9 +1130,9 @@ classdef StageController < handle
             % Try to autosave the DAQBox object
             try
                 % Assign the current DAQBox object to a temporary variable
-                daqBox = obj.daqBox;
+                %daqBox = obj.daqBox;
                 % Save the temporary variable to a .mat file
-                save('./autosave/autosave_daqBox.mat', 'daqBox')
+                %save('./autosave/autosave_daqBox.mat', 'daqBox')
                 
             catch ME
                 % If an autosave error occurs while an experiment is running,

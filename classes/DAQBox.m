@@ -145,7 +145,7 @@ classdef DAQBox < handle
         CHANNEL_ID_HEATING_COIL_SAMP = 'ctr1';
         
         % The scan rate used during sensor readings
-        SCAN_RATE = 62500;
+        SCAN_RATE = 100;
         
         % The duration in seconds of the sensor readings
         INPUT_DURATION_IN_SECONDS = 60;
@@ -761,9 +761,6 @@ classdef DAQBox < handle
             currentReading_Samp =...
                 (rawCurrentAvg_Samp ./ obj.CURRENT_SENSOR_SENS)...
                 + obj.CurrentCalibrationOffset_Samp;
-            
-            % Release the daq hardware when done
-            %obj.InputSession.release;
             
         end
     end
