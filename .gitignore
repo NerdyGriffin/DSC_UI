@@ -7,3 +7,5 @@ autosave/autosave*
 # VSCode configuration files
 .vscode
 *.code-workspace
+
+.history/

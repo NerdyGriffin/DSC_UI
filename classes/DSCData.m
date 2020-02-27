@@ -294,6 +294,16 @@ classdef DSCData < handle
             end
         end
         
+        function latestTargetTemp = get.LatestTargetTemp(obj)
+            %get.LatestTargetTemp
+            %   Return the value from the most recent target temperature
+            if ~isempty(obj.TargetTempData)
+                latestTargetTemp = obj.TargetTempData(end);
+            else
+                latestTargetTemp = 0;
+            end
+        end
+        
         function latestTemp_Ref = get.LatestTemp_Ref(obj)
             %get.LatestTemp_Ref
             %   Return the value from the most recent measurement of the
@@ -328,8 +338,8 @@ classdef DSCData < handle
             
             tempDataRange = [minTemp, maxTemp];
             
-            if isempty(tempDataRange)
-                tempDataRange = [0 0];
+            if isempty(tempData_Combined)
+                tempDataRange = [0, 0];
             end
         end
         
