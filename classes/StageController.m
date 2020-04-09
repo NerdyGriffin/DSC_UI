@@ -805,6 +805,9 @@ classdef StageController < handle
             % Store the latest Target Temp in the DSCData object
             obj.liveData.LatestTargetTemp = obj.TargetTemp;
             
+            % DEBUG ================
+            debug_latestSerialDate = datenum(datetime);
+            % DEBUG ================
             
             % Take the temperature and current readings
             [latestSerialDate, latestTemp_Ref, latestTemp_Samp,...
@@ -823,6 +826,18 @@ classdef StageController < handle
                 error('latestCurrent_Samp is empty')
             end
             
+            % DEBUG ================
+            fprintf("Serial date format:\n")
+            fprintf("DAQBox: %10.10f\n", latestSerialDate)
+            fprintf("MATLAB: %10.10f\n", debug_latestSerialDate)
+            fprintf("Diff:   %10.10f\n", latestSerialDate - debug_latestSerialDate)
+            fprintf("Diff in sec: %f\n", date2sec(abs(latestSerialDate - debug_latestSerialDate)))
+            formatOut = 'yyyy-mm-dd HH:MM:SS.FFF';
+            fprintf("Date String format:\n")
+            fprintf("DAQBox: %s\n", datestr(latestSerialDate, formatOut))
+            fprintf("MATLAB: %s\n", datestr(debug_latestSerialDate, formatOut))
+            fprintf("\n")
+            % DEBUG ================
             
             % Store the current elapsed time value in the DSCData object
             obj.liveData.LatestSerialDate = latestSerialDate;
@@ -865,11 +880,6 @@ classdef StageController < handle
             % Store the latest PWM duty cycle values in the DSCData object
             obj.liveData.LatestPWMDutyCycle_Ref = newDutyCycle_Ref;
             obj.liveData.LatestPWMDutyCycle_Samp = newDutyCycle_Samp;
-            
-            
-            % Refresh the PWM duty cycle values of pulse generators using
-            % the newly calculated values
-            obj.daqBox.updatePWMDutyCycle(newDutyCycle_Ref, newDutyCycle_Samp);
             
             
             if obj.UseAppUI

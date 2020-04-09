@@ -916,6 +916,11 @@ classdef DAQBox < handle
                 newDutyCycle_Samp = Pp_Samp + Pi_Samp + Pd_Samp;
                 
             end
+            
+            % Refresh the PWM duty cycle values of pulse generators using
+            % the newly calculated values
+            %obj.updatePWMDutyCycle(newDutyCycle_Ref, newDutyCycle_Samp);
+            
         end
     end
     
