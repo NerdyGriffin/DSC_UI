@@ -1,8 +1,10 @@
 # DSC_UI
-UI and real-time equipment control software for a Differential Scanning Calorimetry Prototype System, as part of my undergraduate physics research. 
+
+UI and real-time equipment control software for a Differential Scanning Calorimetry Prototype System, as part of my undergraduate physics research.
 
 ### DSC_UI: UI and control systems for DSC prototype system
-Copyright (C) 2019  Christian Kunis
+
+Copyright (C) 2019 Christian Kunis
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -11,7 +13,7 @@ the Free Software Foundation, either version 3 of the License, or
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
@@ -23,8 +25,8 @@ NOTE: This project is currently a work-in-progress. Not all features have been i
 
 ## Graphic UI Instructions
 
-To run the Graphical User Interface (GUI), run the file classes/DSC_GUI_APP.mlapp or type Run_DSC_GUI in the MATLAB command window.
-
+To run the Graphical User Interface (GUI), run the file Run_DSC_GUI.m or `cd` to
+the project folder and type Run_DSC_GUI in the MATLAB command window.
 
 ## Command-Line UI Instructions
 
