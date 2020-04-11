@@ -24,7 +24,7 @@ classdef DAQBox < handle
     %   Author: Christian Kunis (Nov 27, 2018)
     
     properties
-        device = []
+        devicesList = [];
         
         % An object of the DAQTrigger class which represents the DAQ
         % triggers, which are used to trigger the data acquisition at
@@ -35,42 +35,39 @@ classdef DAQBox < handle
         % and maintaining data while an experiment is running
         liveData DSCData
         
-        % An event listener to perform calulations and store the
-        % measurement data every time there is data available from the
-        % background data acquisition
-        lh_DataAvailable
-        
         daqSemaphore Semaphore
         
         % Boolean variable indicating whether to interact with a physical
         % DAQ Box (true) or simulate the hardware (false).
         UseDAQHardware logical = false
         
-        % Boolean variable indicating the state of the DAQ Box hardware
-        IsRunningState = false
-        
         TempSensorSelection = 'Thermocouple'
     end
     
-    % daq.ni.Session objects
+    % DataAcquisition objects
     properties
         
-        % The session for reading temperature and power data
-        InputSession daq.ni.Session
+        % The DataAcquisition object for reading temperature and power data
+        dqInput daq.interfaces.DataAcquisition
         
-        % The session for controlling the power output to the heating coils
-        OutputSession daq.ni.Session
+        % The DataAcquisition object for controlling the power output to the heating coils
+        dqOutput daq.interfaces.DataAcquisition
         
-        CurrentChannel_Ref
-        CurrentChannel_Samp
+        % The device ID of the DAQ Box
+        DeviceID = 'Dev1';
         
+        % daq.ni.AnalogInputVoltageChannel objects
+        ch_Temp_Ref
+        ch_Temp_Samp
+        ch_Current_Ref
+        ch_Current_Samp
         
         % The counter output channel for sending PWM to the reference
         % sample heating coil
-        HeatingCoilPWMChannel_Ref
+        ctr_PWM_Ref
         % The counter output channel for sending PWM to the test sample
         % heating coil
-        HeatingCoilPWMChannel_Samp
+        ctr_PWM_Samp
     end
     
     % Calibration Offsets
@@ -93,7 +90,7 @@ classdef DAQBox < handle
     
     % Configuration Properties
     properties
-        PID_Kp = 1 % PID proportional gain constant
+        PID_Kp = 0.01 % PID proportional gain constant
         PID_Ki = 0 % PID integral gain constant
         PID_Kd = 0 % PID derivative gain constant
         
@@ -114,8 +111,8 @@ classdef DAQBox < handle
         SimulatedCurrent_Samp(1,1) = 0
     end
     
-    % Dependent Properties
-    properties (Dependent)
+    % Dependent Properties % TODO Update this comment
+    properties %(Dependent)
         PWMDutyCycle_Ref
         PWMDutyCycle_Samp
     end
@@ -133,26 +130,34 @@ classdef DAQBox < handle
         
         CONFIG_XL_RANGE = 'B2:B10';
         
-        % The device ID of the DAQ Box
-        DEVICE_ID = 'Dev1';
-        
         % The channel ID's for each sensor
         CHANNEL_ID_TEMP_REF = 'ai3'; %'ai5';
         CHANNEL_ID_TEMP_SAMP = 'ai6'; %'ai6';
         CHANNEL_ID_CURRENT_REF = 'ai4'; %'ai3';
         CHANNEL_ID_CURRENT_SAMP = 'ai5'; %'ai4';
-        CHANNEL_ID_HEATING_COIL_REF = 'ctr0';
-        CHANNEL_ID_HEATING_COIL_SAMP = 'ctr1';
+        CHANNEL_ID_PWM_REF = 'ctr0';
+        CHANNEL_ID_PWM_SAMP = 'ctr1';
         
-        % The scan rate used during sensor readings
-        SCAN_RATE = 100;
+        % The scan rate used during sensor readings (default: 1000)
+        INPUT_SCAN_RATE = 1000;
+        
+        % The number of scans to hold in the buffer before activating the
+        % ScansAvailableFcn callback (default: 100)
+        SCANS_AVAILABLE_FCN_COUNT = 100
+        
+        % The scan rate used by the mimiced PWM (default: 1000)
+        OUTPUT_SCAN_RATE = 100
+        
+        % The number of scans at which to generate more data for the output
+        % (default: 500)
+        SCANS_REQUIRED_FCN_COUNT = 50;
         
         % The duration in seconds of the sensor readings
-        INPUT_DURATION_IN_SECONDS = 60;
+        %INPUT_DURATION_IN_SECONDS = 60; % TODO Delete this
         
         % The duration in seconds of the PWM outputs (if not manually
         % stopped)
-        OUTPUT_DURATION_IN_SECONDS = 60;
+        %OUTPUT_DURATION = 1; % TODO Remove this
         
         % The minimum duty cycle allowed for both PWM channels
         PWM_MIN_DUTY_CYCLE = 1e-3;
@@ -161,7 +166,7 @@ classdef DAQBox < handle
         PWM_MAX_DUTY_CYCLE = 1 - 1e-3;
         
         % The PWM frequency of the PWM channels
-        PWM_FREQUENCY = 1e3;
+        PWM_FREQUENCY = 100;
         
         MAX_PWM_ATTEMPTS = 10;
         
@@ -230,29 +235,31 @@ classdef DAQBox < handle
             % Check whether a DAQ Box is connected to the computer
             message = 'Checking for DAQ devices...';
             [s, n, f] = refreshWaitbar(s, n, f, message);
-            if isempty(obj.device)
+            if isempty(obj.devicesList)
                 % Check for DAQ devices before attempting to create
                 % sessions
                 fprintf('\nChecking for DAQ devices...\n')
-                obj.device = daq.getDevices;
-                if isempty(obj.device)
+                daqreset;
+                obj.devicesList = daqlist("ni");
+                if isempty(obj.devicesList)
                     disp('No DAQ devices have been detected.')
                     obj.UseDAQHardware = false;
                 else
                     disp('DAQ device found')
+                    obj.DeviceID = obj.devicesList.DeviceID(1);
                     obj.UseDAQHardware = true;
                 end
             end
             
-            % Create the daq.Session for measuring inputs from sensors
-            message = 'Creating Input Session...';
+            % Create the daq.DataAcquisition for measuring inputs from sensors
+            message = 'Setting up DataAcquisition Input...';
             [s, n, f] = refreshWaitbar(s, n, f, message);
-            obj.createInputSession();
+            obj.initializeInput();
             
-            % Create the daq.Session for producing PWM output
-            message = 'Creating Output Session...';
+            % Create the daq.DataAcquisition for producing PWM output
+            message = 'Setting up DataAcquisition Output...';
             [s, n, f] = refreshWaitbar(s, n, f, message);
-            obj.createOutputSession();
+            obj.initializeOutput();
             
             % Load the DAQ Box config file
             message = 'Loading Default DAQ Box Configuration...';
@@ -266,7 +273,7 @@ classdef DAQBox < handle
                 message = 'Creating DAQ Trigger...';
                 [s, n, f] = refreshWaitbar(s, n, f, message);
                 % Create the DAQTrigger object
-                obj.daqTrigger = DAQTrigger(obj.device);
+                obj.daqTrigger = DAQTrigger(obj.devicesList);
             end
             
             % Indicate to user that the setup is complete
@@ -275,7 +282,7 @@ classdef DAQBox < handle
             else
                 message = 'Simulated DAQ Box is ready';
             end
-            [s, n, f] = refreshWaitbar(s, n, f, message);
+            [~, ~, f] = refreshWaitbar(s, n, f, message);
             
             pause(0.5)
             
@@ -293,90 +300,77 @@ classdef DAQBox < handle
         end
     end
     
-    % Dependant Properties Accessor Methods
-    methods
-        function pwmDutyCycle_Ref = get.PWMDutyCycle_Ref(obj)
-            % Return the PWM duty cycle currently set for the reference
-            % sample heating coil output channel
-            pwmDutyCycle_Ref = obj.HeatingCoilPWMChannel_Ref.DutyCycle;
-        end
+    % % Dependant Properties Accessor Methods
+    % methods
+    %     function pwmDutyCycle_Ref = get.PWMDutyCycle_Ref(obj)
+    %         % Return the PWM duty cycle currently set for the reference
+    %         % sample heating coil output channel
+    %         pwmDutyCycle_Ref = obj.ctr_PWM_Ref.DutyCycle;
+    %     end
         
-        function pwmDutyCycle_Samp = get.PWMDutyCycle_Samp(obj)
-            % Return the PWM duty cycle currently set for the test sample
-            % heating coil output channel
-            pwmDutyCycle_Samp = obj.HeatingCoilPWMChannel_Samp.DutyCycle;
-        end
-    end
+    %     function pwmDutyCycle_Samp = get.PWMDutyCycle_Samp(obj)
+    %         % Return the PWM duty cycle currently set for the test sample
+    %         % heating coil output channel
+    %         pwmDutyCycle_Samp = obj.ctr_PWM_Samp.DutyCycle;
+    %     end
+    % end
     
-    % Dependant Properties Mutator Methods
-    methods
-        function set.PWMDutyCycle_Ref(obj, newPWMDutyCycle_Ref)
-            if newPWMDutyCycle_Ref > obj.PWM_MAX_DUTY_CYCLE
-                obj.HeatingCoilPWMChannel_Ref.DutyCycle = obj.PWM_MAX_DUTY_CYCLE;
-                
-            elseif newPWMDutyCycle_Ref < obj.PWM_MIN_DUTY_CYCLE
-                obj.HeatingCoilPWMChannel_Ref.DutyCycle = obj.PWM_MIN_DUTY_CYCLE;
-                
-            else
-                obj.HeatingCoilPWMChannel_Ref.DutyCycle = newPWMDutyCycle_Ref;
-                
-            end
-        end
+    % % Dependant Properties Mutator Methods
+    % methods
+    %     function set.PWMDutyCycle_Ref(obj, newPWMDutyCycle_Ref)
+    %         if obj.dqOutput.Running
+    %             obj.ctr_PWM_Ref.DutyCycle = newPWMDutyCycle_Ref;
+    %         end
+    %     end
         
-        function set.PWMDutyCycle_Samp(obj, newPWMDutyCycle_Samp)
-            if newPWMDutyCycle_Samp > obj.PWM_MAX_DUTY_CYCLE
-                obj.HeatingCoilPWMChannel_Samp.DutyCycle = obj.PWM_MAX_DUTY_CYCLE;
-                
-            elseif newPWMDutyCycle_Samp < obj.PWM_MIN_DUTY_CYCLE
-                obj.HeatingCoilPWMChannel_Samp.DutyCycle = obj.PWM_MIN_DUTY_CYCLE;
-                
-            else
-                obj.HeatingCoilPWMChannel_Samp.DutyCycle = newPWMDutyCycle_Samp;
-                
-            end
-        end
-    end
+    %     function set.PWMDutyCycle_Samp(obj, newPWMDutyCycle_Samp)
+    %         if obj.dqOutput.Running
+    %             obj.ctr_PWM_Samp.DutyCycle = newPWMDutyCycle_Samp;
+    %         end
+    %     end
+    % end
     
     % daq.createSession Methods
     methods
-        function obj = createInputSession(obj)
-            %createInputSession
+        function obj = initializeInput(obj)
+            %initializeInput
             %   Creates and configures the session that is used to take
             %   measurements from the temperature and power sensors
             
             if obj.UseDAQHardware
-                % Release any existing sessions
+                % Stop and flush any existing DataAcquisition objects
                 try
-                    release(obj.InputSession)
+                    stop(obj.dqInput);
+                    flush(obj.dqInput);
                 catch
-                    if isvalid(obj.InputSession)
-                        warning('Failed to release existing InputSession')
+                    if isvalid(obj.dqInput)
+                        warning('Failed to release existing Input DataAcquisition')
                     end
                 end
                 
-                fprintf('\nCreating input session...\n')
-                % Create the session for the input measurements
-                obj.InputSession = daq.createSession('Ni');
-                disp('Input session was successfully created')
+                fprintf('\nCreating Input DataAcquisition...\n')
+                % Create the DataAcquisition object for the input measurements
+                obj.dqInput = daq("ni");
+                disp('Input DataAcquistion was successfully created')
                 
-                fprintf('\nConfiguring input session channels...\n')
+                fprintf('\nConfiguring input DataAcquisition channels...\n')
                 % Add the input channels
                 switch obj.TempSensorSelection
                     case 'Thermocouple'
                         %Add the temperature sensor input channel for the
                         %reference sample
-                        tempChannel_Ref = addAnalogInputChannel(obj.InputSession,...
-                            obj.DEVICE_ID, obj.CHANNEL_ID_TEMP_REF, 'Voltage');
-                        tempChannel_Ref.TerminalConfig = 'SingleEnded';
-                        tempChannel_Ref.Name = 'Temperature Sensor: Reference';
+                        obj.ch_Temp_Ref = addinput(obj.dqInput, obj.DeviceID,...
+                            obj.CHANNEL_ID_TEMP_REF, "Voltage");
+                        obj.ch_Temp_Ref.TerminalConfig = "SingleEnded";
+                        obj.ch_Temp_Ref.Name = "Temp_Ref_Voltage";
                         disp('Created: analog input channel for reference sample temperature sensor')
                         
                         %Add the temperature sensor input channel for the
                         %test sample
-                        tempChannel_Samp = addAnalogInputChannel(obj.InputSession,...
-                            obj.DEVICE_ID, obj.CHANNEL_ID_TEMP_SAMP, 'Voltage');
-                        tempChannel_Samp.TerminalConfig = 'SingleEnded';
-                        tempChannel_Samp.Name = 'Temperature Sensor: Test Sample';
+                        obj.ch_Temp_Samp = addinput(obj.dqInput, obj.DeviceID,...
+                            obj.CHANNEL_ID_TEMP_SAMP, "Voltage");
+                        obj.ch_Temp_Samp.TerminalConfig = "SingleEnded";
+                        obj.ch_Temp_Samp.Name = "Temp_Samp_Voltage";
                         disp('Created: analog input channel for test sample temperature sensor')
                         
                     case 'RTD' % NOT YET IMPLEMENTED
@@ -387,81 +381,78 @@ classdef DAQBox < handle
                 
                 %Add the current sensor input channel for the reference
                 %sample
-                obj.CurrentChannel_Ref = addAnalogInputChannel(obj.InputSession,...
-                    obj.DEVICE_ID, obj.CHANNEL_ID_CURRENT_REF, 'Voltage');
-                obj.CurrentChannel_Ref.TerminalConfig = 'SingleEnded';
-                obj.CurrentChannel_Ref.Name = 'Current Sensor: Reference';
+                obj.ch_Current_Ref = addinput(obj.dqInput, obj.DeviceID,...
+                    obj.CHANNEL_ID_CURRENT_REF, "Voltage");
+                obj.ch_Current_Ref.TerminalConfig = "SingleEnded";
+                obj.ch_Current_Ref.Name = "Current_Ref_Voltage";
                 disp('Created: analog input channel for reference sample current sensor')
                 
                 %Add the current sensor input channel for the test sample
-                obj.CurrentChannel_Samp = addAnalogInputChannel(obj.InputSession,...
-                    obj.DEVICE_ID, obj.CHANNEL_ID_CURRENT_SAMP, 'Voltage');
-                obj.CurrentChannel_Samp.TerminalConfig = 'SingleEnded';
-                obj.CurrentChannel_Samp.Name = 'Current Sensor: Test Sample';
+                obj.ch_Current_Samp = addinput(obj.dqInput, obj.DeviceID,...
+                    obj.CHANNEL_ID_CURRENT_SAMP, "Voltage");
+                obj.ch_Current_Samp.TerminalConfig = "SingleEnded";
+                obj.ch_Current_Samp.Name = "Current_Samp_Voltage";
                 disp('Created: analog input channel for test sample current sensor')
                 
-                obj.InputSession.Rate = obj.SCAN_RATE;
+                obj.dqInput.Rate = obj.INPUT_SCAN_RATE;
                 
-                obj.InputSession.DurationInSeconds = obj.INPUT_DURATION_IN_SECONDS;
-                
-                obj.InputSession.IsContinuous = true;
-                
-                obj.lh_DataAvailable = addlistener(obj.InputSession,...
-                    'DataAvailable',...
-                    @(src,event) warning('listener triggered outside of experiment staging'));
+                obj.dqInput.ScansAvailableFcnCount = obj.SCANS_AVAILABLE_FCN_COUNT;
             else
-                % Delete the session object if no DAQ devices are found
-                delete(obj.InputSession)
+                % Delete the DataAcquisition object if no DAQ devices are found
+                delete(obj.dqInput)
                 
                 % Inform the user that no devices were detected
                 fprintf('\nTo allow for UI testing, temperature and power data will be simulated\n')
             end
         end
         
-        function obj = createOutputSession(obj)
-            %createOutputSession
+        function obj = initializeOutput(obj)
+            %initializeOutput
             %   Creates and configures the session that is used to send
             %   outputs to the heating coils via PWM pulse generation
             
             if obj.UseDAQHardware
-                % Release any existing sessions
+                % Stop and flush any existing DataAcquisition objects
                 try
-                    release(obj.OutputSession)
+                    stop(obj.dqOutput);
+                    flush(obj.dqOutput);
                 catch
-                    if isvalid(obj.OutputSession)
-                        warning('Failed to release existing OutputSession')
+                    if isvalid(obj.dqOutput)
+                        warning('Failed to release existing Output DataAcquisition')
                     end
                 end
                 
-                fprintf('\nCreating output session...\n')
-                % Create the session for the PWM output to the heating
+                fprintf('\nCreating Output DataAcquisition...\n')
+                % Create the DataAcquisition object for the PWM output to the heating
                 % coils
-                obj.OutputSession = daq.createSession('Ni');
-                disp('Output session was successfully created')
+                obj.dqOutput = daq("ni");
+                disp('Output DataAcquisition was successfully created')
                 
-                fprintf('\nConfiguring output session channels...\n')
+                fprintf('\nConfiguring output DataAcquisition channels...\n')
                 
                 %Add the heating coil output channel for the reference
                 %sample
-                obj.HeatingCoilPWMChannel_Ref = addCounterOutputChannel(obj.OutputSession,...
-                    obj.DEVICE_ID, obj.CHANNEL_ID_HEATING_COIL_REF, 'PulseGeneration');
-                obj.HeatingCoilPWMChannel_Ref.DutyCycle = obj.PWM_MIN_DUTY_CYCLE;
-                obj.HeatingCoilPWMChannel_Ref.Frequency = obj.PWM_FREQUENCY;
-                obj.HeatingCoilPWMChannel_Ref.Name = 'Heating Coil PWM: Reference';
+                obj.ctr_PWM_Ref = addoutput(obj.dqOutput, obj.DeviceID,...
+                    obj.CHANNEL_ID_PWM_REF, "PulseGeneration");
+                obj.ctr_PWM_Ref.DutyCycle = obj.PWM_MIN_DUTY_CYCLE;
+                obj.ctr_PWM_Ref.Frequency = obj.PWM_FREQUENCY;
+                obj.ctr_PWM_Ref.Name = 'Heating Coil PWM: Reference';
                 disp('Created: counter output channel for reference sample heating coil')
                 
                 %Add the heating coil output channel for the test sample
-                obj.HeatingCoilPWMChannel_Samp = addCounterOutputChannel(obj.OutputSession,...
-                    obj.DEVICE_ID, obj.CHANNEL_ID_HEATING_COIL_SAMP, 'PulseGeneration');
-                obj.HeatingCoilPWMChannel_Samp.DutyCycle = obj.PWM_MIN_DUTY_CYCLE;
-                obj.HeatingCoilPWMChannel_Samp.Frequency = obj.PWM_FREQUENCY;
-                obj.HeatingCoilPWMChannel_Samp.Name = 'Heating Coil PWM: Test Sample';
+                obj.ctr_PWM_Samp = addoutput(obj.dqOutput, obj.DeviceID,...
+                    obj.CHANNEL_ID_PWM_SAMP, "PulseGeneration");
+                obj.ctr_PWM_Samp.DutyCycle = obj.PWM_MIN_DUTY_CYCLE;
+                obj.ctr_PWM_Samp.Frequency = obj.PWM_FREQUENCY;
+                obj.ctr_PWM_Samp.Name = 'Heating Coil PWM: Test Sample';
                 disp('Created: counter output channel for test sample heating coil')
                 
-                obj.OutputSession.DurationInSeconds = obj.OUTPUT_DURATION_IN_SECONDS;
+                obj.dqOutput.Rate = obj.OUTPUT_SCAN_RATE;
+                
+                obj.dqOutput.ScansRequiredFcnCount = obj.SCANS_REQUIRED_FCN_COUNT;
             else
                 % Delete the session object if no DAQ devices are found
-                delete(obj.OutputSession)
+                delete(obj.dqOutput)
                 
                 % Inform the user that no devices were detected
                 fprintf('\nTo allow for UI testing, PWM outputs will be simulated\n')
@@ -609,26 +600,25 @@ classdef DAQBox < handle
     methods
         function [serialDate, tempReading_Ref, tempReading_Samp,...
                 currentReading_Ref, currentReading_Samp]...
-                = getBackgroundData(obj, event)
+                = getBackgroundData(obj)
             %getBackgroundData
             %   Get temperature and power readings from the background data
             %   acquisition
+            
             if obj.UseDAQHardware
-                % Get the raw data of the time stamps
-                rawTimeStamps = event.TimeStamps;
+                % Get the data from the DataAcquisition object
+                [scanData, triggerTime]...
+                    = read(obj.dqInput, obj.dqInput.ScansAvailableFcnCount);
                 
-                % Calculate the serial date from the average of the time
-                % stamps
-                serialDate = event.TriggerTime + sec2date(mean(rawTimeStamps));
-                
-                % Get the data from the listener event
-                data = event.Data;
+                % Calculate the serial date from the triggerTime and the first
+                % time stamp
+                serialDate = datenum(triggerTime) + datenum(scanData.Time(1));
                 
                 % Convert the raw voltage data into the corresponding
                 % temperature and current units
                 [tempReading_Ref, tempReading_Samp,...
                     currentReading_Ref, currentReading_Samp]...
-                    = obj.extractDaqData(data);
+                    = obj.extractDaqData(scanData);
                 
             else
                 % Simulate the input values if a DAQ Box is not connected
@@ -646,26 +636,30 @@ classdef DAQBox < handle
             %   Get temperature and power readings from a single scan
             if obj.UseDAQHardware
                 try
-                    % Read the input data from the session
-                    [data, serialDate]...
-                        = inputSingleScan(obj.InputSession);
+                    % Read the input data from the DataAcquisition
+                    [scanData, triggerTime]...
+                        = read(obj.dqInput);
                 catch
                     try
                         pause(0.1)
-                        % Read the input data from the session
-                        [data, serialDate]...
-                            = inputSingleScan(obj.InputSession);
+                        % Read the input data from the DataAcquisition
+                        [scanData, triggerTime]...
+                            = read(obj.dqInput);
                     catch ME
                         warning('An error occured while trying to read the input data from the DAQ Box')
                         rethrow(ME)
                     end
                 end
                 
+                % Calculate the serial date from the triggerTime and the first
+                % time stamp
+                serialDate = datenum(triggerTime) + datenum(scanData.Time(1));
+                
                 % Convert the raw voltage data into the corresponding
                 % temperature and current units
                 [tempReading_Ref, tempReading_Samp,...
                     currentReading_Ref, currentReading_Samp]...
-                    = obj.extractDaqData(data);
+                    = obj.extractDaqData(scanData);
                 
             else
                 % Simulate the input values if a DAQ Box is not connected
@@ -683,24 +677,29 @@ classdef DAQBox < handle
             
             if obj.UseDAQHardware
                 try
-                    % Read the input data from the input session
-                    [~, serialDate]...
-                        = inputSingleScan(obj.InputSession);
+                    % Read the input data from the input DataAcquisition
+                    [scanData, triggerTime]...
+                        = read(obj.dqInput);
                 catch
                     try
-                        obj.InputSession.stop();
+                        stop(obj.dqInput);
                         
-                        % Read the input data from the input session
-                        [~, serialDate]...
-                            = inputSingleScan(obj.InputSession);
+                        % Read the input data from the input DataAcquisition
+                        [scanData, triggerTime]...
+                            = read(obj.dqInput);
                         disp('restarted background for time measurement')
-                        obj.InputSession.startBackground();
+                        start(obj.dqInput, "Continuous");
                         
                     catch ME
                         warning('An error occured while trying to read the serial date from the DAQ Box')
                         rethrow(ME)
                     end
                 end
+                
+                % Calculate the serial date from the triggerTime and the first
+                % time stamp
+                serialDate = datenum(triggerTime) + datenum(scanData.Time(1));
+                
             else
                 serialDate = datenum(datetime);
                 
@@ -712,17 +711,17 @@ classdef DAQBox < handle
     methods (Access = private)
         function [tempReading_Ref, tempReading_Samp,...
                 currentReading_Ref, currentReading_Samp]...
-                = extractDaqData(obj, data)
+                = extractDaqData(obj, scanData)
             %extractEventData
             %   Compute the averages of the raw voltage data and convert these
             %   into the corresponding temperature or current units
             
             % Organize the raw data into separate vectors for each
             % sensor
-            rawTempData_Ref = data(:,1);
-            rawTempData_Samp = data(:,2);
-            rawCurrentData_Ref = data(:,3);
-            rawCurrentData_Samp = data(:,4);
+            rawTempData_Ref = scanData.Temp_Ref_Voltage;
+            rawTempData_Samp = scanData.Temp_Samp_Voltage;
+            rawCurrentData_Ref = scanData.Current_Ref_Voltage;
+            rawCurrentData_Samp = scanData.Current_Samp_Voltage;
             
             % Calculate the average of the measured input values
             rawTempAvg_Ref = mean(rawTempData_Ref);
@@ -781,7 +780,10 @@ classdef DAQBox < handle
                     end
                     
                     try
-                        obj.OutputSession.startBackground()
+                        obj.dqOutput.ScansRequiredFcn = @obj.loadMorePWMDataFcn;
+                        start(obj.dqOutput, "Continuous")
+                        % start(obj.dqOutput,...
+                        %    "Duration", seconds(obj.OUTPUT_DURATION));
                     catch
                         warning('An error occured while attempting to start the PWM. Retrying...')
                         err_count = err_count + 1;
@@ -795,7 +797,7 @@ classdef DAQBox < handle
             %   Stop generating the PWM outputs
             
             if obj.UseDAQHardware
-                if obj.OutputSession.IsRunning
+                if obj.dqOutput.Running
                     err_count = 0;
                     for try_count = 0:obj.MAX_PWM_ATTEMPTS
                         if try_count ~= err_count
@@ -803,7 +805,8 @@ classdef DAQBox < handle
                         end
                         
                         try
-                            obj.OutputSession.stop()
+                            stop(obj.dqOutput);
+                            flush(obj.dqOutput);
                         catch
                             warning('An error occured while attempting to stop the PWM. Retrying...')
                             err_count = err_count + 1;
@@ -819,20 +822,52 @@ classdef DAQBox < handle
             %   Adjusts the PWM duty cycle for the reference and test
             %   sample heating coil outputs
             
-            % Stop the PWM outputs temporarily
-            obj.stopPWM;
+            % Bounds checking on duty cycle for reference sample
+            if newPWMDutyCycle_Ref > obj.PWM_MAX_DUTY_CYCLE
+                newPWMDutyCycle_Ref = obj.PWM_MAX_DUTY_CYCLE;
+            elseif newPWMDutyCycle_Ref < obj.PWM_MIN_DUTY_CYCLE
+                newPWMDutyCycle_Ref = obj.PWM_MIN_DUTY_CYCLE;
+            end
+            
+            % Bounds checking on duty cycle for test sample
+            if newPWMDutyCycle_Samp > obj.PWM_MAX_DUTY_CYCLE
+                newPWMDutyCycle_Samp = obj.PWM_MAX_DUTY_CYCLE;
+            elseif newPWMDutyCycle_Samp < obj.PWM_MIN_DUTY_CYCLE
+                newPWMDutyCycle_Samp = obj.PWM_MIN_DUTY_CYCLE;
+            end
             
             % Assign the new duty cycle values
-            % obj.PWMDutyCycle_Ref = newPWMDutyCycle_Ref;
-            % obj.PWMDutyCycle_Samp = newPWMDutyCycle_Samp;
+            obj.PWMDutyCycle_Ref = newPWMDutyCycle_Ref;
+            obj.PWMDutyCycle_Samp = newPWMDutyCycle_Samp;
             
-            % Restart the PWM outputs
-            obj.startPWM;
+            fprintf("PWMDutyCycle_Ref  = %g\n", obj.PWMDutyCycle_Ref);
+            fprintf("PWMDutyCycle_Samp = %g\n", obj.PWMDutyCycle_Samp);
             
             if ~obj.UseDAQHardware
                 obj.simulateOutput();
                 
             end
+        end
+        
+        function loadMorePWMDataFcn(obj, ~, ~)
+            %loadMorePWMDataFcn
+            %   Loads more data of a pregenerated PWM waveform into the
+            %   buffer of the outputs, using the most recent value defined
+            %   for the duty cycles
+            
+            numScans = 0.2 * obj.SCANS_REQUIRED_FCN_COUNT;
+            
+            PWM_Length_Ref = round(numScans * obj.PWMDutyCycle_Ref);
+            PWM_Length_Samp = round(numScans * obj.PWMDutyCycle_Samp);
+            
+            PWM_scanData_Ref = [ones(1,PWM_Length_Ref), ...
+                zeros(1,numScans-PWM_Length_Ref)];
+            PWM_scanData_Samp = [ones(1,PWM_Length_Samp), ...
+                zeros(1,numScans-PWM_Length_Samp)];
+            
+            PWM_scanData = [PWM_scanData_Ref', PWM_scanData_Samp'];
+            
+            preload(obj.dqOutput,PWM_scanData);
         end
     end
     
@@ -917,6 +952,11 @@ classdef DAQBox < handle
                 
             end
             
+            % TODO DEBUG ================
+            newDutyCycle_Ref = 0.5*(1+sin(0.5*seconds(days(datenum(now)))));
+            newDutyCycle_Samp = 0.5*(1+sin(-0.5*seconds(days(datenum(now)))));
+            % TODO DEBUG ================
+            
             % Refresh the PWM duty cycle values of pulse generators using
             % the newly calculated values
             obj.updatePWMDutyCycle(newDutyCycle_Ref, newDutyCycle_Samp);
@@ -931,33 +971,21 @@ classdef DAQBox < handle
             %   Configure the listener to perform the heating procedure
             
             if obj.UseDAQHardware
-                % Delete any existing listeners
-                try
-                    if isvalid(obj.lh_DataAvailable)
-                        delete(obj.lh_DataAvailable)
-                    end
-                catch ME
-                    warning('Failed to delete listener')
-                    % Force the experiment to stop in the event of an error
-                    stageController.forceStop();
-                    rethrow(ME)
-                end
-                
                 switch heatingType
                     case 'singleTarget'
-                        obj.lh_DataAvailable = addlistener(obj.InputSession,...
-                            'DataAvailable', @stageController.singleTargetDataFcn);
+                        obj.dqInput.ScansAvailableFcn = @stageController.singleTargetDataFcn;
                     case 'rampUp'
-                        obj.lh_DataAvailable = addlistener(obj.InputSession,...
-                            'DataAvailable', @stageController.rampUpDataFcn);
+                        obj.dqInput.ScansAvailableFcn = @stageController.rampUpDataFcn;
                     case 'holdTemp'
-                        obj.lh_DataAvailable = addlistener(obj.InputSession,...
-                            'DataAvailable', @stageController.holdTempDataFcn);
+                        obj.dqInput.ScansAvailableFcn = @stageController.holdTempDataFcn;
                     otherwise
                         error('Invalid heatingType = %s', heatingType)
                 end
                 
-                obj.InputSession.startBackground();
+                start(obj.dqInput, "Continuous");
+                
+                start(obj.dqOutput, "Continuous");
+                % start(obj.dqOutput, "Duration", obj.OUTPUT_DURATION);
                 
                 obj.daqSemaphore.lock();
                 
@@ -986,16 +1014,9 @@ classdef DAQBox < handle
             %   Stop the background data aquisition
             
             if obj.UseDAQHardware
-                obj.InputSession.stop();
+                stop(obj.dqInput);
                 
-                % Attempt to delete the listener
-                try
-                    if isvalid(obj.lh_DataAvailable)
-                        delete(obj.lh_DataAvailable)
-                    end
-                catch
-                    warning('Failed to delete listener after stopping the background data acquisition.')
-                end
+                flush(obj.dqInput);
                 
                 obj.daqSemaphore.release();
                 

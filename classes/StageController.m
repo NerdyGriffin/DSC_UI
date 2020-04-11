@@ -662,7 +662,7 @@ classdef StageController < handle
         function forceStop(obj)
             %forceStop
             %   Force the experiment staging to stop
-            warning('Force stop attempted')
+            warning('Force stop command received')
             
             obj.ForceSkipStage = true;
             obj.ForceStop = true;
@@ -675,7 +675,7 @@ classdef StageController < handle
         function forceSkipStage(obj)
             %forceSkipStage
             %   Force the experiment staging to skip the current stage
-            warning('Force skip stage attempted')
+            warning('Force skip stage command received')
             
             obj.ForceSkipStage = true;
             
@@ -683,13 +683,13 @@ classdef StageController < handle
             
         end
         
-        function singleTargetDataFcn(obj, src, event)
+        function singleTargetDataFcn(obj, dqInput, event)
             %singleTargetDataFcn
             %   Dynamically controls the power output in order to heat the
             %   samples until they reach the target temperature
             
             % Run the live data analysis
-            obj.experimentLiveDataAnalysis(event);
+            obj.experimentLiveDataAnalysis();
             
             % Force the function to end if requested by the user
             if obj.ForceStop
@@ -713,14 +713,14 @@ classdef StageController < handle
             end
         end
         
-        function rampUpDataFcn(obj, src, event)
+        function rampUpDataFcn(obj, dqInput, event)
             % Experiment {loop} that dynamically controls the power output in
             % order to make the sample temperatures equal to the target
             % temperature, while also ramping up the target temperature
             % over time at a given rate.
             
             % Run the live data analysis
-            obj.experimentLiveDataAnalysis(event);
+            obj.experimentLiveDataAnalysis();
             
             % Force the function to end if requested by the user
             if obj.ForceStop
@@ -767,13 +767,13 @@ classdef StageController < handle
             end
         end
         
-        function holdTempDataFcn(obj, src, event)
+        function holdTempDataFcn(obj, dqInput, event)
             % Experiment loop that dynamically controls the power output in
             % order to make the hold the sample temperatures at the target
             % temperature over the duration of the given hold time
             
             % Run the live data analysis
-            obj.experimentLiveDataAnalysis(event);
+            obj.experimentLiveDataAnalysis();
             
             % Force the function to end if requested by the user
             if obj.ForceStop
@@ -799,20 +799,20 @@ classdef StageController < handle
             end
         end
         
-        function experimentLiveDataAnalysis(obj, event)
+        function experimentLiveDataAnalysis(obj)
             %experimentLiveDataAnalysis
             
             % Store the latest Target Temp in the DSCData object
             obj.liveData.LatestTargetTemp = obj.TargetTemp;
             
-            % DEBUG ================
-            debug_latestSerialDate = datenum(datetime);
-            % DEBUG ================
-            
             % Take the temperature and current readings
             [latestSerialDate, latestTemp_Ref, latestTemp_Samp,...
                 latestCurrent_Ref, latestCurrent_Samp]...
-                = obj.daqBox.getBackgroundData(event);
+                = obj.daqBox.getBackgroundData();
+            
+            % TODO DEBUG ================
+            debug_latestSerialDate = datenum(datetime);
+            % TODO DEBUG ================
             
             if isempty(latestSerialDate)
                 error('latestSerialDate is empty')
@@ -826,7 +826,7 @@ classdef StageController < handle
                 error('latestCurrent_Samp is empty')
             end
             
-            % DEBUG ================
+            % TODO DEBUG ================
             fprintf("Serial date format:\n")
             fprintf("DAQBox: %10.10f\n", latestSerialDate)
             fprintf("MATLAB: %10.10f\n", debug_latestSerialDate)
@@ -837,7 +837,7 @@ classdef StageController < handle
             fprintf("DAQBox: %s\n", datestr(latestSerialDate, formatOut))
             fprintf("MATLAB: %s\n", datestr(debug_latestSerialDate, formatOut))
             fprintf("\n")
-            % DEBUG ================
+            % TODO DEBUG ================
             
             % Store the current elapsed time value in the DSCData object
             obj.liveData.LatestSerialDate = latestSerialDate;

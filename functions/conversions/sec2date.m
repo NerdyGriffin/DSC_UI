@@ -16,12 +16,12 @@
 %     
 %     You may contact the author at ckunis.contact@gmail.com
 
-function serialDate = sec2date(seconds)
+function serialDate = sec2date(sec)
 %sec2date
 %   Return the serial date number which corresponds to the given time in
 %   seconds
 
-serialDate = datenum(0, 0, 0, 0, 0, seconds);
+serialDate = datenum(0, 0, 0, 0, 0, sec);
 
 end
 

@@ -1,19 +1,19 @@
 % DSC_UI: UI and control systems for prototype DSC system
 %     Copyright (C) 2019  Christian Kunis
-% 
+%
 %     This program is free software: you can redistribute it and/or modify
 %     it under the terms of the GNU General Public License as published by
 %     the Free Software Foundation, either version 3 of the License, or
 %     (at your option) any later version.
-% 
+%
 %     This program is distributed in the hope that it will be useful,
 %     but WITHOUT ANY WARRANTY; without even the implied warranty of
 %     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 %     GNU General Public License for more details.
-% 
+%
 %     You should have received a copy of the GNU General Public License
 %     along with this program. If not, see <https://www.gnu.org/licenses/>.
-%     
+%
 %     You may contact the author at ckunis.contact@gmail.com
 
 %% DSC_Testing_Script.m
@@ -144,8 +144,8 @@ PIDOutControl = 10;
 
 %% Take initial reading
 [DaqBoxExpStartDate, LatestTemp_Ref, LatestTemp_Samp,...
-     LatestCurrent_Ref, LatestCurrent_Samp]...
-     = daqBox.getSingleScanData()
+    LatestCurrent_Ref, LatestCurrent_Samp]...
+    = daqBox.getSingleScanData()
 
 % Compare this date with the Matlab one
 MatlabExpStartDate = datenum(datetime)
@@ -321,13 +321,13 @@ while HeatingLoopController
     
     
     
-%     % Redraw the data plots
-%     plotData(UIAxesDifferential, UIAxesSamples,...
-%        AllData, XAxisData, TemperatureUnits, Interp1Type)
-%     xlabel(UIAxesDifferential, 'Temperature (C)')
-%     ylabel(UIAxesDifferential, 'Heat Flow (Differential)')
-%     xlabel(UIAxesSamples, 'Temperature (C)')
-%     ylabel(UIAxesSamples, 'Heat Flow')
+    %     % Redraw the data plots
+    %     plotData(UIAxesDifferential, UIAxesSamples,...
+    %        AllData, XAxisData, TemperatureUnits, Interp1Type)
+    %     xlabel(UIAxesDifferential, 'Temperature (C)')
+    %     ylabel(UIAxesDifferential, 'Heat Flow (Differential)')
+    %     xlabel(UIAxesSamples, 'Temperature (C)')
+    %     ylabel(UIAxesSamples, 'Heat Flow')
     
     
     % Plots for debugging
@@ -346,13 +346,13 @@ while HeatingLoopController
     xlabel(UIAxesPIDOut, 'Time (s)')
     ylabel(UIAxesPIDOut, 'PID Out Value')
     
-%     plot(UIAxesPower,...
-%         TimeData, PowerData_Reference,...
-%         TimeData, PowerData_TestSample)
-%     legend(UIAxesPower, 'Reference Samp Power', 'Test Sample Power', 'Location', 'best')
-%     xlabel(UIAxesPower, 'Time (s)')
-%     ylabel(UIAxesPower, 'Power (raw input values)')
-%     
+    %     plot(UIAxesPower,...
+    %         TimeData, PowerData_Reference,...
+    %         TimeData, PowerData_TestSample)
+    %     legend(UIAxesPower, 'Reference Samp Power', 'Test Sample Power', 'Location', 'best')
+    %     xlabel(UIAxesPower, 'Time (s)')
+    %     ylabel(UIAxesPower, 'Power (raw input values)')
+    %
     
     
     % Compare the sample temperatures to the end temperature
@@ -367,68 +367,68 @@ while HeatingLoopController
 end
 
 function setupSingleTarget(latestTemp_Ref, latestTemp_Samp)
-            %setupSingleTarget
-            %   Initialize the appropriate variables for single target heating
-            %   then start the heating
-            
-            % Set the target temp to the start temp
-            obj.TargetTemp = obj.StartTemp;
-            
-            % Measure the start time of the current stage
-            latestStageSerialDate = obj.daqBox.getCurrentSerialDate();
-            
-            % Record the latest stage serial date
-            obj.liveData.LatestStageSerialDate = latestStageSerialDate;
-            
-            % Start single target heating
-            startHeating();
-            
-        end
+%setupSingleTarget
+%   Initialize the appropriate variables for single target heating
+%   then start the heating
+
+% Set the target temp to the start temp
+obj.TargetTemp = obj.StartTemp;
+
+% Measure the start time of the current stage
+latestStageSerialDate = obj.daqBox.getCurrentSerialDate();
+
+% Record the latest stage serial date
+obj.liveData.LatestStageSerialDate = latestStageSerialDate;
+
+% Start single target heating
+startHeating();
+
+end
 
 function startHeating()
 try
-                    if isvalid(daqBox.lh_DataAvailable)
-                        delete(daqBox.lh_DataAvailable)
-                    end
-                catch ME
-                    warning('Failed to delete listener')
-                    % Force the experiment to stop in the event of an error
-                    % stageController.forceStop();
-                    rethrow(ME)
+    if isvalid(daqBox.lh_DataAvailable)
+        delete(daqBox.lh_DataAvailable)
+    end
+catch ME
+    warning('Failed to delete listener')
+    % Force the experiment to stop in the event of an error
+    % stageController.forceStop();
+    rethrow(ME)
 end
-                
-daqBox.lh_DataAvailable = addlistener(daqBox.InputSession,...
-                            'DataAvailable', @singleTargetDataFcn);
 
-                        daqBox.InputSession.startBackground();
-                        end
+daqBox.lh_DataAvailable = addlistener(daqBox.InputSession,...
+    'DataAvailable', @singleTargetDataFcn);
+
+daqBox.InputSession.startBackground();
+end
 
 function singleTargetDataFcn(src, event)
-            %singleTargetDataFcn
-            %   Dynamically controls the power output in order to heat the
-            %   samples until they reach the target temperature
-            
-            % Run the live data analysis
-            obj.experimentLiveDataAnalysis(event);
-            
-            % Force the function to end if requested by the user
-            if obj.ForceStop
-                obj.stopDAQ();
-                return
-            end
-            
-            % Force the function to end if the user requested to skip the
-            % stage
-            if obj.ForceSkipStage
-                obj.stopDAQ();
-                return
-            end
-            
-            
-            % Compare the sample temperatures to the target temperature
-            if (abs(obj.liveData.LatestTempError_Ref) < obj.MINIMUM_ACCEPTABLE_ERROR)...
-                    && (abs(obj.liveData.LatestTempError_Samp) < obj.MINIMUM_ACCEPTABLE_ERROR)
-                obj.stopDAQ();
-                return
-            end
-        end
+%singleTargetDataFcn
+%   Dynamically controls the power output in order to heat the
+%   samples until they reach the target temperature
+
+% Run the live data analysis
+obj.experimentLiveDataAnalysis(event);
+
+% Force the function to end if requested by the user
+if obj.ForceStop
+    obj.stopDAQ();
+    return
+end
+
+% Force the function to end if the user requested to skip the
+% stage
+if obj.ForceSkipStage
+    obj.stopDAQ();
+    return
+end
+
+
+% Compare the sample temperatures to the target temperature
+if (abs(obj.liveData.LatestTempError_Ref) < obj.MINIMUM_ACCEPTABLE_ERROR)...
+        && (abs(obj.liveData.LatestTempError_Samp) < obj.MINIMUM_ACCEPTABLE_ERROR)
+    obj.stopDAQ();
+    return
+end
+end

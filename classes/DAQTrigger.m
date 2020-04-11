@@ -25,7 +25,7 @@ classdef DAQTrigger < handle
     %   Author: Christian Kunis (Nov 27, 2018)
     
     properties
-        device = []
+        devicesList = []
         
         % Boolean variable indicating whether to interact with a physical
         % DAQ Box (true) or simulate the hardware (false).
@@ -40,7 +40,7 @@ classdef DAQTrigger < handle
     end
     
     methods
-        function obj = DAQTrigger(device, varargin)
+        function obj = DAQTrigger(devicesList, varargin)
             %DAQTrigger Construct an instance of this class
             %   Detailed explanation goes here
             
@@ -50,15 +50,15 @@ classdef DAQTrigger < handle
             obj.UseDAQHardware = false;
             
             if nargin > 0
-                obj.device = device;
+                obj.devicesList = devicesList;
             else
                 % Check for DAQ devices before attempting to create
                 % sessions
                 fprintf('\nChecking for DAQ devices...\n')
-                obj.device = daq.getDevices;
+                obj.devicesList = daqlist;
             end
             
-            if isempty(obj.device)
+            if isempty(obj.devicesList)
                 disp('No DAQ devices have been detected.')
                 obj.UseDAQHardware = false;
             else
