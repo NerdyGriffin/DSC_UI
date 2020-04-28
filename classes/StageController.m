@@ -685,6 +685,37 @@ classdef StageController < handle
             
         end
         
+        function calibrationDataFcn(obj, dqInput, event)
+            % Calibration loop that simply refreshes the calibration tab
+            % with the measurment data
+            
+            % Take the temperature and current readings
+            [latestSerialDate, latestTemp_Ref, latestTemp_Samp,...
+                latestCurrent_Ref, latestCurrent_Samp]...
+                = obj.daqBox.getBackgroundData();
+            
+            if isempty(latestSerialDate)
+                error('latestSerialDate is empty')
+            elseif isempty(latestTemp_Ref)
+                error('latestTemp_Ref is empty')
+            elseif isempty(latestTemp_Samp)
+                error('latestTemp_Samp is empty')
+            elseif isempty(latestCurrent_Ref)
+                error('latestCurrent_Ref is empty')
+            elseif isempty(latestCurrent_Samp)
+                error('latestCurrent_Samp is empty')
+            end
+            
+            obj.app.refreshCalibrationUI(latestTemp_Ref, latestTemp_Samp,...
+                latestCurrent_Ref, latestCurrent_Samp);
+            
+            % Force the function to end if requested by the user
+            if obj.ForceStop
+                obj.stopDAQ();
+                return
+            end
+        end
+        
         function singleTargetDataFcn(obj, dqInput, event)
             %singleTargetDataFcn
             %   Dynamically controls the power output in order to heat the

@@ -856,14 +856,14 @@ classdef DAQBox < handle
         %     %   Loads more data of a pregenerated PWM waveform into the
         %     %   buffer of the outputs, using the most recent value defined
         %     %   for the duty cycles
-            
+        
         %     numScans = 0.2 * obj.SCANS_REQUIRED_FCN_COUNT;
-            
+        
         %     scanData_Ref = zeros(1,numScans);
         %     scanData_Samp = zeros(1,numScans);
-            
+        
         %     period = obj.OUTPUT_SCAN_RATE / obj.PWM_FREQUENCY;
-            
+        
         %     for i=1:numScans
         %         proportion = mod(1,period)/period;
         %         if proportion < obj.PWMDutyCycle_Ref
@@ -877,17 +877,17 @@ classdef DAQBox < handle
         %             scanData_Samp(i) = -5;
         %         end
         %     end
-            
+        
         %     % PWM_Length_Ref = round(numScans * obj.PWMDutyCycle_Ref);
         %     % PWM_Length_Samp = round(numScans * obj.PWMDutyCycle_Samp);
-            
+        
         %     % PWM_scanData_Ref = [ones(1,PWM_Length_Ref), ...
         %     %     zeros(1,numScans-PWM_Length_Ref)];
         %     % PWM_scanData_Samp = [ones(1,PWM_Length_Samp), ...
         %     %     zeros(1,numScans-PWM_Length_Samp)];
-            
+        
         %     PWM_scanData = [PWM_scanData_Ref', PWM_scanData_Samp'];
-            
+        
         %     preload(obj.dqOutput,PWM_scanData);
         % end
     end
@@ -982,6 +982,24 @@ classdef DAQBox < handle
     
     % Data Listener Interface Methods
     methods
+        function startCalibrationMeasurement(obj, stageController)
+            %startHeating
+            %   Configure the listener to perform the heating procedure
+            
+            if obj.UseDAQHardware
+                obj.dqInput.ScansAvailableFcn = @stageController.calibrationDataFcn;
+                
+                start(obj.dqInput, "Continuous");
+                
+                obj.daqSemaphore.lock();
+                
+            else
+                % TODO: make the simulated equivalent
+                % obj.daqTrigger.startHeating(stageController, heatingType)
+                warning('background calibration data is not implemented for simulated data');
+            end
+        end
+        
         function startHeating(obj, stageController, heatingType)
             %startHeating
             %   Configure the listener to perform the heating procedure
