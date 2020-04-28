@@ -135,8 +135,8 @@ classdef DAQBox < handle
         CHANNEL_ID_TEMP_SAMP = 'ai6'; %'ai6';
         CHANNEL_ID_CURRENT_REF = 'ai4'; %'ai3';
         CHANNEL_ID_CURRENT_SAMP = 'ai5'; %'ai4';
-        CHANNEL_ID_PWM_REF = 'ao0'; %'ctr0';
-        CHANNEL_ID_PWM_SAMP = 'ao1'; %'ctr1';
+        CHANNEL_ID_PWM_REF = 'ctr0'; %'ctr0';
+        CHANNEL_ID_PWM_SAMP = 'ctr1'; %'ctr1';
         
         % The scan rate used during sensor readings (default: 1000)
         INPUT_SCAN_RATE = 1000;
@@ -146,11 +146,11 @@ classdef DAQBox < handle
         SCANS_AVAILABLE_FCN_COUNT = 100
         
         % The scan rate used by the mimiced PWM (default: 1000)
-        OUTPUT_SCAN_RATE = 1000
+        % OUTPUT_SCAN_RATE = 1000 % TODO Remove this
         
         % The number of scans at which to generate more data for the output
         % (default: 500)
-        SCANS_REQUIRED_FCN_COUNT = 500;
+        % SCANS_REQUIRED_FCN_COUNT = 500; % TODO Remove this
         
         % The duration in seconds of the sensor readings
         %INPUT_DURATION_IN_SECONDS = 60; % TODO Delete this
@@ -166,7 +166,7 @@ classdef DAQBox < handle
         PWM_MAX_DUTY_CYCLE = 1 - 1e-3;
         
         % The PWM frequency of the PWM channels
-        PWM_FREQUENCY = 5;
+        PWM_FREQUENCY = 100;
         
         MAX_PWM_ATTEMPTS = 10;
         
@@ -433,23 +433,23 @@ classdef DAQBox < handle
                 %Add the heating coil output channel for the reference
                 %sample
                 obj.ctr_PWM_Ref = addoutput(obj.dqOutput, obj.DeviceID,...
-                    obj.CHANNEL_ID_PWM_REF, "Voltage");
-                % obj.ctr_PWM_Ref.DutyCycle = obj.PWM_MIN_DUTY_CYCLE; % TODO Remove this
-                % obj.ctr_PWM_Ref.Frequency = obj.PWM_FREQUENCY; % TODO Remove this
+                    obj.CHANNEL_ID_PWM_REF, "PulseGeneration");
+                obj.ctr_PWM_Ref.DutyCycle = obj.PWM_MIN_DUTY_CYCLE; % TODO Remove this
+                obj.ctr_PWM_Ref.Frequency = obj.PWM_FREQUENCY; % TODO Remove this
                 obj.ctr_PWM_Ref.Name = 'Heating Coil PWM: Reference';
                 disp('Created: counter output channel for reference sample heating coil')
                 
                 %Add the heating coil output channel for the test sample
                 obj.ctr_PWM_Samp = addoutput(obj.dqOutput, obj.DeviceID,...
-                    obj.CHANNEL_ID_PWM_SAMP, "Voltage");
-                % obj.ctr_PWM_Samp.DutyCycle = obj.PWM_MIN_DUTY_CYCLE; % TODO Remove this
-                % obj.ctr_PWM_Samp.Frequency = obj.PWM_FREQUENCY; % TODO Remove this
+                    obj.CHANNEL_ID_PWM_SAMP, "PulseGeneration");
+                obj.ctr_PWM_Samp.DutyCycle = obj.PWM_MIN_DUTY_CYCLE; % TODO Remove this
+                obj.ctr_PWM_Samp.Frequency = obj.PWM_FREQUENCY; % TODO Remove this
                 obj.ctr_PWM_Samp.Name = 'Heating Coil PWM: Test Sample';
                 disp('Created: counter output channel for test sample heating coil')
                 
-                obj.dqOutput.Rate = obj.OUTPUT_SCAN_RATE;
+                % obj.dqOutput.Rate = obj.OUTPUT_SCAN_RATE; % TODO Remove this
                 
-                obj.dqOutput.ScansRequiredFcnCount = obj.SCANS_REQUIRED_FCN_COUNT;
+                % obj.dqOutput.ScansRequiredFcnCount = obj.SCANS_REQUIRED_FCN_COUNT; % TODO Remove this
             else
                 % Delete the session object if no DAQ devices are found
                 delete(obj.dqOutput)
@@ -780,7 +780,7 @@ classdef DAQBox < handle
                     end
                     
                     try
-                        obj.dqOutput.ScansRequiredFcn = @obj.loadMorePWMDataFcn;
+                        % obj.dqOutput.ScansRequiredFcn = @obj.loadMorePWMDataFcn;
                         start(obj.dqOutput, "Continuous")
                         % start(obj.dqOutput,...
                         %    "Duration", seconds(obj.OUTPUT_DURATION));
@@ -839,11 +839,11 @@ classdef DAQBox < handle
             % Assign the new duty cycle values
             obj.PWMDutyCycle_Ref = newPWMDutyCycle_Ref;
             obj.PWMDutyCycle_Samp = newPWMDutyCycle_Samp;
-            % obj.ctr_PWM_Ref.DutyCycle = newPWMDutyCycle_Ref;
-            % obj.ctr_PWM_Samp.DutyCycle = newPWMDutyCycle_Samp;
+            obj.ctr_PWM_Ref.DutyCycle = newPWMDutyCycle_Ref;
+            obj.ctr_PWM_Samp.DutyCycle = newPWMDutyCycle_Samp;
             
-            fprintf("PWMDutyCycle_Ref  = %g\n", obj.PWMDutyCycle_Ref); % TODO Remove this
-            fprintf("PWMDutyCycle_Samp = %g\n", obj.PWMDutyCycle_Samp); % TODO Remove this
+            % fprintf("PWMDutyCycle_Ref  = %g\n", obj.PWMDutyCycle_Ref); % TODO Remove this
+            % fprintf("PWMDutyCycle_Samp = %g\n", obj.PWMDutyCycle_Samp); % TODO Remove this
             
             if ~obj.UseDAQHardware
                 obj.simulateOutput();
@@ -851,45 +851,45 @@ classdef DAQBox < handle
             end
         end
         
-        function loadMorePWMDataFcn(obj, ~, ~)
-            %loadMorePWMDataFcn
-            %   Loads more data of a pregenerated PWM waveform into the
-            %   buffer of the outputs, using the most recent value defined
-            %   for the duty cycles
+        % function loadMorePWMDataFcn(obj, ~, ~)
+        %     %loadMorePWMDataFcn
+        %     %   Loads more data of a pregenerated PWM waveform into the
+        %     %   buffer of the outputs, using the most recent value defined
+        %     %   for the duty cycles
             
-            numScans = 0.2 * obj.SCANS_REQUIRED_FCN_COUNT;
+        %     numScans = 0.2 * obj.SCANS_REQUIRED_FCN_COUNT;
             
-            scanData_Ref = zeros(1,numScans);
-            scanData_Samp = zeros(1,numScans);
+        %     scanData_Ref = zeros(1,numScans);
+        %     scanData_Samp = zeros(1,numScans);
             
-            period = obj.OUTPUT_SCAN_RATE / obj.PWM_FREQUENCY;
+        %     period = obj.OUTPUT_SCAN_RATE / obj.PWM_FREQUENCY;
             
-            for i=1:numScans
-                proportion = mod(1,period)/period;
-                if proportion < obj.PWMDutyCycle_Ref
-                    scanData_Ref(i) = 5;
-                else
-                    scanData_Ref(i) = -5;
-                end
-                if proportion < obj.PWMDutyCycle_Samp
-                    scanData_Samp(i) = 5;
-                else
-                    scanData_Samp(i) = -5;
-                end
-            end
+        %     for i=1:numScans
+        %         proportion = mod(1,period)/period;
+        %         if proportion < obj.PWMDutyCycle_Ref
+        %             scanData_Ref(i) = 5;
+        %         else
+        %             scanData_Ref(i) = -5;
+        %         end
+        %         if proportion < obj.PWMDutyCycle_Samp
+        %             scanData_Samp(i) = 5;
+        %         else
+        %             scanData_Samp(i) = -5;
+        %         end
+        %     end
             
-            % PWM_Length_Ref = round(numScans * obj.PWMDutyCycle_Ref);
-            % PWM_Length_Samp = round(numScans * obj.PWMDutyCycle_Samp);
+        %     % PWM_Length_Ref = round(numScans * obj.PWMDutyCycle_Ref);
+        %     % PWM_Length_Samp = round(numScans * obj.PWMDutyCycle_Samp);
             
-            % PWM_scanData_Ref = [ones(1,PWM_Length_Ref), ...
-            %     zeros(1,numScans-PWM_Length_Ref)];
-            % PWM_scanData_Samp = [ones(1,PWM_Length_Samp), ...
-            %     zeros(1,numScans-PWM_Length_Samp)];
+        %     % PWM_scanData_Ref = [ones(1,PWM_Length_Ref), ...
+        %     %     zeros(1,numScans-PWM_Length_Ref)];
+        %     % PWM_scanData_Samp = [ones(1,PWM_Length_Samp), ...
+        %     %     zeros(1,numScans-PWM_Length_Samp)];
             
-            PWM_scanData = [PWM_scanData_Ref', PWM_scanData_Samp'];
+        %     PWM_scanData = [PWM_scanData_Ref', PWM_scanData_Samp'];
             
-            preload(obj.dqOutput,PWM_scanData);
-        end
+        %     preload(obj.dqOutput,PWM_scanData);
+        % end
     end
     
     % PID Controller Methods
@@ -973,14 +973,9 @@ classdef DAQBox < handle
                 
             end
             
-            % TODO DEBUG ================
-            newDutyCycle_Ref = 0.5*(1+sin(0.5*seconds(days(datenum(now)))));
-            newDutyCycle_Samp = 0.5*(1+sin(-0.5*seconds(days(datenum(now)))));
-            % TODO DEBUG ================
-            
             % Refresh the PWM duty cycle values of pulse generators using
             % the newly calculated values
-            % obj.updatePWMDutyCycle(newDutyCycle_Ref, newDutyCycle_Samp);
+            obj.updatePWMDutyCycle(newDutyCycle_Ref, newDutyCycle_Samp);
             
         end
     end
