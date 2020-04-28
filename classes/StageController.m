@@ -46,6 +46,8 @@ classdef StageController < handle
         
         ExperimentInProgress = false % Status of whether the system is currently running measurements
         
+        RefreshCounter = 0;
+        
         % Controller variable to indicate if a running experiment should be
         % stopped before the end of the experiment
         ForceStop logical = false
@@ -376,8 +378,8 @@ classdef StageController < handle
             liveData = obj.liveData;
         end
         
-        function daqBox = startDAQBox(obj)
-            %startDAQBox
+        function daqBox = initializeDAQBox(obj)
+            %initializeDAQBox
             %   Create a new DAQBox object and return its handle
             
             % Create the DAQBox object
@@ -432,7 +434,7 @@ classdef StageController < handle
                     end
                 else
                     % Create a DAQBox object if app UI is not being used
-                    obj.startDAQBox();
+                    obj.initializeDAQBox();
                 end
                 
                 % Attempt to import DSCData object from app is one does not
@@ -805,14 +807,14 @@ classdef StageController < handle
             % Store the latest Target Temp in the DSCData object
             obj.liveData.LatestTargetTemp = obj.TargetTemp;
             
+            % TODO DEBUG ================
+            debug_latestSerialDate = datenum(datetime);
+            % TODO DEBUG ================
+            
             % Take the temperature and current readings
             [latestSerialDate, latestTemp_Ref, latestTemp_Samp,...
                 latestCurrent_Ref, latestCurrent_Samp]...
                 = obj.daqBox.getBackgroundData();
-            
-            % TODO DEBUG ================
-            debug_latestSerialDate = datenum(datetime);
-            % TODO DEBUG ================
             
             if isempty(latestSerialDate)
                 error('latestSerialDate is empty')
@@ -886,8 +888,13 @@ classdef StageController < handle
                 % Refresh the clocks with the new values
                 obj.app.refreshOperationClock(latestSerialDate);
                 
-                % Refresh the data plots
-                obj.app.refreshOperationPlots();
+                if obj.RefreshCounter < 100
+                    obj.RefreshCounter = obj.RefreshCounter + 1;
+                else
+                    % Refresh the data plots
+                    obj.app.refreshOperationPlots();
+                    obj.RefreshCounter = 0;
+                end
             end
         end
     end
