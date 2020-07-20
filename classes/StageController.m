@@ -47,6 +47,7 @@ classdef StageController < handle
         ExperimentInProgress = false % Status of whether the system is currently running measurements
         
         RefreshCounter = 0;
+        TargetCounter = 0;
         
         % Controller variable to indicate if a running experiment should be
         % stopped before the end of the experiment
@@ -741,8 +742,14 @@ classdef StageController < handle
             % Compare the sample temperatures to the target temperature
             if (abs(obj.liveData.LatestTempError_Ref) < obj.MINIMUM_ACCEPTABLE_ERROR)...
                     && (abs(obj.liveData.LatestTempError_Samp) < obj.MINIMUM_ACCEPTABLE_ERROR)
-                obj.stopDAQ();
-                return
+                if obj.TargetCounter < 100
+                    obj.TargetCounter = obj.TargetCounter + 1;
+                else
+                    obj.TargetCounter = 0;
+                    obj.stopDAQ();
+                    obj.TargetCounter = 0;
+                    return
+                end
             end
         end
         
@@ -795,8 +802,14 @@ classdef StageController < handle
             if (obj.TargetTemp == obj.EndTemp)...
                     && (abs(obj.liveData.LatestTempError_Ref) < obj.MINIMUM_ACCEPTABLE_ERROR) ...
                     && (abs(obj.liveData.LatestTempError_Samp) < obj.MINIMUM_ACCEPTABLE_ERROR)
-                obj.stopDAQ();
-                return
+                if obj.TargetCounter < 100
+                    obj.TargetCounter = obj.TargetCounter + 1;
+                else
+                    obj.TargetCounter = 0;
+                    obj.stopDAQ();
+                    obj.TargetCounter = 0;
+                    return
+                end
             end
         end
         
@@ -860,13 +873,15 @@ classdef StageController < handle
             end
             
             % TODO DEBUG ================
-            fprintf("Serial date format:\n")
+            home
+            fprintf("============ DEBUG ============\n")
+            fprintf("---- Serial date format -------\n")
             fprintf("DAQBox: %10.10f\n", latestSerialDate)
             fprintf("MATLAB: %10.10f\n", debug_latestSerialDate)
             fprintf("Diff:   %10.10f\n", latestSerialDate - debug_latestSerialDate)
             fprintf("Diff in sec: %f\n", date2sec(abs(latestSerialDate - debug_latestSerialDate)))
             formatOut = 'yyyy-mm-dd HH:MM:SS.FFF';
-            fprintf("Date String format:\n")
+            fprintf("---- Date String format -------\n")
             fprintf("DAQBox: %s\n", datestr(latestSerialDate, formatOut))
             fprintf("MATLAB: %s\n", datestr(debug_latestSerialDate, formatOut))
             fprintf("\n")

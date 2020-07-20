@@ -39,6 +39,7 @@ waitbarLength = 60;
 %disp(' ')
 disp(' ')
 disp(' ')
+home
 fprintf('[')
 i = 1;
 while i < x.*waitbarLength
