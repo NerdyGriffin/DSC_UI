@@ -166,7 +166,8 @@ classdef DAQBox < handle
         PWM_MAX_DUTY_CYCLE = 1 - 1e-3;
         
         % The PWM frequency of the PWM channels
-        PWM_FREQUENCY = 100;
+        % (default: 100)
+        %PWM_FREQUENCY = 100; % TODO Remove this
         
         MAX_PWM_ATTEMPTS = 10;
         
@@ -430,26 +431,26 @@ classdef DAQBox < handle
                 
                 fprintf('\nConfiguring output DataAcquisition channels...\n')
                 
-                %Add the heating coil output channel for the reference
-                %sample
+                % Add the heating coil output channel for the reference
+                % sample
                 obj.ctr_PWM_Ref = addoutput(obj.dqOutput, obj.DeviceID,...
                     obj.CHANNEL_ID_PWM_REF, "PulseGeneration");
-                obj.ctr_PWM_Ref.DutyCycle = obj.PWM_MIN_DUTY_CYCLE; % TODO Remove this
-                obj.ctr_PWM_Ref.Frequency = obj.PWM_FREQUENCY; % TODO Remove this
+                % obj.ctr_PWM_Ref.DutyCycle = obj.PWM_MIN_DUTY_CYCLE; % TODO Remove this (because default is 0.50)
+                % obj.ctr_PWM_Ref.Frequency = obj.PWM_FREQUENCY; % TODO Remove this (because default is 100)
                 obj.ctr_PWM_Ref.Name = 'Heating Coil PWM: Reference';
                 disp('Created: counter output channel for reference sample heating coil')
                 
-                %Add the heating coil output channel for the test sample
+                % Add the heating coil output channel for the test sample
                 obj.ctr_PWM_Samp = addoutput(obj.dqOutput, obj.DeviceID,...
                     obj.CHANNEL_ID_PWM_SAMP, "PulseGeneration");
-                obj.ctr_PWM_Samp.DutyCycle = obj.PWM_MIN_DUTY_CYCLE; % TODO Remove this
-                obj.ctr_PWM_Samp.Frequency = obj.PWM_FREQUENCY; % TODO Remove this
+                % obj.ctr_PWM_Samp.DutyCycle = obj.PWM_MIN_DUTY_CYCLE; % TODO Remove this (because default is 0.50)
+                % obj.ctr_PWM_Samp.Frequency = obj.PWM_FREQUENCY; % TODO Remove this (because default is 100)
                 obj.ctr_PWM_Samp.Name = 'Heating Coil PWM: Test Sample';
                 disp('Created: counter output channel for test sample heating coil')
                 
-                % obj.dqOutput.Rate = obj.OUTPUT_SCAN_RATE; % TODO Remove this
+                % obj.dqOutput.Rate = obj.OUTPUT_SCAN_RATE; % TODO Remove this (because default is used)
                 
-                % obj.dqOutput.ScansRequiredFcnCount = obj.SCANS_REQUIRED_FCN_COUNT; % TODO Remove this
+                % obj.dqOutput.ScansRequiredFcnCount = obj.SCANS_REQUIRED_FCN_COUNT; % TODO Remove this (because default is used)
             else
                 % Delete the session object if no DAQ devices are found
                 delete(obj.dqOutput)
