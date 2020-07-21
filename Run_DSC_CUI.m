@@ -1,9 +1,9 @@
-%Run_DSC_CUI.m
-%   Start the DSC CUI
+%Run_DSC_CLI.m
+%   Start the DSC CLI
 %   Author: Christian Kunis (Feb 3, 2019)
 
 % Add the DSC subdirectories to the search path
 addpath(genpath('.'));
 
-% Run the CUI file
-DSC_CUI_APP;
+% Run the CLI file
+DSC_CLI_APP;

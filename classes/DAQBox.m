@@ -166,7 +166,8 @@ classdef DAQBox < handle
         PWM_MAX_DUTY_CYCLE = 1 - 1e-3;
         
         % The PWM frequency of the PWM channels
-        PWM_FREQUENCY = 100;
+        % (default: 100)
+        %PWM_FREQUENCY = 100; % TODO Remove this
         
         MAX_PWM_ATTEMPTS = 10;
         
@@ -184,14 +185,14 @@ classdef DAQBox < handle
         
         % Used to simulate the cooling of the samples when the heating
         % coils are off
-        SIMULATED_TEMP_COOLING_CONSTANT = -0.001;
+        SIMULATED_TEMP_COOLING_CONSTANT = -0.0005;
         
         % Used to simulate the heating of the samples when running the
         % software without a physical DAQ Box
         SIMULATED_HEATING_COEFFICIENT = 1.5;
         
         % Used to simulate random variance in the temperature
-        SIMULATED_TEMP_SPREAD_COEFFICIENT = 0.001;
+        SIMULATED_TEMP_SPREAD_COEFFICIENT = 0.0004;
         
         % Used to convert PWMDutyCycle to SimulatedCurrent when running the
         % software without a physical DAQ Box
@@ -214,12 +215,12 @@ classdef DAQBox < handle
                     s = s + 1;
                     % Attempt to update the waitbar progress and label
                     waitbar(s/n,f,message);
-                    % Update the cuiWaitbar progress and label
-                    cuiWaitbar(s/n,message);
+                    % Update the CLI_Waitbar progress and label
+                    CLI_Waitbar(s/n,message);
                 catch
                     % Recreate the waitbar if was closed by the user
                     f = waitbar(s/n,message);
-                    cuiWaitbar(s/n,message);
+                    CLI_Waitbar(s/n,message);
                 end
             end
             
@@ -228,7 +229,7 @@ classdef DAQBox < handle
             
             % Create a waitbar
             f = waitbar(s/n,'Please wait...');
-            cuiWaitbar(s/n,'Please wait...');
+            CLI_Waitbar(s/n,'Please wait...');
             
             obj.UseDAQHardware = false;
             
@@ -430,26 +431,26 @@ classdef DAQBox < handle
                 
                 fprintf('\nConfiguring output DataAcquisition channels...\n')
                 
-                %Add the heating coil output channel for the reference
-                %sample
+                % Add the heating coil output channel for the reference
+                % sample
                 obj.ctr_PWM_Ref = addoutput(obj.dqOutput, obj.DeviceID,...
                     obj.CHANNEL_ID_PWM_REF, "PulseGeneration");
-                obj.ctr_PWM_Ref.DutyCycle = obj.PWM_MIN_DUTY_CYCLE; % TODO Remove this
-                obj.ctr_PWM_Ref.Frequency = obj.PWM_FREQUENCY; % TODO Remove this
+                % obj.ctr_PWM_Ref.DutyCycle = obj.PWM_MIN_DUTY_CYCLE; % TODO Remove this (because default is 0.50)
+                % obj.ctr_PWM_Ref.Frequency = obj.PWM_FREQUENCY; % TODO Remove this (because default is 100)
                 obj.ctr_PWM_Ref.Name = 'Heating Coil PWM: Reference';
                 disp('Created: counter output channel for reference sample heating coil')
                 
-                %Add the heating coil output channel for the test sample
+                % Add the heating coil output channel for the test sample
                 obj.ctr_PWM_Samp = addoutput(obj.dqOutput, obj.DeviceID,...
                     obj.CHANNEL_ID_PWM_SAMP, "PulseGeneration");
-                obj.ctr_PWM_Samp.DutyCycle = obj.PWM_MIN_DUTY_CYCLE; % TODO Remove this
-                obj.ctr_PWM_Samp.Frequency = obj.PWM_FREQUENCY; % TODO Remove this
+                % obj.ctr_PWM_Samp.DutyCycle = obj.PWM_MIN_DUTY_CYCLE; % TODO Remove this (because default is 0.50)
+                % obj.ctr_PWM_Samp.Frequency = obj.PWM_FREQUENCY; % TODO Remove this (because default is 100)
                 obj.ctr_PWM_Samp.Name = 'Heating Coil PWM: Test Sample';
                 disp('Created: counter output channel for test sample heating coil')
                 
-                % obj.dqOutput.Rate = obj.OUTPUT_SCAN_RATE; % TODO Remove this
+                % obj.dqOutput.Rate = obj.OUTPUT_SCAN_RATE; % TODO Remove this (because default is used)
                 
-                % obj.dqOutput.ScansRequiredFcnCount = obj.SCANS_REQUIRED_FCN_COUNT; % TODO Remove this
+                % obj.dqOutput.ScansRequiredFcnCount = obj.SCANS_REQUIRED_FCN_COUNT; % TODO Remove this (because default is used)
             else
                 % Delete the session object if no DAQ devices are found
                 delete(obj.dqOutput)

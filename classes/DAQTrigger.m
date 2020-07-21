@@ -36,7 +36,7 @@ classdef DAQTrigger < handle
         % MATLAB timer class object
         TriggerTimer timer
         TimerExecutionMode = 'fixedRate'
-        TimerPeriod = 0.2
+        TimerPeriod = 0.1
     end
     
     methods

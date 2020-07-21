@@ -470,7 +470,9 @@ classdef DSCData < handle
             %   Return the interpolated celsius temperature data,
             %   calculated over the full range of existing temperature data
             if length(obj.TempData_Ref) > 2
-                [minTemp, maxTemp] = obj.TempDataRange;
+                %[minTemp, maxTemp] = obj.TempDataRange;
+                minTemp = obj.TempDataRange(1);
+                maxTemp = obj.TempDataRange(2);
                 
                 tempData_Interpolated = linspace(minTemp, maxTemp,...
                     2 * length(obj.TempData_Ref));
@@ -484,13 +486,27 @@ classdef DSCData < handle
             %   Return the interpolated reference sample heat flow data,
             %   calculated using the original reference sample heat flow
             %   data and the interpolated temperature data
-            if length(obj.HeatFlowData_Ref) > 2
-                heatFlowData_Ref_Interpolated...
-                    = interp1(obj.TempData_Ref, obj.HeatFlowData_Ref,...
-                    obj.TempData_Interpolated, obj.INTERP_METHOD);
-            else
-                heatFlowData_Ref_Interpolated = obj.HeatFlowData_Ref;
+            n = length(obj.HeatFlowData_Ref);
+            switch n
+                case 0
+                    heatFlowData_Ref_Interpolated = [0, 0];
+                case 1
+                    heatFlowData_Ref_Interpolated...
+                        = [min(obj.HeatFlowData_Ref), max(obj.HeatFlowData_Ref)];
+                case 2
+                    heatFlowData_Ref_Interpolated = obj.HeatFlowData_Ref;
+                otherwise
+                    heatFlowData_Ref_Interpolated...
+                        = interp1(obj.TempData_Ref, obj.HeatFlowData_Ref,...
+                        obj.TempData_Interpolated, obj.INTERP_METHOD);
             end
+            % if length(obj.HeatFlowData_Ref) > 2
+            %     heatFlowData_Ref_Interpolated...
+            %         = interp1(obj.TempData_Ref, obj.HeatFlowData_Ref,...
+            %         obj.TempData_Interpolated, obj.INTERP_METHOD);
+            % else
+            %     heatFlowData_Ref_Interpolated = obj.HeatFlowData_Ref;
+            % end
         end
         
         function heatFlowData_Samp_Interpolated = get.HeatFlowData_Samp_Interpolated(obj)
@@ -498,13 +514,27 @@ classdef DSCData < handle
             %   Return the interpolated test sample heat flow data,
             %   calculated using the original test sample heat flow data
             %   and the interpolated temperature data
-            if length(obj.HeatFlowData_Samp) > 2
-                heatFlowData_Samp_Interpolated...
-                    = interp1(obj.TempData_Samp, obj.HeatFlowData_Samp,...
-                    obj.TempData_Interpolated, obj.INTERP_METHOD);
-            else
-                heatFlowData_Samp_Interpolated = obj.HeatFlowData_Samp;
+            n = length(obj.HeatFlowData_Samp);
+            switch n
+                case 0
+                    heatFlowData_Samp_Interpolated = [0, 0];
+                case 1
+                    heatFlowData_Samp_Interpolated...
+                        = [min(obj.HeatFlowData_Samp), max(obj.HeatFlowData_Samp)];
+                case 2
+                    heatFlowData_Samp_Interpolated = obj.HeatFlowData_Samp;
+                otherwise
+                    heatFlowData_Samp_Interpolated...
+                        = interp1(obj.TempData_Samp, obj.HeatFlowData_Samp,...
+                        obj.TempData_Interpolated, obj.INTERP_METHOD);
             end
+            % if length(obj.HeatFlowData_Samp) > 2
+            %     heatFlowData_Samp_Interpolated...
+            %         = interp1(obj.TempData_Samp, obj.HeatFlowData_Samp,...
+            %         obj.TempData_Interpolated, obj.INTERP_METHOD);
+            % else
+            %     heatFlowData_Samp_Interpolated = obj.HeatFlowData_Samp;
+            % end
         end
         
         function heatFlowData_Diff_Interpolated = get.HeatFlowData_Diff_Interpolated(obj)

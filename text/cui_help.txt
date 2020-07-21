@@ -1,8 +1,8 @@
 -------------------------------------------------------------------------------
-List of DSC CUI commands:
+List of DSC CLI commands:
 
 
-exit                Exit the DSC CUI program
+exit                Exit the DSC CLI program
 
 start daqbox        Check for DAQ Box hardware and create the nessecary sessions
 start daq box       Same as 'start daqbox'
