@@ -30,11 +30,11 @@ the project folder and type Run_DSC_GUI in the MATLAB command window.
 
 ## Command-Line UI Instructions
 
-WARNING: The CUI is not yet full implemented. It is recommended that you use the GUI for any and all testing or experiments.
+WARNING: The CLI is not yet full implemented. It is recommended that you use the GUI for any and all testing or experiments.
 
-To run the Command-Line User Interface (CUI), type Run_DSC_CUI in the MATLAB command window
+To run the Command-Line User Interface (CLI), type Run_DSC_CLI in the MATLAB command window
 
-To run an experiment with the CUI,
+To run an experiment with the CLI,
 type "start daq box" to start the daq box sessions,
 then type "start experiment" to start the experiment.
 

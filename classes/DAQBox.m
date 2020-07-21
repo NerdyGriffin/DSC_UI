@@ -214,12 +214,12 @@ classdef DAQBox < handle
                     s = s + 1;
                     % Attempt to update the waitbar progress and label
                     waitbar(s/n,f,message);
-                    % Update the cuiWaitbar progress and label
-                    cuiWaitbar(s/n,message);
+                    % Update the CLI_Waitbar progress and label
+                    CLI_Waitbar(s/n,message);
                 catch
                     % Recreate the waitbar if was closed by the user
                     f = waitbar(s/n,message);
-                    cuiWaitbar(s/n,message);
+                    CLI_Waitbar(s/n,message);
                 end
             end
             
@@ -228,7 +228,7 @@ classdef DAQBox < handle
             
             % Create a waitbar
             f = waitbar(s/n,'Please wait...');
-            cuiWaitbar(s/n,'Please wait...');
+            CLI_Waitbar(s/n,'Please wait...');
             
             obj.UseDAQHardware = false;
             

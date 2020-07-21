@@ -30,7 +30,7 @@ classdef StageController < handle
         
         StagingSaveStatus logical = false % Status of whether the current staging table has been saved to a file
         
-        % An object of the DSC_GUI_APP class or the DSC_CUI_APP class which
+        % An object of the DSC_GUI_APP class or the DSC_CLI_APP class which
         % provides the user iterface
         app
         

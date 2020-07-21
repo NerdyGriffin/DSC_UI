@@ -8,4 +8,4 @@ clc
 addpath(genpath('.'));
 
 % Run the GUI app file
-DSC_GUI_APP;
+DSC_GUI_APP_autoreflow;
