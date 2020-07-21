@@ -13,25 +13,30 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
         InitializeDAQBoxButton          matlab.ui.control.Button
         SkipCurrentStageButton          matlab.ui.control.Button
         ReferenceSampleLiveDataPanel    matlab.ui.container.Panel
-        ReferenceCurrentEditField_2     matlab.ui.control.NumericEditField
-        ReferenceTemperatureEditField_2  matlab.ui.control.NumericEditField
+        GridLayout22                    matlab.ui.container.GridLayout
+        ReferenceCurrentEditField       matlab.ui.control.NumericEditField
+        ReferenceTemperatureEditField   matlab.ui.control.NumericEditField
         ReferenceCurrentGaugeLabel_2    matlab.ui.control.Label
-        ReferenceTemperatureGaugeLabel_2  matlab.ui.control.Label
+        ReferenceTemperatureGaugeLabel  matlab.ui.control.Label
         TestSampleLiveDataPanel         matlab.ui.container.Panel
-        TestSampleCurrentEditField_2    matlab.ui.control.NumericEditField
-        TestSampleTemperatureEditField_2  matlab.ui.control.NumericEditField
+        GridLayout23                    matlab.ui.container.GridLayout
+        TestSampleCurrentEditField      matlab.ui.control.NumericEditField
+        TestSampleTemperatureEditField  matlab.ui.control.NumericEditField
         TestSampleCurrentGaugeLabel_2   matlab.ui.control.Label
-        TestSampleTemperatureGaugeLabel_2  matlab.ui.control.Label
+        TestSampleTemperatureGaugeLabel  matlab.ui.control.Label
         TargetTemperatureLiveDataPanel  matlab.ui.container.Panel
-        TargetTemperatureEditField_2    matlab.ui.control.NumericEditField
-        TargetTemperatureGaugeLabel_2   matlab.ui.control.Label
+        GridLayout24                    matlab.ui.container.GridLayout
+        TargetTemperatureEditField      matlab.ui.control.NumericEditField
+        TargetTemperatureGaugeLabel     matlab.ui.control.Label
         CurrentStageClocksPanel         matlab.ui.container.Panel
-        ElapsedTimeLabel                matlab.ui.control.Label
+        GridLayout20                    matlab.ui.container.GridLayout
+        ElapsedTimeStage0Label          matlab.ui.control.Label
         CurrentStage_ElapsedTimeEditField  matlab.ui.control.EditField
         EstimatedTimeRemainingLabel     matlab.ui.control.Label
         CurrentStage_EstimatedTimeRemainingEditField  matlab.ui.control.EditField
         ExperimentClockPanel            matlab.ui.container.Panel
-        ElapsedTimeEditFieldLabel       matlab.ui.control.Label
+        GridLayout21                    matlab.ui.container.GridLayout
+        TotalTimeLabel                  matlab.ui.control.Label
         ElapsedTimeEditField            matlab.ui.control.EditField
         ReferenceSamplePropertiesPanel  matlab.ui.container.Panel
         ReferenceSampleMassgramsSpinnerLabel  matlab.ui.control.Label
@@ -46,6 +51,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
         TestSampleMaterialEditFieldLabel  matlab.ui.control.Label
         TestSampleMaterialEditField     matlab.ui.control.EditField
         RightPanel                      matlab.ui.container.Panel
+        GridLayout18                    matlab.ui.container.GridLayout
         TabGroup                        matlab.ui.container.TabGroup
         OperationTab                    matlab.ui.container.Tab
         GridLayout3                     matlab.ui.container.GridLayout
@@ -70,13 +76,13 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
         GridLayout15                    matlab.ui.container.GridLayout
         StageNumberDropDownLabel        matlab.ui.control.Label
         StageNumberDropDown             matlab.ui.control.DropDown
-        StartTempCEditFieldLabel        matlab.ui.control.Label
+        StartTempEditFieldLabel         matlab.ui.control.Label
         StartTempEditField              matlab.ui.control.NumericEditField
         RampUpRateCminEditFieldLabel    matlab.ui.control.Label
         RampUpRateCminEditField         matlab.ui.control.NumericEditField
-        EndTempCEditFieldLabel          matlab.ui.control.Label
+        EndTempEditFieldLabel           matlab.ui.control.Label
         EndTempEditField                matlab.ui.control.NumericEditField
-        HoldTimesecEditFieldLabel       matlab.ui.control.Label
+        HoldTimeEditFieldLabel          matlab.ui.control.Label
         HoldTimeEditField               matlab.ui.control.NumericEditField
         AddStageButton                  matlab.ui.control.Button
         CancelButton                    matlab.ui.control.Button
@@ -84,13 +90,13 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
         GridLayout16                    matlab.ui.container.GridLayout
         StageNumberDropDown_2Label      matlab.ui.control.Label
         StageNumberDropDown_2           matlab.ui.control.DropDown
-        StartTempCEditField_2Label      matlab.ui.control.Label
+        StartTempEditField_2Label       matlab.ui.control.Label
         StartTempEditField_2            matlab.ui.control.NumericEditField
         RampUpRateCminEditField_2Label  matlab.ui.control.Label
         RampUpRateCminEditField_2       matlab.ui.control.NumericEditField
-        EndTempCEditField_2Label        matlab.ui.control.Label
+        EndTempEditField_2Label         matlab.ui.control.Label
         EndTempEditField_2              matlab.ui.control.NumericEditField
-        HoldTimesecEditField_2Label     matlab.ui.control.Label
+        HoldTimeEditField_2Label        matlab.ui.control.Label
         HoldTimeEditField_2             matlab.ui.control.NumericEditField
         ApplyChangesButton              matlab.ui.control.Button
         CancelButton_2                  matlab.ui.control.Button
@@ -98,13 +104,13 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
         GridLayout17                    matlab.ui.container.GridLayout
         StageNumberDropDown_3Label      matlab.ui.control.Label
         StageNumberDropDown_3           matlab.ui.control.DropDown
-        StartTempCEditField_3Label      matlab.ui.control.Label
+        StartTempEditField_3Label       matlab.ui.control.Label
         StartTempEditField_3            matlab.ui.control.NumericEditField
         RampUpRateCminEditField_3Label  matlab.ui.control.Label
         RampUpRateCminEditField_3       matlab.ui.control.NumericEditField
-        EndTempCEditField_3Label        matlab.ui.control.Label
+        EndTempEditField_3Label         matlab.ui.control.Label
         EndTempEditField_3              matlab.ui.control.NumericEditField
-        HoldTimesecEditField_3Label     matlab.ui.control.Label
+        HoldTimeEditField_3Label        matlab.ui.control.Label
         HoldTimeEditField_3             matlab.ui.control.NumericEditField
         RemoveStageButton               matlab.ui.control.Button
         CancelButton_3                  matlab.ui.control.Button
@@ -170,8 +176,9 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
         ClearCalibrationDataButton      matlab.ui.control.Button
         AddtoCalibrationDataButton      matlab.ui.control.Button
         CalibrationOffsetPanel          matlab.ui.container.Panel
+        GridLayout19                    matlab.ui.container.GridLayout
         SaveCalibrationOffsetButton     matlab.ui.control.Button
-        CalibrationOffsetLabel  matlab.ui.control.Label
+        CalibrationOffsetLabel          matlab.ui.control.Label
         CalibrationOffsetEditField      matlab.ui.control.NumericEditField
         AutoCalibrateButton             matlab.ui.control.Button
         SaveConfigToFileButton          matlab.ui.control.Button
@@ -204,7 +211,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
 
     % Properties that correspond to apps with auto-reflow
     properties (Access = private)
-        onePanelWidth = 580;
+        onePanelWidth = 576;
     end
 
     %   DSC: UI and control systems for prototype DSC system
@@ -347,7 +354,6 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
         
         function startExperiment(app)
             app.StartExperimentButton.Enable = 'off';
-            app.StartExperimentButton_2.Enable = 'off';
             drawnow nocallbacks
             
             % Prevent this function from running more than once at a time
@@ -392,7 +398,6 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
         function skipCurrentStage(app)
             % Prevent this function from running more than once at a time
             app.SkipCurrentStageButton.Enable = 'off';
-            app.SkipCurrentStageButton_2.Enable = 'off';
             
             app.SkipStageSemaphore.wait();
             app.SkipStageSemaphore.lock();
@@ -455,7 +460,6 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
                 
             else
                 app.StartExperimentButton.Enable = 'on';
-                app.StartExperimentButton_2.Enable = 'on';
                 
             end
             
@@ -463,21 +467,16 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             if app.stageController.ExperimentInProgress
                 if app.stageController.ForceStop
                     app.StopExperimentButton.Enable = 'off';
-                    app.StopExperimentButton_2.Enable = 'off';
                 else
                     app.StopExperimentButton.Enable = 'on';
-                    app.StopExperimentButton_2.Enable = 'on';
                 end
                 
                 if app.stageController.ForceSkipStage
                     app.SkipCurrentStageButton.Enable = 'off';
-                    app.SkipCurrentStageButton_2.Enable = 'off';
                 else
                     app.SkipCurrentStageButton.Enable = 'on';
-                    app.SkipCurrentStageButton_2.Enable = 'on';
                 end
                 app.StartExperimentButton.Enable = 'off';
-                app.StartExperimentButton_2.Enable = 'off';
                 app.SaveDataToFileButton.Enable = 'off';
                 app.ClearDataButton.Enable = 'off';
                 
@@ -487,9 +486,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
                 app.RemoveaStageButton.Enable = 'off';
                 
                 app.ReferenceSampleMassgramsSpinner.Enable = 'off';
-                app.ReferenceSampleMassgramsSpinner_2.Enable = 'off';
                 app.TestSampleMassgramsSpinner.Enable = 'off';
-                app.TestSampleMassgramsSpinner_2.Enable = 'off';
                 
             else
                 app.StopExperimentButton.Enable = 'off';
@@ -529,6 +526,9 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             % Update the mode display to indicate the current mode of the stage
             app.CurrentModeEditField.Value = currentModeText;
             
+            % Update stage clock text
+            app.ElapsedTimeStage0Label.Text = sprintf('Elapsed Time\n(Stage %d):', stageCounter);
+            
             drawnow
         end
         
@@ -561,12 +561,12 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             end
             
             elapsedSerialDate = currentSerialDate - app.liveData.ExpStartSerialDate;
-            app.ElapsedTimeEditField.Value = datestr(elapsedSerialDate, 'HH:MM:SS.FFF');
+            app.ElapsedTimeEditField.Value = datestr(elapsedSerialDate, 'dd - HH:MM:SS.FFF');
             
             try
                 elapsedStageSerialDate = currentSerialDate - app.liveData.LatestStageSerialDate;
                 app.CurrentStage_ElapsedTimeEditField.Value...
-                    = datestr(elapsedStageSerialDate, 'HH:MM:SS.FFF');
+                    = datestr(elapsedStageSerialDate, 'dd - HH:MM:SS.FFF');
             catch
                 app.CurrentStage_ElapsedTimeEditField.Value = 'NaN';
             end
@@ -575,7 +575,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
                 estimatedTimeRemainingSerialDate...
                     = sec2date(app.stageController.EstimatedStageDuration) - elapsedStageSerialDate;
                 app.CurrentStage_EstimatedTimeRemainingEditField.Value...
-                    = datestr(estimatedTimeRemainingSerialDate, 'HH:MM:SS.FFF');
+                    = datestr(estimatedTimeRemainingSerialDate, 'dd - HH:MM:SS.FFF');
             catch
                 app.CurrentStage_EstimatedTimeRemainingEditField.Value = 'NaN';
             end
@@ -669,38 +669,30 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             switch app.TemperatureUnits
                 case 'Celsius'
                     app.TargetTemperatureEditField.Value = targetTemp;
-                    app.TargetTemperatureEditField_2.Value = targetTemp;
                     
                 case 'Kelvin'
                     app.TargetTemperatureEditField.Value = cel2kel(targetTemp);
-                    app.TargetTemperatureEditField_2.Value = cel2kel(targetTemp);
             end
             
             switch app.TemperatureUnits
                 case 'Celsius'
                     app.ReferenceTemperatureEditField.Value = temp_Ref;
-                    app.ReferenceTemperatureEditField_2.Value = temp_Ref;
                     
                 case 'Kelvin'
                     app.ReferenceTemperatureEditField.Value = cel2kel(temp_Ref);
-                    app.ReferenceTemperatureEditField_2.Value = cel2kel(temp_Ref);
             end
             
             switch app.TemperatureUnits
                 case 'Celsius'
                     app.TestSampleTemperatureEditField.Value = temp_Samp;
-                    app.TestSampleTemperatureEditField_2.Value = temp_Samp;
                     
                 case 'Kelvin'
                     app.TestSampleTemperatureEditField.Value = cel2kel(temp_Samp);
-                    app.TestSampleTemperatureEditField_2.Value = cel2kel(temp_Samp);
             end
             
             app.ReferenceCurrentEditField.Value = current_Ref;
-            app.ReferenceCurrentEditField_2.Value = current_Ref;
             
             app.TestSampleCurrentEditField.Value = current_Samp;
-            app.TestSampleCurrentEditField_2.Value = current_Samp;
             
             drawnow limitrate
         end
@@ -1225,10 +1217,10 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
                 
             catch
                 % Update the options displayed depending on the temperature sensor selection (thermocouple by default)
-                app.TemperatureSensorSelectionButtonGroup.SelectedObject = app.ThermocoupleButton;
+                %app.TemperatureSensorSelectionButtonGroup.SelectedObject = app.ThermocoupleButton;
                 
-                app.ThermocoupleConfigurationPanel.Visible = 'on';
-                app.PlatinumRTDConfigurationPanel.Visible = 'off';
+                %app.ThermocoupleConfigurationPanel.Visible = 'on';
+                %app.PlatinumRTDConfigurationPanel.Visible = 'off';
             end
             
             
@@ -1318,6 +1310,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             if isempty(app.daqBox) || ~isvalid(app.daqBox)
                 % Refresh the values displayed on the Maintenance Tab
                 app.DAQStatusLamp.Color = 'r';
+                app.DAQStatusLamp.Enable = 'off';
                 app.InitializeDAQBoxButton_2.Enable = 'on';
                 app.InitializeDAQBoxButton.Enable = 'on';
                 
@@ -1349,6 +1342,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             else
                 % Refresh the values displayed on the Maintenance Tab
                 app.DAQStatusLamp.Color = 'g';
+                app.DAQStatusLamp.Enable = 'on';
                 app.InitializeDAQBoxButton_2.Text = 'Restart DAQ Box';
                 app.InitializeDAQBoxButton_2.Enable = 'on';
                 app.InitializeDAQBoxButton.Enable = 'off';
@@ -1397,9 +1391,11 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
                 % Set the system status lamp to green if the system is fully configured
                 if app.SystemConfigStatus
                     app.SystemStatusLamp.Color = 'g';
+                    app.SystemStatusLamp.Enable = 'on';
                     
                 else
                     app.SystemStatusLamp.Color = 'r';
+                    app.SystemStatusLamp.Enable = 'off';
                     
                 end
                 
@@ -1410,10 +1406,9 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
                     app.LoadConfigFileButton.Enable = 'off';
                     app.LoadDefaultConfigButton.Enable = 'off';
                     
-                    app.ThermocoupleButton.Enable = 'off';
-                    app.PlatinumRTDButton.Enable = 'off';
-                    
                     app.TakeMeasurementButton.Enable = 'off';
+                    
+                    app.AutoCalibrateButton.Enable = 'off';
                     
                     app.AddtoCalibrationDataButton.Enable = 'off';
                     
@@ -1463,7 +1458,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
     % Callbacks that handle component events
     methods (Access = private)
 
-        % Callback function
+        % Code that executes after component creation
         function startupFcn(app)
             
             % Add the DSC subdirectories to the MATLAB search path
@@ -1631,27 +1626,62 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             
         end
 
-        % Selection change function: TabGroup
-        function TabGroupSelectionChanged(app, event)
-            switch app.TabGroup.SelectedTab
-                case app.OperationTab
-                    app.refreshOperationUI();
-                    
-                case app.AnalysisTab
-                    app.refreshAnalysisUI();
-                    
-                case app.MaintenanceTab
-                    % Prevent the user from opening the Maintenance Tab if the experiment is currently running
-                    if app.stageController.ExperimentInProgress
-                        warndlg('The configuration parameters on the Maintenance Tab cannot be edited while an experiment is running')
-                        app.TabGroup.SelectedTab = app.OperationTab;
-                        
-                    else
-                        app.refreshMaintenanceUI();
-                        
-                    end
-                    
+        % Changes arrangement of the app based on UIFigure width
+        function updateAppLayout(app, event)
+            currentFigureWidth = app.UIFigure.Position(3);
+            if(currentFigureWidth <= app.onePanelWidth)
+                % Change to a 2x1 grid
+                app.GridLayout.RowHeight = {640, 640};
+                app.GridLayout.ColumnWidth = {'1x'};
+                app.RightPanel.Layout.Row = 2;
+                app.RightPanel.Layout.Column = 1;
+            else
+                % Change to a 1x2 grid
+                app.GridLayout.RowHeight = {'1x'};
+                app.GridLayout.ColumnWidth = {352, '1x'};
+                app.RightPanel.Layout.Row = 1;
+                app.RightPanel.Layout.Column = 2;
             end
+        end
+
+        % Button pushed function: LoadConfigFileButton
+        function LoadConfigFileButtonPushed(app, event)
+            configLoadStatus = app.daqBox.loadConfigFile();
+            
+            app.SystemConfigStatus = configLoadStatus;
+            
+            app.refreshMaintenanceUI();
+            app.refreshOperationUI(); % Update the UI with the new values
+            
+        end
+
+        % Button pushed function: InitializeDAQBoxButton, 
+        % InitializeDAQBoxButton_2
+        function StartDAQSessionsButtonPushed(app, event)
+            app.InitializeDAQBoxButton_2.Enable = 'off';
+            app.InitializeDAQBoxButton.Enable = 'off';
+            
+            drawnow nocallbacks
+            
+            app.initializeDAQBox();
+            
+            drawnow
+            
+        end
+
+        % Button pushed function: StartExperimentButton
+        function StartExperimentButtonPushed(app, event)
+            app.startExperiment();
+            
+        end
+
+        % Button pushed function: LoadDefaultConfigButton
+        function LoadDefaultConfigButtonPushed(app, event)
+            % Load the default config values
+            app.daqBox.loadConfigFile('default');
+            
+            app.refreshMaintenanceUI();
+            app.refreshOperationUI(); % Update the UI with the new values
             
         end
 
@@ -1677,6 +1707,19 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
                     % Create a new, empty DSCData object
                     app.liveData = app.stageController.createLiveData();
                     
+                    app.ReferenceCurrentEditField.Value = 0;
+                    app.ReferenceTemperatureEditField.Value = 0;
+                    app.TestSampleCurrentEditField.Value = 0;
+                    app.TestSampleTemperatureEditField.Value = 0;
+                    app.TargetTemperatureEditField.Value = 0;
+                    
+                    app.ElapsedTimeEditField.Value = datestr(0, 'dd - HH:MM:SS.FFF');
+                    app.CurrentStage_ElapsedTimeEditField.Value = datestr(0, 'dd - HH:MM:SS.FFF');
+                    app.CurrentStage_EstimatedTimeRemainingEditField.Value = datestr(0, 'dd - HH:MM:SS.FFF');
+                    
+                    app.daqBox.SimulatedTemp_Ref = app.daqBox.SIMULATED_AMBIENT_TEMP;
+                    app.daqBox.SimulatedTemp_Samp = app.daqBox.SIMULATED_AMBIENT_TEMP;
+                    
                     app.DataSaveStatus = true;
                     
                     app.refreshMaintenanceUI();
@@ -1689,345 +1732,15 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             
         end
 
-        % Button pushed function: SaveDataToFileButton
-        function SaveDataToFileButtonPushed(app, event)
-            app.SaveDataToFileButton.Text = 'Saving Data . . .';
-            
-            app.DataSaveStatus = app.liveData.saveXlsxFile();
-            
-            app.refreshOperationUI; % Update the UI with the new values
-            
-            if app.DataSaveStatus
-                app.SaveDataToFileButton.Text = 'Data Saved';
-                pause(1)
-                app.SaveDataToFileButton.Text = 'Save Data To File';
-                
-            else
-                app.SaveDataToFileButton.Text = 'Save Data To File';
-                
-            end
-            
-        end
-
-        % Button pushed function: StartExperimentButton
-        function StartExperimentButtonPushed(app, event)
-            app.startExperiment();
-            
-        end
-
-        % Button pushed function: StopExperimentButton
-        function StopExperimentButtonPushed(app, event)
-            app.StartExperimentButton.Enable = 'off';
-            app.StartExperimentButton_2.Enable = 'off';
-            app.StopExperimentButton.Enable = 'off';
-            app.StopExperimentButton_2.Enable = 'off';
-            app.SkipCurrentStageButton.Enable = 'off';
-            app.SkipCurrentStageButton_2.Enable = 'off';
-            drawnow nocallbacks
-            
-            % Stop the currently running experiment
-            app.stopExperiment();
-            
-            app.refreshOperationUI(); % Update the UI with the new values
-            
-            drawnow
-            
-        end
-
-        % Button pushed function: InitializeDAQBoxButton, 
-        % InitializeDAQBoxButton_2
-        function StartDAQSessionsButtonPushed(app, event)
-            app.InitializeDAQBoxButton_2.Enable = 'off';
-            app.InitializeDAQBoxButton.Enable = 'off';
-            
-            drawnow nocallbacks
-            
-            app.initializeDAQBox();
-            
-            drawnow
-            
-        end
-
-        % Button pushed function: AddaStageButton
-        function AddaStageButtonPushed(app, event)
-            % Clear the Items and ItemsData cell arrays before they are rebuilt with the newest values
-            app.StageNumberDropDown.Items = {'1'};
-            app.StageNumberDropDown.ItemsData = {1};
-            
-            for StageNumber = 1:(app.stageController.NumberOfStages + 1)
-                app.StageNumberDropDown.Items{StageNumber} = int2str(StageNumber);
-                app.StageNumberDropDown.ItemsData{StageNumber} = StageNumber;
-                
-            end
-            app.StageNumberDropDown.Value = StageNumber;
-            
-            % Update the values displayed in the "Add a Stage" panel
-            app.StartTempEditField.Value = 0;
-            app.RampUpRateCminEditField.Value = 0;
-            app.EndTempEditField.Value = 0;
-            app.HoldTimeEditField.Value = 0;
-            
-            % Update the values displayed in the staging table
-            app.refreshStagingTable();
-            
-            app.AddaStagePanel.Visible = 'on';
-            
-        end
-
-        % Button pushed function: EditaStageButton
-        function EditaStageButtonPushed(app, event)
-            % Clear the Items and ItemsData cell arrays before they are rebuilt with the newest values
-            app.StageNumberDropDown_2.Items = {'1'};
-            app.StageNumberDropDown_2.ItemsData = {1};
-            
-            for StageNumber = 1:(app.stageController.NumberOfStages)
-                app.StageNumberDropDown_2.Items{StageNumber} = int2str(StageNumber);
-                app.StageNumberDropDown_2.ItemsData{StageNumber} = StageNumber;
-                
-            end
-            
-            app.StageNumberDropDown_2.Value = StageNumber;
-            
-            % Convert units from Celsius to Kelvin if necessary
-            switch app.TemperatureUnits
-                case 'Celsius'
-                    StartTemp = app.stageController.getStartTemp(StageNumber);
-                    EndTemp = app.stageController.getEndTemp(StageNumber);
-                    
-                case 'Kelvin'
-                    StartTemp = cel2kel(app.stageController.getStartTemp(StageNumber));
-                    EndTemp = cel2kel(app.stageController.getEndTemp(StageNumber));
-                    
-            end
-            
-            % Update the values displayed in the "Edit a Stage" panel
-            app.StartTempEditField_2.Value = StartTemp;
-            app.RampUpRateCminEditField_2.Value = app.stageController.getRampUpRate(StageNumber);
-            app.EndTempEditField_2.Value = EndTemp;
-            app.HoldTimeEditField_2.Value = app.stageController.getHoldTime(StageNumber);
-            
-            % Update the values displayed in the staging table
-            app.refreshStagingTable();
-            
-            app.EditaStagePanel.Visible = 'on';
-            
-        end
-
-        % Cell selection callback: TempControlStagingUITable
-        function TempControlStagingUITableCellSelection(app, event)
-            % Update the values displayed in the staging table
-            app.refreshStagingTable();
-            
-        end
-
-        % Button pushed function: RemoveaStageButton
-        function RemoveaStageButtonPushed(app, event)
-            % Clear the Items and ItemsData cell arrays before they are rebuilt with the newest values
-            app.StageNumberDropDown_3.Items = {'1'};
-            app.StageNumberDropDown_3.ItemsData = {1};
-            
-            for StageNumber = 1:(app.stageController.NumberOfStages)
-                app.StageNumberDropDown_3.Items{StageNumber} = int2str(StageNumber);
-                app.StageNumberDropDown_3.ItemsData{StageNumber} = StageNumber;
-                
-            end
-            
-            app.StageNumberDropDown_3.Value = StageNumber;
-            
-            % Convert units from Celsius to Kelvin if necessary
-            switch app.TemperatureUnits
-                case 'Celsius'
-                    StartTemp = app.stageController.getStartTemp(StageNumber);
-                    EndTemp = app.stageController.getEndTemp(StageNumber);
-                    
-                case 'Kelvin'
-                    StartTemp = cel2kel(app.stageController.getStartTemp(StageNumber));
-                    EndTemp = cel2kel(app.stageController.getEndTemp(StageNumber));
-                    
-            end
-            
-            % Update the values displayed in the "Remove a Stage" panel
-            app.StartTempEditField_3.Value = StartTemp;
-            app.RampUpRateCminEditField_3.Value = app.stageController.getRampUpRate(StageNumber);
-            app.EndTempEditField_3.Value = EndTemp;
-            app.HoldTimeEditField_3.Value = app.stageController.getHoldTime(StageNumber);
-            
-            
-            % Update the values displayed in the staging table
-            app.refreshStagingTable();
-            
-            app.RemoveaStagePanel.Visible = 'on';
-            
-        end
-
         % Callback function
-        function AddStageButtonPushed(app, event)
-            NewStageNumber = app.StageNumberDropDown.Value;
+        function ReferenceSampleSpecificHeatSpinnerValueChanged(app, event)
+            app.liveData.ReferenceSampleData.SpecificHeat = app.ReferenceSpecificHeatJgKSpinner.Value;
             
-            % Convert units from Celsius to Kelvin if necessary
-            switch app.TemperatureUnits
-                case 'Celsius'
-                    StartTemp = app.StartTempEditField.Value;
-                    EndTemp = app.EndTempEditField.Value;
-                    
-                case 'Kelvin'
-                    StartTemp = kel2cel(app.StartTempEditField.Value);
-                    EndTemp = kel2cel(app.EndTempEditField.Value);
-                    
-            end
+            app.daqBox.ConfigSaveStatus = false;
+            app.SystemConfigStatus = false;
             
-            RampUpRate = app.RampUpRateCminEditField.Value;
-            
-            HoldTime = app.HoldTimeEditField.Value;
-            
-            % Add the stage
-            app.stageController.addStage(NewStageNumber, StartTemp, RampUpRate, EndTemp, HoldTime);
-            
-            % Update the values displayed in the staging table
-            app.refreshStagingTable();
-            
-            app.AddaStagePanel.Visible = 'off';
-            
-        end
-
-        % Callback function
-        function CancelButtonPushed(app, event)
-            % Update the values displayed in the staging table
-            app.refreshStagingTable();
-            
-            app.AddaStagePanel.Visible = 'off';
-            
-        end
-
-        % Callback function
-        function StageNumberDropDown_2ValueChanged(app, event)
-            StageNumber = app.StageNumberDropDown_2.Value;
-            
-            % Convert units from Celsius to Kelvin if necessary
-            switch app.TemperatureUnits
-                case 'Celsius'
-                    StartTemp = app.stageController.getStartTemp(StageNumber);
-                    EndTemp = app.stageController.getEndTemp(StageNumber);
-                    
-                case 'Kelvin'
-                    StartTemp = cel2kel(app.stageController.getStartTemp(StageNumber));
-                    EndTemp = cel2kel(app.stageController.getEndTemp(StageNumber));
-                    
-            end
-            
-            % Update the values displayed in the "Edit a Stage" panel
-            app.StartTempEditField_2.Value = StartTemp;
-            app.RampUpRateCminEditField_2.Value = app.stageController.getRampUpRate(StageNumber);
-            app.EndTempEditField_2.Value = EndTemp;
-            app.HoldTimeEditField_2.Value = app.stageController.getHoldTime(StageNumber);
-            
-            % Update the values displayed in the staging table
-            app.refreshStagingTable();
-            
-        end
-
-        % Callback function
-        function ApplyChangesButtonPushed(app, event)
-            StageNumber = app.StageNumberDropDown_2.Value;
-            
-            % Convert units from Celsius to Kelvin if necessary
-            switch app.TemperatureUnits
-                case 'Celsius'
-                    StartTemp = app.StartTempEditField_2.Value;
-                    EndTemp = app.EndTempEditField_2.Value;
-                    
-                case 'Kelvin'
-                    StartTemp = kel2cel(app.StartTempEditField_2.Value);
-                    EndTemp = kel2cel(app.EndTempEditField_2.Value);
-                    
-            end
-            
-            RampUpRate = app.RampUpRateCminEditField_2.Value;
-            
-            HoldTime = app.HoldTimeEditField_2.Value;
-            
-            % Have the new stage parameters added to the table
-            app.stageController.editStage(StageNumber, StartTemp, RampUpRate, EndTemp, HoldTime);
-            
-            % Update the values displayed in the staging table
-            app.refreshStagingTable();
-            
-            app.EditaStagePanel.Visible = 'off';
-            
-        end
-
-        % Callback function
-        function CancelButton_2Pushed(app, event)
-            % Update the values displayed in the staging table
-            app.refreshStagingTable();
-            
-            app.EditaStagePanel.Visible = 'off';
-            
-        end
-
-        % Callback function
-        function StageNumberDropDown_3ValueChanged(app, event)
-            StageNumber = app.StageNumberDropDown_3.Value;
-            
-            % Convert units from Celsius to Kelvin if necessary
-            switch app.TemperatureUnits
-                case 'Celsius'
-                    StartTemp = app.stageController.getStartTemp(StageNumber);
-                    EndTemp = app.stageController.getEndTemp(StageNumber);
-                    
-                case 'Kelvin'
-                    StartTemp = cel2kel(app.stageController.getStartTemp(StageNumber));
-                    EndTemp = cel2kel(app.stageController.getEndTemp(StageNumber));
-                    
-            end
-            
-            % Update the values displayed in the "Remove a Stage" panel
-            app.StartTempEditField_3.Value = StartTemp;
-            app.RampUpRateCminEditField_3.Value = app.stageController.getRampUpRate(StageNumber);
-            app.EndTempEditField_3.Value = EndTemp;
-            app.HoldTimeEditField_3.Value = app.stageController.getHoldTime(StageNumber);
-            
-            % Update the values displayed in the staging table
-            app.refreshStagingTable();
-            
-        end
-
-        % Callback function
-        function RemoveStageButtonPushed(app, event)
-            StageNumber = app.StageNumberDropDown_3.Value;
-            
-            % Have the specified stage removed from the table
-            app.stageController.removeStage(StageNumber);
-            
-            % Update the values displayed in the staging table
-            app.refreshStagingTable();
-            
-            app.RemoveaStagePanel.Visible = 'off';
-            
-        end
-
-        % Callback function
-        function CancelButton_3Pushed(app, event)
-            % Update the values displayed in the staging table
-            app.refreshStagingTable();
-            
-            app.RemoveaStagePanel.Visible = 'off';
-            
-        end
-
-        % Button pushed function: SkipCurrentStageButton
-        function SkipCurrentStageButtonPushed(app, event)
-            app.StopExperimentButton.Enable = 'off';
-            app.StopExperimentButton_2.Enable = 'off';
-            app.SkipCurrentStageButton.Enable = 'off';
-            app.SkipCurrentStageButton_2.Enable = 'off';
-            drawnow nocallbacks
-            
-            app.skipCurrentStage();
-            
+            app.refreshMaintenanceUI();
             app.refreshOperationUI();
-            
-            drawnow
             
         end
 
@@ -2065,30 +1778,6 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             
         end
 
-        % Callback function
-        function ReferenceSampleSpecificHeatSpinnerValueChanged(app, event)
-            app.liveData.ReferenceSampleData.SpecificHeat = app.ReferenceSpecificHeatJgKSpinner.Value;
-            
-            app.daqBox.ConfigSaveStatus = false;
-            app.SystemConfigStatus = false;
-            
-            app.refreshMaintenanceUI();
-            app.refreshOperationUI();
-            
-        end
-
-        % Value changed function: ReferenceSampleMaterialEditField
-        function ReferenceSampleMaterialEditFieldValueChanged(app, event)
-            app.SampleMaterial_Reference = app.ReferenceSampleMaterialEditField.Value;
-            
-            app.daqBox.ConfigSaveStatus = false;
-            app.SystemConfigStatus = false;
-            
-            app.refreshMaintenanceUI();
-            app.refreshOperationUI();
-            
-        end
-
         % Value changed function: TestSampleMassgramsSpinner
         function TestSampleMassgramsSpinnerValueChanged(app, event)
             % Prevent this function from running more than once at a time
@@ -2123,9 +1812,137 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             
         end
 
-        % Value changed function: TestSampleMaterialEditField
-        function TestSampleMaterialEditFieldValueChanged(app, event)
-            app.SampleMaterial_TestSample = app.TestSampleMaterialEditField.Value;
+        % Button pushed function: SaveDataToFileButton
+        function SaveDataToFileButtonPushed(app, event)
+            app.SaveDataToFileButton.Text = 'Saving Data . . .';
+            
+            app.DataSaveStatus = app.liveData.saveXlsxFile();
+            
+            app.refreshOperationUI; % Update the UI with the new values
+            
+            if app.DataSaveStatus
+                app.SaveDataToFileButton.Text = 'Data Saved';
+                pause(1)
+                app.SaveDataToFileButton.Text = 'Save Data To File';
+                
+            else
+                app.SaveDataToFileButton.Text = 'Save Data To File';
+                
+            end
+            
+        end
+
+        % Button pushed function: ApplyConfigChangesButton
+        function ApplyConfigChangesButtonPushed(app, event)
+            if isempty(app.daqBox) || ~isvalid(app.daqBox)
+                app.SystemConfigStatus = false;
+                
+                app.refreshMaintenanceUI();
+                app.refreshOperationUI();
+                
+                warndlg('DAQ Box must be configured')
+                
+            else
+                app.SystemConfigStatus = true;
+                
+                app.refreshMaintenanceUI();
+                app.refreshOperationUI();
+                
+            end
+            
+        end
+
+        % Button pushed function: StopExperimentButton
+        function StopExperimentButtonPushed(app, event)
+            app.StartExperimentButton.Enable = 'off';
+            app.StopExperimentButton.Enable = 'off';
+            app.SkipCurrentStageButton.Enable = 'off';
+            drawnow nocallbacks
+            
+            % Stop the currently running experiment
+            app.stopExperiment();
+            
+            app.refreshOperationUI(); % Update the UI with the new values
+            
+            drawnow
+            
+        end
+
+        % Callback function
+        function TemperatureSensorSelectionButtonGroupSelectionChanged(app, event)
+            switch app.TemperatureSensorSelectionButtonGroup.SelectedObject
+                case app.ThermocoupleButton
+                    app.TempSensorSelection = 'Thermocouple';
+                    
+                case app.PlatinumRTDButton
+                    app.TempSensorSelection = 'RTD';
+                    
+            end
+            
+            app.daqBox.ConfigSaveStatus = false;
+            app.SystemConfigStatus = false;
+            
+            app.refreshMaintenanceUI();
+            app.refreshOperationUI();
+            
+        end
+
+        % Callback function
+        function ThermocoupleTypeDropDownValueChanged(app, event)
+            switch app.ThermocoupleTypeDropDown.Value
+                case 'Type J'
+                    app.ThermocoupleType = 'J';
+                    app.refreshMaintenanceUI();
+                    
+                case 'Type K'
+                    app.ThermocoupleType = 'K';
+                    app.refreshMaintenanceUI();
+                    
+            end
+            
+            app.daqBox.ConfigSaveStatus = false;
+            app.SystemConfigStatus = false;
+            
+            app.refreshMaintenanceUI();
+            app.refreshOperationUI();
+            
+        end
+
+        % Callback function
+        function RTDResistenceohmSpinnerValueChanged(app, event)
+            app.RTDResistance = app.RTDResistenceohmSpinner.Value;
+            
+            app.daqBox.ConfigSaveStatus = false;
+            app.SystemConfigStatus = false;
+            
+            app.refreshMaintenanceUI();
+            app.refreshOperationUI();
+            
+        end
+
+        % Callback function
+        function TemperatureUnitsSwitchValueChanged(app, event)
+            app.TemperatureUnits = app.TemperatureUnitsSwitch.Value;
+            
+            app.refreshOperationUnits() % Update the Units displayed on the UI
+            
+        end
+
+        % Callback function
+        function RTDTypeDropDownValueChanged(app, event)
+            app.RTDType = app.RTDTypeDropDown.Value;
+            
+            app.daqBox.ConfigSaveStatus = false;
+            app.SystemConfigStatus = false;
+            
+            app.refreshMaintenanceUI();
+            app.refreshOperationUI();
+            
+        end
+
+        % Callback function
+        function RTDConfigurationDropDownValueChanged(app, event)
+            app.RTDConfiguration = app.RTDConfigurationDropDown.Value;
             
             app.daqBox.ConfigSaveStatus = false;
             app.SystemConfigStatus = false;
@@ -2140,72 +1957,6 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             app.XAxisUnits = app.XAxisDataSwitch.Value;
             
             app.refreshOperationUnits() % Update the Units displayed on the UI
-            
-        end
-
-        % Button pushed function: LoadStagingFileButton
-        function LoadStagingFileButtonPushed(app, event)
-            app.stageController.loadStagingFile('user select');
-            
-            app.refreshOperationUI();
-            
-            app.refreshStagingTable();
-            
-        end
-
-        % Button pushed function: SaveStagingFileButton
-        function SaveStagingFileButtonPushed(app, event)
-            app.SaveStagingFileButton.Text = 'Saving Staging . . .';
-            
-            app.StagingSaveStatus = app.stageController.saveStagingFile();
-            
-            app.refreshOperationUI();
-            
-            if app.StagingSaveStatus
-                app.SaveStagingFileButton.Text = 'Staging Saved';
-                pause(1)
-                app.SaveStagingFileButton.Text = 'Save Staging File';
-                
-            else
-                app.SaveStagingFileButton.Text = 'Save Staging File';
-                
-            end
-            
-        end
-
-        % Callback function
-        function TemperatureUnitsSwitchValueChanged(app, event)
-            app.TemperatureUnits = app.TemperatureUnitsSwitch.Value;
-            
-            app.refreshOperationUnits() % Update the Units displayed on the UI
-            
-        end
-
-        % Button pushed function: ImportDataFromOperationButton
-        function ImportDataFromOperationButtonPushed(app, event)
-            if app.liveData.DataLength == 0
-                warndlg('No data has been detected from the Operation Tab')
-                
-            else
-                app.analysisData = app.liveData;
-                
-            end
-            
-            app.refreshAnalysisUI()
-            
-        end
-
-        % Button pushed function: ImportDataFromMATFileButton
-        function ImportDataFromMATFileButtonPushed(app, event)
-            app.DataLoadingTextArea.Visible = 'on';
-            
-            app.analysisData = DSCData();
-            
-            app.loadMATFileToAnalysis();
-            
-            app.refreshAnalysisUI()
-            
-            app.DataLoadingTextArea.Visible = 'off';
             
         end
 
@@ -2272,196 +2023,15 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             
         end
 
-        % Selection changed function: XAxisDataButtonGroup
-        function XAxisDataButtonGroupSelectionChanged(app, event)
-            app.refreshAnalysisUI();
-            
-        end
-
         % Selection changed function: YAxisDataButtonGroup
         function YAxisDataButtonGroupSelectionChanged(app, event)
             app.refreshAnalysisUI();
             
         end
 
-        % Button pushed function: RefreshPlotButton
-        function RefreshPlotButtonPushed(app, event)
+        % Selection changed function: XAxisDataButtonGroup
+        function XAxisDataButtonGroupSelectionChanged(app, event)
             app.refreshAnalysisUI();
-            
-        end
-
-        % Value changed function: ReferenceSpecificHeatJgKSpinner_2
-        function ReferenceSpecificHeatJgKSpinner_2ValueChanged(app, event)
-            app.analysisData.ReferenceSampleData.SpecificHeat = app.ReferenceSpecificHeatJgKSpinner_2.Value;
-            
-            app.daqBox.ConfigSaveStatus = false;
-            app.SystemConfigStatus = false;
-            
-            app.refreshMaintenanceUI();
-            app.refreshOperationUI();
-            
-        end
-
-        % Button pushed function: SaveAnalysisDataToExcelFileButton
-        function SaveAnalysisDataToExcelFileButtonPushed(app, event)
-            app.SaveAnalysisDataToExcelFileButton.Text = 'Saving Data . . .';
-            
-            app.AnalysisDataSaveStatus = app.analysisData.saveXlsxFile();
-            
-            app.refreshOperationUI(); % Update the UI with the new values
-            
-            if app.AnalysisDataSaveStatus
-                app.SaveAnalysisDataToExcelFileButton.Text = 'Data Saved';
-                pause(1)
-                app.SaveAnalysisDataToExcelFileButton.Text = 'Save Data To Excel File';
-                
-            else
-                app.SaveAnalysisDataToExcelFileButton.Text = 'Save Data To Excel File';
-                
-            end
-            
-        end
-
-        % Button pushed function: ImportDataFromExcelFileButton
-        function ImportDataFromExcelFileButtonPushed(app, event)
-            app.DataLoadingTextArea.Visible = 'on';
-            
-            app.analysisData = DSCData();
-            
-            app.analysisData.loadXlsxFile();
-            
-            app.refreshAnalysisUI()
-            
-            app.DataLoadingTextArea.Visible = 'off';
-            
-        end
-
-        % Button pushed function: SaveAnalysisDataToMATFileButton
-        function SaveAnalysisDataToMATFileButtonPushed(app, event)
-            app.SaveAnalysisDataToMATFileButton.Text = 'Saving Data . . .';
-            
-            app.AnalysisDataSaveStatus = app.analysisData.saveMATFile();
-            
-            app.refreshOperationUI(); % Update the UI with the new values
-            
-            if app.AnalysisDataSaveStatus
-                app.SaveAnalysisDataToMATFileButton.Text = 'Data Saved';
-                pause(1)
-                app.SaveAnalysisDataToMATFileButton.Text = 'Save Data To MAT File';
-                
-            else
-                app.SaveAnalysisDataToMATFileButton.Text = 'Save Data To MAT File';
-                
-            end
-            
-        end
-
-        % Button pushed function: LoadConfigFileButton
-        function LoadConfigFileButtonPushed(app, event)
-            configLoadStatus = app.daqBox.loadConfigFile();
-            
-            app.SystemConfigStatus = configLoadStatus;
-            
-            app.refreshMaintenanceUI();
-            app.refreshOperationUI(); % Update the UI with the new values
-            
-        end
-
-        % Button pushed function: LoadDefaultConfigButton
-        function LoadDefaultConfigButtonPushed(app, event)
-            % Load the default config values
-            app.daqBox.loadConfigFile('default');
-            
-            app.refreshMaintenanceUI();
-            app.refreshOperationUI(); % Update the UI with the new values
-            
-        end
-
-        % Callback function
-        function TemperatureSensorSelectionButtonGroupSelectionChanged(app, event)
-            switch app.TemperatureSensorSelectionButtonGroup.SelectedObject
-                case app.ThermocoupleButton
-                    app.TempSensorSelection = 'Thermocouple';
-                    
-                case app.PlatinumRTDButton
-                    app.TempSensorSelection = 'RTD';
-                    
-            end
-            
-            app.daqBox.ConfigSaveStatus = false;
-            app.SystemConfigStatus = false;
-            
-            app.refreshMaintenanceUI();
-            app.refreshOperationUI();
-            
-        end
-
-        % Callback function
-        function ThermocoupleTypeDropDownValueChanged(app, event)
-            switch app.ThermocoupleTypeDropDown.Value
-                case 'Type J'
-                    app.ThermocoupleType = 'J';
-                    app.refreshMaintenanceUI();
-                    
-                case 'Type K'
-                    app.ThermocoupleType = 'K';
-                    app.refreshMaintenanceUI();
-                    
-            end
-            
-            app.daqBox.ConfigSaveStatus = false;
-            app.SystemConfigStatus = false;
-            
-            app.refreshMaintenanceUI();
-            app.refreshOperationUI();
-            
-        end
-
-        % Callback function
-        function RTDResistenceohmSpinnerValueChanged(app, event)
-            app.RTDResistance = app.RTDResistenceohmSpinner.Value;
-            
-            app.daqBox.ConfigSaveStatus = false;
-            app.SystemConfigStatus = false;
-            
-            app.refreshMaintenanceUI();
-            app.refreshOperationUI();
-            
-        end
-
-        % Callback function
-        function RTDTypeDropDownValueChanged(app, event)
-            app.RTDType = app.RTDTypeDropDown.Value;
-            
-            app.daqBox.ConfigSaveStatus = false;
-            app.SystemConfigStatus = false;
-            
-            app.refreshMaintenanceUI();
-            app.refreshOperationUI();
-            
-        end
-
-        % Callback function
-        function RTDConfigurationDropDownValueChanged(app, event)
-            app.RTDConfiguration = app.RTDConfigurationDropDown.Value;
-            
-            app.daqBox.ConfigSaveStatus = false;
-            app.SystemConfigStatus = false;
-            
-            app.refreshMaintenanceUI();
-            app.refreshOperationUI();
-            
-        end
-
-        % Value changed function: MaxTempLimitCelsiusSpinner
-        function MaxTempLimitCelsiusSpinnerValueChanged(app, event)
-            app.daqBox.MaxTempLimit = app.MaxTempLimitCelsiusSpinner.Value;
-            
-            app.daqBox.ConfigSaveStatus = false;
-            app.SystemConfigStatus = false;
-            
-            app.refreshMaintenanceUI();
-            app.refreshOperationUI();
             
         end
 
@@ -2488,6 +2058,403 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             
         end
 
+        % Value changed function: MaxTempLimitCelsiusSpinner
+        function MaxTempLimitCelsiusSpinnerValueChanged(app, event)
+            app.daqBox.MaxTempLimit = app.MaxTempLimitCelsiusSpinner.Value;
+            
+            app.daqBox.ConfigSaveStatus = false;
+            app.SystemConfigStatus = false;
+            
+            app.refreshMaintenanceUI();
+            app.refreshOperationUI();
+            
+        end
+
+        % Button pushed function: ImportDataFromOperationButton
+        function ImportDataFromOperationButtonPushed(app, event)
+            if app.liveData.DataLength == 0
+                warndlg('No data has been detected from the Operation Tab')
+                
+            else
+                app.analysisData = app.liveData;
+                
+            end
+            
+            app.refreshAnalysisUI()
+            
+        end
+
+        % Button pushed function: SaveConfigToFileButton
+        function SaveConfigToFileButtonPushed(app, event)
+            app.SaveConfigToFileButton.Text = 'Saving Config . . .';
+            
+            app.daqBox.saveConfigFile();
+            
+            app.refreshMaintenanceUI();
+            
+            if app.daqBox.ConfigSaveStatus
+                app.SaveConfigToFileButton.Text = 'Config Saved';
+                pause(1)
+                app.SaveConfigToFileButton.Text = 'Save Config To File';
+                
+            else
+                app.SaveConfigToFileButton.Text = 'Save Config To File';
+                
+            end
+            
+        end
+
+        % Button pushed function: RefreshPlotButton
+        function RefreshPlotButtonPushed(app, event)
+            app.refreshAnalysisUI();
+            
+        end
+
+        % Button pushed function: ImportDataFromMATFileButton
+        function ImportDataFromMATFileButtonPushed(app, event)
+            app.DataLoadingTextArea.Visible = 'on';
+            
+            app.analysisData = DSCData();
+            
+            app.loadMATFileToAnalysis();
+            
+            app.refreshAnalysisUI()
+            
+            app.DataLoadingTextArea.Visible = 'off';
+            
+        end
+
+        % Value changed function: ReferenceSampleMaterialEditField
+        function ReferenceSampleMaterialEditFieldValueChanged(app, event)
+            app.SampleMaterial_Reference = app.ReferenceSampleMaterialEditField.Value;
+            
+            app.daqBox.ConfigSaveStatus = false;
+            app.SystemConfigStatus = false;
+            
+            app.refreshMaintenanceUI();
+            app.refreshOperationUI();
+            
+        end
+
+        % Value changed function: TestSampleMaterialEditField
+        function TestSampleMaterialEditFieldValueChanged(app, event)
+            app.SampleMaterial_TestSample = app.TestSampleMaterialEditField.Value;
+            
+            app.daqBox.ConfigSaveStatus = false;
+            app.SystemConfigStatus = false;
+            
+            app.refreshMaintenanceUI();
+            app.refreshOperationUI();
+            
+        end
+
+        % Button pushed function: AddaStageButton
+        function AddaStageButtonPushed(app, event)
+            % Clear the Items and ItemsData cell arrays before they are rebuilt with the newest values
+            app.StageNumberDropDown.Items = {'1'};
+            app.StageNumberDropDown.ItemsData = {1};
+            
+            for StageNumber = 1:(app.stageController.NumberOfStages + 1)
+                app.StageNumberDropDown.Items{StageNumber} = int2str(StageNumber);
+                app.StageNumberDropDown.ItemsData{StageNumber} = StageNumber;
+                
+            end
+            app.StageNumberDropDown.Value = StageNumber;
+            
+            % Update the values displayed in the "Add a Stage" panel
+            app.StartTempEditField.Value = 0;
+            app.RampUpRateCminEditField.Value = 0;
+            app.EndTempEditField.Value = 0;
+            app.HoldTimeEditField.Value = 0;
+            
+            % Update the values displayed in the staging table
+            app.refreshStagingTable();
+            
+            app.ExperimentStagingConfigurationPanel.Visible = 'off';
+            app.AddaStagePanel.Visible = 'on';
+            
+        end
+
+        % Button pushed function: AddStageButton
+        function AddStageButtonPushed(app, event)
+            NewStageNumber = app.StageNumberDropDown.Value;
+            
+            % Convert units from Celsius to Kelvin if necessary
+            switch app.TemperatureUnits
+                case 'Celsius'
+                    StartTemp = app.StartTempEditField.Value;
+                    EndTemp = app.EndTempEditField.Value;
+                    
+                case 'Kelvin'
+                    StartTemp = kel2cel(app.StartTempEditField.Value);
+                    EndTemp = kel2cel(app.EndTempEditField.Value);
+                    
+            end
+            
+            RampUpRate = app.RampUpRateCminEditField.Value;
+            
+            HoldTime = app.HoldTimeEditField.Value;
+            
+            % Add the stage
+            app.stageController.addStage(NewStageNumber, StartTemp, RampUpRate, EndTemp, HoldTime);
+            
+            % Update the values displayed in the staging table
+            app.refreshStagingTable();
+            
+            app.AddaStagePanel.Visible = 'off';
+            app.ExperimentStagingConfigurationPanel.Visible = 'on';
+            
+        end
+
+        % Button pushed function: CancelButton
+        function CancelButtonPushed(app, event)
+            % Update the values displayed in the staging table
+            app.refreshStagingTable();
+            
+            app.AddaStagePanel.Visible = 'off';
+            app.ExperimentStagingConfigurationPanel.Visible = 'on';
+            
+        end
+
+        % Button pushed function: EditaStageButton
+        function EditaStageButtonPushed(app, event)
+            % Clear the Items and ItemsData cell arrays before they are rebuilt with the newest values
+            app.StageNumberDropDown_2.Items = {'1'};
+            app.StageNumberDropDown_2.ItemsData = {1};
+            
+            for StageNumber = 1:(app.stageController.NumberOfStages)
+                app.StageNumberDropDown_2.Items{StageNumber} = int2str(StageNumber);
+                app.StageNumberDropDown_2.ItemsData{StageNumber} = StageNumber;
+                
+            end
+            
+            app.StageNumberDropDown_2.Value = StageNumber;
+            
+            % Convert units from Celsius to Kelvin if necessary
+            switch app.TemperatureUnits
+                case 'Celsius'
+                    StartTemp = app.stageController.getStartTemp(StageNumber);
+                    EndTemp = app.stageController.getEndTemp(StageNumber);
+                    
+                case 'Kelvin'
+                    StartTemp = cel2kel(app.stageController.getStartTemp(StageNumber));
+                    EndTemp = cel2kel(app.stageController.getEndTemp(StageNumber));
+                    
+            end
+            
+            % Update the values displayed in the "Edit a Stage" panel
+            app.StartTempEditField_2.Value = StartTemp;
+            app.RampUpRateCminEditField_2.Value = app.stageController.getRampUpRate(StageNumber);
+            app.EndTempEditField_2.Value = EndTemp;
+            app.HoldTimeEditField_2.Value = app.stageController.getHoldTime(StageNumber);
+            
+            % Update the values displayed in the staging table
+            app.refreshStagingTable();
+            
+            app.ExperimentStagingConfigurationPanel.Visible = 'off';
+            app.EditaStagePanel.Visible = 'on';
+            
+        end
+
+        % Callback function
+        function StageNumberDropDown_2ValueChanged(app, event)
+            StageNumber = app.StageNumberDropDown_2.Value;
+            
+            % Convert units from Celsius to Kelvin if necessary
+            switch app.TemperatureUnits
+                case 'Celsius'
+                    StartTemp = app.stageController.getStartTemp(StageNumber);
+                    EndTemp = app.stageController.getEndTemp(StageNumber);
+                    
+                case 'Kelvin'
+                    StartTemp = cel2kel(app.stageController.getStartTemp(StageNumber));
+                    EndTemp = cel2kel(app.stageController.getEndTemp(StageNumber));
+                    
+            end
+            
+            % Update the values displayed in the "Edit a Stage" panel
+            app.StartTempEditField_2.Value = StartTemp;
+            app.RampUpRateCminEditField_2.Value = app.stageController.getRampUpRate(StageNumber);
+            app.EndTempEditField_2.Value = EndTemp;
+            app.HoldTimeEditField_2.Value = app.stageController.getHoldTime(StageNumber);
+            
+            % Update the values displayed in the staging table
+            app.refreshStagingTable();
+            
+        end
+
+        % Button pushed function: ApplyChangesButton
+        function ApplyChangesButtonPushed(app, event)
+            StageNumber = app.StageNumberDropDown_2.Value;
+            
+            % Convert units from Celsius to Kelvin if necessary
+            switch app.TemperatureUnits
+                case 'Celsius'
+                    StartTemp = app.StartTempEditField_2.Value;
+                    EndTemp = app.EndTempEditField_2.Value;
+                    
+                case 'Kelvin'
+                    StartTemp = kel2cel(app.StartTempEditField_2.Value);
+                    EndTemp = kel2cel(app.EndTempEditField_2.Value);
+                    
+            end
+            
+            RampUpRate = app.RampUpRateCminEditField_2.Value;
+            
+            HoldTime = app.HoldTimeEditField_2.Value;
+            
+            % Have the new stage parameters added to the table
+            app.stageController.editStage(StageNumber, StartTemp, RampUpRate, EndTemp, HoldTime);
+            
+            % Update the values displayed in the staging table
+            app.refreshStagingTable();
+            
+            app.EditaStagePanel.Visible = 'off';
+            app.ExperimentStagingConfigurationPanel.Visible = 'on';
+            
+        end
+
+        % Button pushed function: CancelButton_2
+        function CancelButton_2Pushed(app, event)
+            % Update the values displayed in the staging table
+            app.refreshStagingTable();
+            
+            app.EditaStagePanel.Visible = 'off';
+            app.ExperimentStagingConfigurationPanel.Visible = 'on';
+            
+        end
+
+        % Button pushed function: RemoveaStageButton
+        function RemoveaStageButtonPushed(app, event)
+            % Clear the Items and ItemsData cell arrays before they are rebuilt with the newest values
+            app.StageNumberDropDown_3.Items = {'1'};
+            app.StageNumberDropDown_3.ItemsData = {1};
+            
+            for StageNumber = 1:(app.stageController.NumberOfStages)
+                app.StageNumberDropDown_3.Items{StageNumber} = int2str(StageNumber);
+                app.StageNumberDropDown_3.ItemsData{StageNumber} = StageNumber;
+                
+            end
+            
+            app.StageNumberDropDown_3.Value = StageNumber;
+            
+            % Convert units from Celsius to Kelvin if necessary
+            switch app.TemperatureUnits
+                case 'Celsius'
+                    StartTemp = app.stageController.getStartTemp(StageNumber);
+                    EndTemp = app.stageController.getEndTemp(StageNumber);
+                    
+                case 'Kelvin'
+                    StartTemp = cel2kel(app.stageController.getStartTemp(StageNumber));
+                    EndTemp = cel2kel(app.stageController.getEndTemp(StageNumber));
+                    
+            end
+            
+            % Update the values displayed in the "Remove a Stage" panel
+            app.StartTempEditField_3.Value = StartTemp;
+            app.RampUpRateCminEditField_3.Value = app.stageController.getRampUpRate(StageNumber);
+            app.EndTempEditField_3.Value = EndTemp;
+            app.HoldTimeEditField_3.Value = app.stageController.getHoldTime(StageNumber);
+            
+            
+            % Update the values displayed in the staging table
+            app.refreshStagingTable();
+            
+            app.ExperimentStagingConfigurationPanel.Visible = 'off';
+            app.RemoveaStagePanel.Visible = 'on';
+            
+        end
+
+        % Callback function
+        function StageNumberDropDown_3ValueChanged(app, event)
+            StageNumber = app.StageNumberDropDown_3.Value;
+            
+            % Convert units from Celsius to Kelvin if necessary
+            switch app.TemperatureUnits
+                case 'Celsius'
+                    StartTemp = app.stageController.getStartTemp(StageNumber);
+                    EndTemp = app.stageController.getEndTemp(StageNumber);
+                    
+                case 'Kelvin'
+                    StartTemp = cel2kel(app.stageController.getStartTemp(StageNumber));
+                    EndTemp = cel2kel(app.stageController.getEndTemp(StageNumber));
+                    
+            end
+            
+            % Update the values displayed in the "Remove a Stage" panel
+            app.StartTempEditField_3.Value = StartTemp;
+            app.RampUpRateCminEditField_3.Value = app.stageController.getRampUpRate(StageNumber);
+            app.EndTempEditField_3.Value = EndTemp;
+            app.HoldTimeEditField_3.Value = app.stageController.getHoldTime(StageNumber);
+            
+            % Update the values displayed in the staging table
+            app.refreshStagingTable();
+            
+        end
+
+        % Button pushed function: RemoveStageButton
+        function RemoveStageButtonPushed(app, event)
+            StageNumber = app.StageNumberDropDown_3.Value;
+            
+            % Have the specified stage removed from the table
+            app.stageController.removeStage(StageNumber);
+            
+            % Update the values displayed in the staging table
+            app.refreshStagingTable();
+            
+            app.RemoveaStagePanel.Visible = 'off';
+            app.ExperimentStagingConfigurationPanel.Visible = 'on';
+            
+        end
+
+        % Button pushed function: CancelButton_3
+        function CancelButton_3Pushed(app, event)
+            % Update the values displayed in the staging table
+            app.refreshStagingTable();
+            
+            app.RemoveaStagePanel.Visible = 'off';
+            app.ExperimentStagingConfigurationPanel.Visible = 'on';
+            
+        end
+
+        % Selection change function: TabGroup
+        function TabGroupSelectionChanged(app, event)
+            switch app.TabGroup.SelectedTab
+                case app.OperationTab
+                    app.refreshOperationUI();
+                    
+                case app.AnalysisTab
+                    app.refreshAnalysisUI();
+                    
+                case app.MaintenanceTab
+                    % Prevent the user from opening the Maintenance Tab if the experiment is currently running
+                    if app.stageController.ExperimentInProgress
+                        warndlg('The configuration parameters on the Maintenance Tab cannot be edited while an experiment is running')
+                        app.TabGroup.SelectedTab = app.OperationTab;
+                        
+                    else
+                        app.refreshMaintenanceUI();
+                        
+                    end
+                    
+            end
+            
+        end
+
+        % Button pushed function: SkipCurrentStageButton
+        function SkipCurrentStageButtonPushed(app, event)
+            app.StopExperimentButton.Enable = 'off';
+            app.SkipCurrentStageButton.Enable = 'off';
+            drawnow nocallbacks
+            
+            app.skipCurrentStage();
+            
+            app.refreshOperationUI();
+            
+            drawnow
+            
+        end
+
         % Value changed function: CalibrationActualTempEditField
         function CalibrationActualTempEditFieldValueChanged(app, event)
             app.Calibration_Actual = app.CalibrationActualTempEditField.Value;
@@ -2498,9 +2465,16 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             
         end
 
-        % Cell selection callback: CalibrationDataUITable
-        function CalibrationDataUITableCellSelection(app, event)
-            % Refresh the maintenance tab
+        % Button pushed function: AddtoCalibrationDataButton
+        function AddtoCalibrationDataButtonPushed(app, event)
+            app.CalibrationData_Measured(end + 1) = app.Calibration_Measured;
+            app.CalibrationData_Actual(end + 1) = app.Calibration_Actual;
+            app.CalibrationData_Offset(end + 1) = app.Calibration_Offset;
+            
+            app.CalibrationData = [app.CalibrationData_Measured', app.CalibrationData_Actual', app.CalibrationData_Offset'];
+            
+            app.CalibrationDataUITable.Data = app.CalibrationData;
+            
             app.refreshMaintenanceUI();
             
         end
@@ -2541,20 +2515,6 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             
         end
 
-        % Button pushed function: AddtoCalibrationDataButton
-        function AddtoCalibrationDataButtonPushed(app, event)
-            app.CalibrationData_Measured(end + 1) = app.Calibration_Measured;
-            app.CalibrationData_Actual(end + 1) = app.Calibration_Actual;
-            app.CalibrationData_Offset(end + 1) = app.Calibration_Offset;
-            
-            app.CalibrationData = [app.CalibrationData_Measured', app.CalibrationData_Actual', app.CalibrationData_Offset'];
-            
-            app.CalibrationDataUITable.Data = app.CalibrationData;
-            
-            app.refreshMaintenanceUI();
-            
-        end
-
         % Button pushed function: SaveCalibrationOffsetButton
         function SaveCalibrationOffsetButtonPushed(app, event)
             switch app.SelectSensortoCalibrateButtonGroup.SelectedObject
@@ -2576,23 +2536,143 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             
         end
 
-        % Button pushed function: AutoCalibrateButton
-        function AutoCalibrateButtonPushed(app, event)
-            f = waitbar(0, 'Auto calibrating. Please wait...');
+        % Value changed function: KpproportionalgainSpinner
+        function KpproportionalgainSpinnerValueChanged(app, event)
+            app.daqBox.PID_Kp = app.KpproportionalgainSpinner.Value;
             
-            for n = 1:100
-                app.TakeMeasurementButtonPushed();
-                app.AddtoCalibrationDataButtonPushed();
-                pause(0.1)
-                try
-                    waitbar(n/100, f, 'Auto calibrating. Please wait...');
-                catch
-                    break
-                end
+            app.daqBox.ConfigSaveStatus = false;
+            app.SystemConfigStatus = false;
+            
+            app.refreshMaintenanceUI();
+            app.refreshOperationUI();
+            
+        end
+
+        % Value changed function: KiintegralgainSpinner
+        function KiintegralgainSpinnerValueChanged(app, event)
+            app.daqBox.PID_Ki = app.KiintegralgainSpinner.Value;
+            
+            app.daqBox.ConfigSaveStatus = false;
+            app.SystemConfigStatus = false;
+            
+            app.refreshMaintenanceUI();
+            app.refreshOperationUI();
+            
+        end
+
+        % Value changed function: KdderivativegainSpinner
+        function KdderivativegainSpinnerValueChanged(app, event)
+            app.daqBox.PID_Kd = app.KdderivativegainSpinner.Value;
+            
+            app.daqBox.ConfigSaveStatus = false;
+            app.SystemConfigStatus = false;
+            
+            app.refreshMaintenanceUI();
+            app.refreshOperationUI();
+            
+        end
+
+        % Button pushed function: LoadStagingFileButton
+        function LoadStagingFileButtonPushed(app, event)
+            app.stageController.loadStagingFile('user select');
+            
+            app.refreshOperationUI();
+            
+            app.refreshStagingTable();
+            
+        end
+
+        % Button pushed function: SaveStagingFileButton
+        function SaveStagingFileButtonPushed(app, event)
+            app.SaveStagingFileButton.Text = 'Saving Staging . . .';
+            
+            app.StagingSaveStatus = app.stageController.saveStagingFile();
+            
+            app.refreshOperationUI();
+            
+            if app.StagingSaveStatus
+                app.SaveStagingFileButton.Text = 'Staging Saved';
+                pause(1)
+                app.SaveStagingFileButton.Text = 'Save Staging File';
+                
+            else
+                app.SaveStagingFileButton.Text = 'Save Staging File';
+                
             end
             
-            % Attempt to close the waitbar
-            try close(f); catch, end
+        end
+
+        % Button pushed function: SaveAnalysisDataToExcelFileButton
+        function SaveAnalysisDataToExcelFileButtonPushed(app, event)
+            app.SaveAnalysisDataToExcelFileButton.Text = 'Saving Data . . .';
+            
+            app.AnalysisDataSaveStatus = app.analysisData.saveXlsxFile();
+            
+            app.refreshOperationUI(); % Update the UI with the new values
+            
+            if app.AnalysisDataSaveStatus
+                app.SaveAnalysisDataToExcelFileButton.Text = 'Data Saved';
+                pause(1)
+                app.SaveAnalysisDataToExcelFileButton.Text = 'Save Data To Excel File';
+                
+            else
+                app.SaveAnalysisDataToExcelFileButton.Text = 'Save Data To Excel File';
+                
+            end
+            
+        end
+
+        % Selection changed function: 
+        % SelectSensortoCalibrateButtonGroup
+        function SelectSensortoCalibrateButtonGroupSelectionChanged(app, event)
+            if app.CalibrationSelectionChanged
+                if ~isempty(app.CalibrationData)
+                    answer = questdlg(sprintf(['WARNING: Changing the sensor selection will clear the calibration data table.\n'...
+                        'However, any previously calculated calibration offset will still be saved.\n'...
+                        'Are you sure you want to proceed?']));
+                    
+                    switch answer
+                        case 'Yes'
+                            app.CalibrationData_Measured = [];
+                            app.CalibrationData_Actual = [];
+                            app.CalibrationData_Offset = [];
+                            app.CalibrationData = [];
+                            
+                            app.daqBox.ConfigSaveStatus = false;
+                            app.SystemConfigStatus = false;
+                            
+                            app.refreshMaintenanceUI();
+                            app.refreshOperationUI();
+                            
+                            app.CalibrationSelectionChanged = true;
+                            
+                        otherwise
+                            app.SelectSensortoCalibrateButtonGroup.SelectedObject = app.PreviousCalibrationSelection;
+                            
+                            app.CalibrationSelectionChanged = false;
+                    end
+                    
+                else
+                    app.CalibrationData_Measured = [];
+                    app.CalibrationData_Actual = [];
+                    app.CalibrationData_Offset = [];
+                    app.CalibrationData = [];
+                    
+                    app.daqBox.ConfigSaveStatus = false;
+                    app.SystemConfigStatus = false;
+                    
+                    app.refreshMaintenanceUI();
+                    app.refreshOperationUI();
+                    
+                    app.CalibrationSelectionChanged = true;
+                    
+                end
+            else
+                app.CalibrationSelectionChanged = true;
+                
+            end
+            
+            app.PreviousCalibrationSelection = app.SelectSensortoCalibrateButtonGroup.SelectedObject;
         end
 
         % Close request function: UIFigure
@@ -2650,151 +2730,83 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             
         end
 
-        % Button pushed function: SaveConfigToFileButton
-        function SaveConfigToFileButtonPushed(app, event)
-            app.SaveConfigToFileButton.Text = 'Saving Config . . .';
+        % Cell selection callback: TempControlStagingUITable
+        function TempControlStagingUITableCellSelection(app, event)
+            % Update the values displayed in the staging table
+            app.refreshStagingTable();
             
-            app.daqBox.saveConfigFile();
-            
+        end
+
+        % Cell selection callback: CalibrationDataUITable
+        function CalibrationDataUITableCellSelection(app, event)
+            % Refresh the maintenance tab
             app.refreshMaintenanceUI();
             
-            if app.daqBox.ConfigSaveStatus
-                app.SaveConfigToFileButton.Text = 'Config Saved';
+        end
+
+        % Value changed function: ReferenceSpecificHeatJgKSpinner_2
+        function ReferenceSpecificHeatJgKSpinner_2ValueChanged(app, event)
+            app.analysisData.ReferenceSampleData.SpecificHeat = app.ReferenceSpecificHeatJgKSpinner_2.Value;
+            
+            app.daqBox.ConfigSaveStatus = false;
+            app.SystemConfigStatus = false;
+            
+            app.refreshMaintenanceUI();
+            app.refreshOperationUI();
+            
+        end
+
+        % Button pushed function: ImportDataFromExcelFileButton
+        function ImportDataFromExcelFileButtonPushed(app, event)
+            app.DataLoadingTextArea.Visible = 'on';
+            
+            app.analysisData = DSCData();
+            
+            app.analysisData.loadXlsxFile();
+            
+            app.refreshAnalysisUI()
+            
+            app.DataLoadingTextArea.Visible = 'off';
+            
+        end
+
+        % Button pushed function: SaveAnalysisDataToMATFileButton
+        function SaveAnalysisDataToMATFileButtonPushed(app, event)
+            app.SaveAnalysisDataToMATFileButton.Text = 'Saving Data . . .';
+            
+            app.AnalysisDataSaveStatus = app.analysisData.saveMATFile();
+            
+            app.refreshOperationUI(); % Update the UI with the new values
+            
+            if app.AnalysisDataSaveStatus
+                app.SaveAnalysisDataToMATFileButton.Text = 'Data Saved';
                 pause(1)
-                app.SaveConfigToFileButton.Text = 'Save Config To File';
+                app.SaveAnalysisDataToMATFileButton.Text = 'Save Data To MAT File';
                 
             else
-                app.SaveConfigToFileButton.Text = 'Save Config To File';
+                app.SaveAnalysisDataToMATFileButton.Text = 'Save Data To MAT File';
                 
             end
             
         end
 
-        % Button pushed function: ApplyConfigChangesButton
-        function ApplyConfigChangesButtonPushed(app, event)
-            if isempty(app.daqBox) || ~isvalid(app.daqBox)
-                app.SystemConfigStatus = false;
-                
-                app.refreshMaintenanceUI();
-                app.refreshOperationUI();
-                
-                warndlg('DAQ Box must be configured')
-                
-            else
-                app.SystemConfigStatus = true;
-                
-                app.refreshMaintenanceUI();
-                app.refreshOperationUI();
-                
-            end
+        % Button pushed function: AutoCalibrateButton
+        function AutoCalibrateButtonPushed(app, event)
+            f = waitbar(0, 'Auto calibrating. Please wait...');
             
-        end
-
-        % Value changed function: KpproportionalgainSpinner
-        function KpproportionalgainSpinnerValueChanged(app, event)
-            app.daqBox.PID_Kp = app.KpproportionalgainSpinner.Value;
-            
-            app.daqBox.ConfigSaveStatus = false;
-            app.SystemConfigStatus = false;
-            
-            app.refreshMaintenanceUI();
-            app.refreshOperationUI();
-            
-        end
-
-        % Value changed function: KiintegralgainSpinner
-        function KiintegralgainSpinnerValueChanged(app, event)
-            app.daqBox.PID_Ki = app.KiintegralgainSpinner.Value;
-            
-            app.daqBox.ConfigSaveStatus = false;
-            app.SystemConfigStatus = false;
-            
-            app.refreshMaintenanceUI();
-            app.refreshOperationUI();
-            
-        end
-
-        % Value changed function: KdderivativegainSpinner
-        function KdderivativegainSpinnerValueChanged(app, event)
-            app.daqBox.PID_Kd = app.KdderivativegainSpinner.Value;
-            
-            app.daqBox.ConfigSaveStatus = false;
-            app.SystemConfigStatus = false;
-            
-            app.refreshMaintenanceUI();
-            app.refreshOperationUI();
-            
-        end
-
-        % Selection changed function: 
-        % SelectSensortoCalibrateButtonGroup
-        function SelectSensortoCalibrateButtonGroupSelectionChanged(app, event)
-            if app.CalibrationSelectionChanged
-                if ~isempty(app.CalibrationData)
-                    answer = questdlg(sprintf(['WARNING: Changing the sensor selection will clear the calibration data table.\n'...
-                        'However, any previously calculated calibration offset will still be saved.\n'...
-                        'Are you sure you want to proceed?']));
-                    
-                    switch answer
-                        case 'Yes'
-                            app.CalibrationData_Measured = [];
-                            app.CalibrationData_Actual = [];
-                            app.CalibrationData_Offset = [];
-                            app.CalibrationData = [];
-                            
-                            app.daqBox.ConfigSaveStatus = false;
-                            app.SystemConfigStatus = false;
-                            
-                            app.refreshMaintenanceUI();
-                            app.refreshOperationUI();
-                            
-                            app.CalibrationSelectionChanged = true;
-                            
-                        otherwise
-                            app.SelectSensortoCalibrateButtonGroup.SelectedObject = app.PreviousCalibrationSelection;
-                            
-                            app.CalibrationSelectionChanged = false;
-                    end
-                    
-                else
-                    app.CalibrationData_Measured = [];
-                    app.CalibrationData_Actual = [];
-                    app.CalibrationData_Offset = [];
-                    app.CalibrationData = [];
-                    
-                    app.daqBox.ConfigSaveStatus = false;
-                    app.SystemConfigStatus = false;
-                    
-                    app.refreshMaintenanceUI();
-                    app.refreshOperationUI();
-                    
-                    app.CalibrationSelectionChanged = true;
-                    
+            for n = 1:100
+                app.TakeMeasurementButtonPushed();
+                app.AddtoCalibrationDataButtonPushed();
+                pause(0.1)
+                try
+                    waitbar(n/100, f, 'Auto calibrating. Please wait...');
+                catch
+                    break
                 end
-            else
-                app.CalibrationSelectionChanged = true;
-                
             end
             
-            app.PreviousCalibrationSelection = app.SelectSensortoCalibrateButtonGroup.SelectedObject;
-        end
-
-        % Changes arrangement of the app based on UIFigure width
-        function updateAppLayout(app, event)
-            currentFigureWidth = app.UIFigure.Position(3);
-            if(currentFigureWidth <= app.onePanelWidth)
-                % Change to a 2x1 grid
-                app.GridLayout.RowHeight = {640, 640};
-                app.GridLayout.ColumnWidth = {'1x'};
-                app.RightPanel.Layout.Row = 2;
-                app.RightPanel.Layout.Column = 1;
-            else
-                % Change to a 1x2 grid
-                app.GridLayout.RowHeight = {'1x'};
-                app.GridLayout.ColumnWidth = {352, '1x'};
-                app.RightPanel.Layout.Row = 1;
-                app.RightPanel.Layout.Column = 2;
-            end
+            % Attempt to close the waitbar
+            try close(f); catch, end
         end
     end
 
@@ -2823,13 +2835,15 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
 
             % Create LeftPanel
             app.LeftPanel = uipanel(app.GridLayout);
+            app.LeftPanel.BackgroundColor = [0.502 0.502 0.502];
             app.LeftPanel.Layout.Row = 1;
             app.LeftPanel.Layout.Column = 1;
+            app.LeftPanel.Scrollable = 'on';
 
             % Create GridLayout2
             app.GridLayout2 = uigridlayout(app.LeftPanel);
             app.GridLayout2.ColumnWidth = {140, 160, '1x'};
-            app.GridLayout2.RowHeight = {30, 30, 30, 60, 30, 60, 30, 60, 120, 120};
+            app.GridLayout2.RowHeight = {30, 30, 30, 96, 60, 30, 60, 120, 120};
             app.GridLayout2.RowSpacing = 6;
             app.GridLayout2.Padding = [10 6 10 6];
 
@@ -2888,112 +2902,154 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             app.ReferenceSampleLiveDataPanel = uipanel(app.GridLayout2);
             app.ReferenceSampleLiveDataPanel.Title = 'Reference Sample Live Data';
             app.ReferenceSampleLiveDataPanel.BackgroundColor = [0.9412 0.9412 0.9412];
-            app.ReferenceSampleLiveDataPanel.Layout.Row = [4 5];
+            app.ReferenceSampleLiveDataPanel.Layout.Row = 4;
             app.ReferenceSampleLiveDataPanel.Layout.Column = [2 3];
             app.ReferenceSampleLiveDataPanel.FontWeight = 'bold';
 
-            % Create ReferenceCurrentEditField_2
-            app.ReferenceCurrentEditField_2 = uieditfield(app.ReferenceSampleLiveDataPanel, 'numeric');
-            app.ReferenceCurrentEditField_2.ValueDisplayFormat = '%.2f';
-            app.ReferenceCurrentEditField_2.Editable = 'off';
-            app.ReferenceCurrentEditField_2.Position = [11 44 60 22];
+            % Create GridLayout22
+            app.GridLayout22 = uigridlayout(app.ReferenceSampleLiveDataPanel);
+            app.GridLayout22.ColumnWidth = {60, '1x'};
+            app.GridLayout22.RowHeight = {22, 22};
+            app.GridLayout22.ColumnSpacing = 6;
+            app.GridLayout22.Padding = [6 10 6 10];
 
-            % Create ReferenceTemperatureEditField_2
-            app.ReferenceTemperatureEditField_2 = uieditfield(app.ReferenceSampleLiveDataPanel, 'numeric');
-            app.ReferenceTemperatureEditField_2.ValueDisplayFormat = '%.2f';
-            app.ReferenceTemperatureEditField_2.Editable = 'off';
-            app.ReferenceTemperatureEditField_2.Position = [11 14 60 22];
+            % Create ReferenceCurrentEditField
+            app.ReferenceCurrentEditField = uieditfield(app.GridLayout22, 'numeric');
+            app.ReferenceCurrentEditField.ValueDisplayFormat = '%.2f';
+            app.ReferenceCurrentEditField.Editable = 'off';
+            app.ReferenceCurrentEditField.Layout.Row = 1;
+            app.ReferenceCurrentEditField.Layout.Column = 1;
+
+            % Create ReferenceTemperatureEditField
+            app.ReferenceTemperatureEditField = uieditfield(app.GridLayout22, 'numeric');
+            app.ReferenceTemperatureEditField.ValueDisplayFormat = '%.2f';
+            app.ReferenceTemperatureEditField.Editable = 'off';
+            app.ReferenceTemperatureEditField.Layout.Row = 2;
+            app.ReferenceTemperatureEditField.Layout.Column = 1;
 
             % Create ReferenceCurrentGaugeLabel_2
-            app.ReferenceCurrentGaugeLabel_2 = uilabel(app.ReferenceSampleLiveDataPanel);
-            app.ReferenceCurrentGaugeLabel_2.Position = [81 44 100 22];
+            app.ReferenceCurrentGaugeLabel_2 = uilabel(app.GridLayout22);
+            app.ReferenceCurrentGaugeLabel_2.Layout.Row = 1;
+            app.ReferenceCurrentGaugeLabel_2.Layout.Column = 2;
             app.ReferenceCurrentGaugeLabel_2.Text = 'Current (A)';
 
-            % Create ReferenceTemperatureGaugeLabel_2
-            app.ReferenceTemperatureGaugeLabel_2 = uilabel(app.ReferenceSampleLiveDataPanel);
-            app.ReferenceTemperatureGaugeLabel_2.Position = [81 14 100 22];
-            app.ReferenceTemperatureGaugeLabel_2.Text = 'Temperature (C)';
+            % Create ReferenceTemperatureGaugeLabel
+            app.ReferenceTemperatureGaugeLabel = uilabel(app.GridLayout22);
+            app.ReferenceTemperatureGaugeLabel.Layout.Row = 2;
+            app.ReferenceTemperatureGaugeLabel.Layout.Column = 2;
+            app.ReferenceTemperatureGaugeLabel.Text = 'Temperature (C)';
 
             % Create TestSampleLiveDataPanel
             app.TestSampleLiveDataPanel = uipanel(app.GridLayout2);
             app.TestSampleLiveDataPanel.Title = 'Test Sample Live Data';
             app.TestSampleLiveDataPanel.BackgroundColor = [0.9412 0.9412 0.9412];
-            app.TestSampleLiveDataPanel.Layout.Row = [6 7];
+            app.TestSampleLiveDataPanel.Layout.Row = [5 6];
             app.TestSampleLiveDataPanel.Layout.Column = [2 3];
             app.TestSampleLiveDataPanel.FontWeight = 'bold';
 
-            % Create TestSampleCurrentEditField_2
-            app.TestSampleCurrentEditField_2 = uieditfield(app.TestSampleLiveDataPanel, 'numeric');
-            app.TestSampleCurrentEditField_2.ValueDisplayFormat = '%.2f';
-            app.TestSampleCurrentEditField_2.Editable = 'off';
-            app.TestSampleCurrentEditField_2.Position = [11 44 60 22];
+            % Create GridLayout23
+            app.GridLayout23 = uigridlayout(app.TestSampleLiveDataPanel);
+            app.GridLayout23.ColumnWidth = {60, '1x'};
+            app.GridLayout23.RowHeight = {22, 22};
+            app.GridLayout23.ColumnSpacing = 6;
+            app.GridLayout23.Padding = [6 10 6 10];
 
-            % Create TestSampleTemperatureEditField_2
-            app.TestSampleTemperatureEditField_2 = uieditfield(app.TestSampleLiveDataPanel, 'numeric');
-            app.TestSampleTemperatureEditField_2.ValueDisplayFormat = '%.2f';
-            app.TestSampleTemperatureEditField_2.Editable = 'off';
-            app.TestSampleTemperatureEditField_2.Position = [11 14 60 22];
+            % Create TestSampleCurrentEditField
+            app.TestSampleCurrentEditField = uieditfield(app.GridLayout23, 'numeric');
+            app.TestSampleCurrentEditField.ValueDisplayFormat = '%.2f';
+            app.TestSampleCurrentEditField.Editable = 'off';
+            app.TestSampleCurrentEditField.Layout.Row = 1;
+            app.TestSampleCurrentEditField.Layout.Column = 1;
+
+            % Create TestSampleTemperatureEditField
+            app.TestSampleTemperatureEditField = uieditfield(app.GridLayout23, 'numeric');
+            app.TestSampleTemperatureEditField.ValueDisplayFormat = '%.2f';
+            app.TestSampleTemperatureEditField.Editable = 'off';
+            app.TestSampleTemperatureEditField.Layout.Row = 2;
+            app.TestSampleTemperatureEditField.Layout.Column = 1;
 
             % Create TestSampleCurrentGaugeLabel_2
-            app.TestSampleCurrentGaugeLabel_2 = uilabel(app.TestSampleLiveDataPanel);
-            app.TestSampleCurrentGaugeLabel_2.Position = [81 44 100 22];
+            app.TestSampleCurrentGaugeLabel_2 = uilabel(app.GridLayout23);
+            app.TestSampleCurrentGaugeLabel_2.Layout.Row = 1;
+            app.TestSampleCurrentGaugeLabel_2.Layout.Column = 2;
             app.TestSampleCurrentGaugeLabel_2.Text = 'Current (A)';
 
-            % Create TestSampleTemperatureGaugeLabel_2
-            app.TestSampleTemperatureGaugeLabel_2 = uilabel(app.TestSampleLiveDataPanel);
-            app.TestSampleTemperatureGaugeLabel_2.Position = [81 14 100 22];
-            app.TestSampleTemperatureGaugeLabel_2.Text = 'Temperature (C)';
+            % Create TestSampleTemperatureGaugeLabel
+            app.TestSampleTemperatureGaugeLabel = uilabel(app.GridLayout23);
+            app.TestSampleTemperatureGaugeLabel.Layout.Row = 2;
+            app.TestSampleTemperatureGaugeLabel.Layout.Column = 2;
+            app.TestSampleTemperatureGaugeLabel.Text = 'Temperature (C)';
 
             % Create TargetTemperatureLiveDataPanel
             app.TargetTemperatureLiveDataPanel = uipanel(app.GridLayout2);
             app.TargetTemperatureLiveDataPanel.Title = 'Target Temperature Live Data';
             app.TargetTemperatureLiveDataPanel.BackgroundColor = [0.9412 0.9412 0.9412];
-            app.TargetTemperatureLiveDataPanel.Layout.Row = 8;
+            app.TargetTemperatureLiveDataPanel.Layout.Row = 7;
             app.TargetTemperatureLiveDataPanel.Layout.Column = [2 3];
             app.TargetTemperatureLiveDataPanel.FontWeight = 'bold';
 
-            % Create TargetTemperatureEditField_2
-            app.TargetTemperatureEditField_2 = uieditfield(app.TargetTemperatureLiveDataPanel, 'numeric');
-            app.TargetTemperatureEditField_2.ValueDisplayFormat = '%.2f';
-            app.TargetTemperatureEditField_2.Editable = 'off';
-            app.TargetTemperatureEditField_2.Position = [11 8 60 22];
+            % Create GridLayout24
+            app.GridLayout24 = uigridlayout(app.TargetTemperatureLiveDataPanel);
+            app.GridLayout24.ColumnWidth = {60, '1x'};
+            app.GridLayout24.RowHeight = {22};
+            app.GridLayout24.ColumnSpacing = 6;
+            app.GridLayout24.Padding = [6 8.5 6 8.5];
 
-            % Create TargetTemperatureGaugeLabel_2
-            app.TargetTemperatureGaugeLabel_2 = uilabel(app.TargetTemperatureLiveDataPanel);
-            app.TargetTemperatureGaugeLabel_2.Position = [81 8 100 22];
-            app.TargetTemperatureGaugeLabel_2.Text = 'Temperature (C)';
+            % Create TargetTemperatureEditField
+            app.TargetTemperatureEditField = uieditfield(app.GridLayout24, 'numeric');
+            app.TargetTemperatureEditField.ValueDisplayFormat = '%.2f';
+            app.TargetTemperatureEditField.Editable = 'off';
+            app.TargetTemperatureEditField.Layout.Row = 1;
+            app.TargetTemperatureEditField.Layout.Column = 1;
+
+            % Create TargetTemperatureGaugeLabel
+            app.TargetTemperatureGaugeLabel = uilabel(app.GridLayout24);
+            app.TargetTemperatureGaugeLabel.Layout.Row = 1;
+            app.TargetTemperatureGaugeLabel.Layout.Column = 2;
+            app.TargetTemperatureGaugeLabel.Text = 'Temperature (C)';
 
             % Create CurrentStageClocksPanel
             app.CurrentStageClocksPanel = uipanel(app.GridLayout2);
             app.CurrentStageClocksPanel.Title = 'Current Stage Clocks';
-            app.CurrentStageClocksPanel.Layout.Row = [5 8];
+            app.CurrentStageClocksPanel.Layout.Row = [5 7];
             app.CurrentStageClocksPanel.Layout.Column = 1;
             app.CurrentStageClocksPanel.FontWeight = 'bold';
 
-            % Create ElapsedTimeLabel
-            app.ElapsedTimeLabel = uilabel(app.CurrentStageClocksPanel);
-            app.ElapsedTimeLabel.HorizontalAlignment = 'right';
-            app.ElapsedTimeLabel.Position = [11 145 88 22];
-            app.ElapsedTimeLabel.Text = {'Elapsed Time: '; ''};
+            % Create GridLayout20
+            app.GridLayout20 = uigridlayout(app.CurrentStageClocksPanel);
+            app.GridLayout20.ColumnWidth = {'1x'};
+            app.GridLayout20.RowHeight = {28, 22, '1x', 28, 22};
+            app.GridLayout20.RowSpacing = 6;
+            app.GridLayout20.Padding = [10 6 10 6];
+
+            % Create ElapsedTimeStage0Label
+            app.ElapsedTimeStage0Label = uilabel(app.GridLayout20);
+            app.ElapsedTimeStage0Label.HorizontalAlignment = 'center';
+            app.ElapsedTimeStage0Label.Layout.Row = 1;
+            app.ElapsedTimeStage0Label.Layout.Column = 1;
+            app.ElapsedTimeStage0Label.Text = {'Elapsed Time'; '(Stage 0):'; ''};
 
             % Create CurrentStage_ElapsedTimeEditField
-            app.CurrentStage_ElapsedTimeEditField = uieditfield(app.CurrentStageClocksPanel, 'text');
+            app.CurrentStage_ElapsedTimeEditField = uieditfield(app.GridLayout20, 'text');
             app.CurrentStage_ElapsedTimeEditField.Editable = 'off';
             app.CurrentStage_ElapsedTimeEditField.HorizontalAlignment = 'right';
-            app.CurrentStage_ElapsedTimeEditField.Position = [51 125 80 22];
+            app.CurrentStage_ElapsedTimeEditField.Layout.Row = 2;
+            app.CurrentStage_ElapsedTimeEditField.Layout.Column = 1;
             app.CurrentStage_ElapsedTimeEditField.Value = '00:00:00.000';
 
             % Create EstimatedTimeRemainingLabel
-            app.EstimatedTimeRemainingLabel = uilabel(app.CurrentStageClocksPanel);
-            app.EstimatedTimeRemainingLabel.HorizontalAlignment = 'right';
-            app.EstimatedTimeRemainingLabel.Position = [11 79 100 28];
-            app.EstimatedTimeRemainingLabel.Text = {'Estimated Time '; 'Remaining: '; ''};
+            app.EstimatedTimeRemainingLabel = uilabel(app.GridLayout20);
+            app.EstimatedTimeRemainingLabel.HorizontalAlignment = 'center';
+            app.EstimatedTimeRemainingLabel.Layout.Row = 4;
+            app.EstimatedTimeRemainingLabel.Layout.Column = 1;
+            app.EstimatedTimeRemainingLabel.Text = {'Estimated '; 'Time Remaining: '; ''};
 
             % Create CurrentStage_EstimatedTimeRemainingEditField
-            app.CurrentStage_EstimatedTimeRemainingEditField = uieditfield(app.CurrentStageClocksPanel, 'text');
+            app.CurrentStage_EstimatedTimeRemainingEditField = uieditfield(app.GridLayout20, 'text');
             app.CurrentStage_EstimatedTimeRemainingEditField.Editable = 'off';
             app.CurrentStage_EstimatedTimeRemainingEditField.HorizontalAlignment = 'right';
-            app.CurrentStage_EstimatedTimeRemainingEditField.Position = [51 55 80 22];
+            app.CurrentStage_EstimatedTimeRemainingEditField.Layout.Row = 5;
+            app.CurrentStage_EstimatedTimeRemainingEditField.Layout.Column = 1;
             app.CurrentStage_EstimatedTimeRemainingEditField.Value = '00:00:00.000';
 
             % Create ExperimentClockPanel
@@ -3003,23 +3059,30 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             app.ExperimentClockPanel.Layout.Column = 1;
             app.ExperimentClockPanel.FontWeight = 'bold';
 
-            % Create ElapsedTimeEditFieldLabel
-            app.ElapsedTimeEditFieldLabel = uilabel(app.ExperimentClockPanel);
-            app.ElapsedTimeEditFieldLabel.HorizontalAlignment = 'right';
-            app.ElapsedTimeEditFieldLabel.Position = [11 8 40 22];
-            app.ElapsedTimeEditFieldLabel.Text = {'Time: '; ''};
+            % Create GridLayout21
+            app.GridLayout21 = uigridlayout(app.ExperimentClockPanel);
+            app.GridLayout21.ColumnWidth = {'1x'};
+            app.GridLayout21.RowHeight = {22, 22};
+
+            % Create TotalTimeLabel
+            app.TotalTimeLabel = uilabel(app.GridLayout21);
+            app.TotalTimeLabel.HorizontalAlignment = 'center';
+            app.TotalTimeLabel.Layout.Row = 1;
+            app.TotalTimeLabel.Layout.Column = 1;
+            app.TotalTimeLabel.Text = {'Total Time: '; ''};
 
             % Create ElapsedTimeEditField
-            app.ElapsedTimeEditField = uieditfield(app.ExperimentClockPanel, 'text');
+            app.ElapsedTimeEditField = uieditfield(app.GridLayout21, 'text');
             app.ElapsedTimeEditField.Editable = 'off';
             app.ElapsedTimeEditField.HorizontalAlignment = 'right';
-            app.ElapsedTimeEditField.Position = [51 8 80 22];
+            app.ElapsedTimeEditField.Layout.Row = 2;
+            app.ElapsedTimeEditField.Layout.Column = 1;
             app.ElapsedTimeEditField.Value = '00:00:00.000';
 
             % Create ReferenceSamplePropertiesPanel
             app.ReferenceSamplePropertiesPanel = uipanel(app.GridLayout2);
             app.ReferenceSamplePropertiesPanel.Title = 'Reference Sample Properties';
-            app.ReferenceSamplePropertiesPanel.Layout.Row = 9;
+            app.ReferenceSamplePropertiesPanel.Layout.Row = 8;
             app.ReferenceSamplePropertiesPanel.Layout.Column = [1 3];
             app.ReferenceSamplePropertiesPanel.FontWeight = 'bold';
 
@@ -3066,7 +3129,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             % Create TestSamplePropertiesPanel
             app.TestSamplePropertiesPanel = uipanel(app.GridLayout2);
             app.TestSamplePropertiesPanel.Title = 'Test Sample Properties';
-            app.TestSamplePropertiesPanel.Layout.Row = 10;
+            app.TestSamplePropertiesPanel.Layout.Row = 9;
             app.TestSamplePropertiesPanel.Layout.Column = [1 3];
             app.TestSamplePropertiesPanel.FontWeight = 'bold';
 
@@ -3101,15 +3164,22 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             app.RightPanel.Layout.Row = 1;
             app.RightPanel.Layout.Column = 2;
 
+            % Create GridLayout18
+            app.GridLayout18 = uigridlayout(app.RightPanel);
+            app.GridLayout18.ColumnWidth = {'1x'};
+            app.GridLayout18.RowHeight = {'1x'};
+            app.GridLayout18.Padding = [0 0 0 0];
+
             % Create TabGroup
-            app.TabGroup = uitabgroup(app.RightPanel);
+            app.TabGroup = uitabgroup(app.GridLayout18);
             app.TabGroup.SelectionChangedFcn = createCallbackFcn(app, @TabGroupSelectionChanged, true);
-            app.TabGroup.Position = [6 1 902 640];
+            app.TabGroup.Layout.Row = 1;
+            app.TabGroup.Layout.Column = 1;
 
             % Create OperationTab
             app.OperationTab = uitab(app.TabGroup);
             app.OperationTab.Title = 'Operation';
-            app.OperationTab.BackgroundColor = [0.9412 0.9412 0.9412];
+            app.OperationTab.BackgroundColor = [0.149 0.149 0.149];
 
             % Create GridLayout3
             app.GridLayout3 = uigridlayout(app.OperationTab);
@@ -3173,7 +3243,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             % Create TempControlStagingUITable
             app.TempControlStagingUITable = uitable(app.GridLayout13);
             app.TempControlStagingUITable.ColumnName = {'Stage'; 'Start T (*C)'; 'Rate (C/min)'; 'End T (*C)'; 'Hold Time (sec)'};
-            app.TempControlStagingUITable.ColumnWidth = {50, 80, 80, 75, 105};
+            app.TempControlStagingUITable.ColumnWidth = {50, 80, 85, 80, 110};
             app.TempControlStagingUITable.RowName = {};
             app.TempControlStagingUITable.CellSelectionCallback = createCallbackFcn(app, @TempControlStagingUITableCellSelection, true);
             app.TempControlStagingUITable.Layout.Row = 3;
@@ -3254,7 +3324,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             app.AddaStagePanel.Title = 'Add a Stage';
             app.AddaStagePanel.Visible = 'off';
             app.AddaStagePanel.Layout.Row = [1 5];
-            app.AddaStagePanel.Layout.Column = [2 4];
+            app.AddaStagePanel.Layout.Column = 1;
 
             % Create GridLayout15
             app.GridLayout15 = uigridlayout(app.AddaStagePanel);
@@ -3274,12 +3344,12 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             app.StageNumberDropDown.Layout.Column = 2;
             app.StageNumberDropDown.Value = '1';
 
-            % Create StartTempCEditFieldLabel
-            app.StartTempCEditFieldLabel = uilabel(app.GridLayout15);
-            app.StartTempCEditFieldLabel.HorizontalAlignment = 'right';
-            app.StartTempCEditFieldLabel.Layout.Row = 2;
-            app.StartTempCEditFieldLabel.Layout.Column = 1;
-            app.StartTempCEditFieldLabel.Text = 'Start Temp (*C)';
+            % Create StartTempEditFieldLabel
+            app.StartTempEditFieldLabel = uilabel(app.GridLayout15);
+            app.StartTempEditFieldLabel.HorizontalAlignment = 'right';
+            app.StartTempEditFieldLabel.Layout.Row = 2;
+            app.StartTempEditFieldLabel.Layout.Column = 1;
+            app.StartTempEditFieldLabel.Text = 'Start Temp (*C)';
 
             % Create StartTempEditField
             app.StartTempEditField = uieditfield(app.GridLayout15, 'numeric');
@@ -3298,24 +3368,24 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             app.RampUpRateCminEditField.Layout.Row = 3;
             app.RampUpRateCminEditField.Layout.Column = 2;
 
-            % Create EndTempCEditFieldLabel
-            app.EndTempCEditFieldLabel = uilabel(app.GridLayout15);
-            app.EndTempCEditFieldLabel.HorizontalAlignment = 'right';
-            app.EndTempCEditFieldLabel.Layout.Row = 4;
-            app.EndTempCEditFieldLabel.Layout.Column = 1;
-            app.EndTempCEditFieldLabel.Text = 'End Temp (*C)';
+            % Create EndTempEditFieldLabel
+            app.EndTempEditFieldLabel = uilabel(app.GridLayout15);
+            app.EndTempEditFieldLabel.HorizontalAlignment = 'right';
+            app.EndTempEditFieldLabel.Layout.Row = 4;
+            app.EndTempEditFieldLabel.Layout.Column = 1;
+            app.EndTempEditFieldLabel.Text = 'End Temp (*C)';
 
             % Create EndTempEditField
             app.EndTempEditField = uieditfield(app.GridLayout15, 'numeric');
             app.EndTempEditField.Layout.Row = 4;
             app.EndTempEditField.Layout.Column = 2;
 
-            % Create HoldTimesecEditFieldLabel
-            app.HoldTimesecEditFieldLabel = uilabel(app.GridLayout15);
-            app.HoldTimesecEditFieldLabel.HorizontalAlignment = 'right';
-            app.HoldTimesecEditFieldLabel.Layout.Row = 5;
-            app.HoldTimesecEditFieldLabel.Layout.Column = 1;
-            app.HoldTimesecEditFieldLabel.Text = 'Hold Time (sec)';
+            % Create HoldTimeEditFieldLabel
+            app.HoldTimeEditFieldLabel = uilabel(app.GridLayout15);
+            app.HoldTimeEditFieldLabel.HorizontalAlignment = 'right';
+            app.HoldTimeEditFieldLabel.Layout.Row = 5;
+            app.HoldTimeEditFieldLabel.Layout.Column = 1;
+            app.HoldTimeEditFieldLabel.Text = 'Hold Time (sec)';
 
             % Create HoldTimeEditField
             app.HoldTimeEditField = uieditfield(app.GridLayout15, 'numeric');
@@ -3324,12 +3394,14 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
 
             % Create AddStageButton
             app.AddStageButton = uibutton(app.GridLayout15, 'push');
+            app.AddStageButton.ButtonPushedFcn = createCallbackFcn(app, @AddStageButtonPushed, true);
             app.AddStageButton.Layout.Row = 6;
             app.AddStageButton.Layout.Column = 1;
             app.AddStageButton.Text = 'Add Stage';
 
             % Create CancelButton
             app.CancelButton = uibutton(app.GridLayout15, 'push');
+            app.CancelButton.ButtonPushedFcn = createCallbackFcn(app, @CancelButtonPushed, true);
             app.CancelButton.Layout.Row = 6;
             app.CancelButton.Layout.Column = 2;
             app.CancelButton.Text = 'Cancel';
@@ -3339,7 +3411,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             app.EditaStagePanel.Title = 'Edit a Stage';
             app.EditaStagePanel.Visible = 'off';
             app.EditaStagePanel.Layout.Row = [1 5];
-            app.EditaStagePanel.Layout.Column = [2 4];
+            app.EditaStagePanel.Layout.Column = 1;
 
             % Create GridLayout16
             app.GridLayout16 = uigridlayout(app.EditaStagePanel);
@@ -3359,12 +3431,12 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             app.StageNumberDropDown_2.Layout.Column = 2;
             app.StageNumberDropDown_2.Value = '1';
 
-            % Create StartTempCEditField_2Label
-            app.StartTempCEditField_2Label = uilabel(app.GridLayout16);
-            app.StartTempCEditField_2Label.HorizontalAlignment = 'right';
-            app.StartTempCEditField_2Label.Layout.Row = 2;
-            app.StartTempCEditField_2Label.Layout.Column = 1;
-            app.StartTempCEditField_2Label.Text = 'Start Temp (*C)';
+            % Create StartTempEditField_2Label
+            app.StartTempEditField_2Label = uilabel(app.GridLayout16);
+            app.StartTempEditField_2Label.HorizontalAlignment = 'right';
+            app.StartTempEditField_2Label.Layout.Row = 2;
+            app.StartTempEditField_2Label.Layout.Column = 1;
+            app.StartTempEditField_2Label.Text = 'Start Temp (*C)';
 
             % Create StartTempEditField_2
             app.StartTempEditField_2 = uieditfield(app.GridLayout16, 'numeric');
@@ -3383,24 +3455,24 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             app.RampUpRateCminEditField_2.Layout.Row = 3;
             app.RampUpRateCminEditField_2.Layout.Column = 2;
 
-            % Create EndTempCEditField_2Label
-            app.EndTempCEditField_2Label = uilabel(app.GridLayout16);
-            app.EndTempCEditField_2Label.HorizontalAlignment = 'right';
-            app.EndTempCEditField_2Label.Layout.Row = 4;
-            app.EndTempCEditField_2Label.Layout.Column = 1;
-            app.EndTempCEditField_2Label.Text = 'End Temp (*C)';
+            % Create EndTempEditField_2Label
+            app.EndTempEditField_2Label = uilabel(app.GridLayout16);
+            app.EndTempEditField_2Label.HorizontalAlignment = 'right';
+            app.EndTempEditField_2Label.Layout.Row = 4;
+            app.EndTempEditField_2Label.Layout.Column = 1;
+            app.EndTempEditField_2Label.Text = 'End Temp (*C)';
 
             % Create EndTempEditField_2
             app.EndTempEditField_2 = uieditfield(app.GridLayout16, 'numeric');
             app.EndTempEditField_2.Layout.Row = 4;
             app.EndTempEditField_2.Layout.Column = 2;
 
-            % Create HoldTimesecEditField_2Label
-            app.HoldTimesecEditField_2Label = uilabel(app.GridLayout16);
-            app.HoldTimesecEditField_2Label.HorizontalAlignment = 'right';
-            app.HoldTimesecEditField_2Label.Layout.Row = 5;
-            app.HoldTimesecEditField_2Label.Layout.Column = 1;
-            app.HoldTimesecEditField_2Label.Text = 'Hold Time (sec)';
+            % Create HoldTimeEditField_2Label
+            app.HoldTimeEditField_2Label = uilabel(app.GridLayout16);
+            app.HoldTimeEditField_2Label.HorizontalAlignment = 'right';
+            app.HoldTimeEditField_2Label.Layout.Row = 5;
+            app.HoldTimeEditField_2Label.Layout.Column = 1;
+            app.HoldTimeEditField_2Label.Text = 'Hold Time (sec)';
 
             % Create HoldTimeEditField_2
             app.HoldTimeEditField_2 = uieditfield(app.GridLayout16, 'numeric');
@@ -3409,12 +3481,14 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
 
             % Create ApplyChangesButton
             app.ApplyChangesButton = uibutton(app.GridLayout16, 'push');
+            app.ApplyChangesButton.ButtonPushedFcn = createCallbackFcn(app, @ApplyChangesButtonPushed, true);
             app.ApplyChangesButton.Layout.Row = 6;
             app.ApplyChangesButton.Layout.Column = 1;
             app.ApplyChangesButton.Text = 'Apply Changes';
 
             % Create CancelButton_2
             app.CancelButton_2 = uibutton(app.GridLayout16, 'push');
+            app.CancelButton_2.ButtonPushedFcn = createCallbackFcn(app, @CancelButton_2Pushed, true);
             app.CancelButton_2.Layout.Row = 6;
             app.CancelButton_2.Layout.Column = 2;
             app.CancelButton_2.Text = 'Cancel';
@@ -3424,7 +3498,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             app.RemoveaStagePanel.Title = 'Remove a Stage';
             app.RemoveaStagePanel.Visible = 'off';
             app.RemoveaStagePanel.Layout.Row = [1 5];
-            app.RemoveaStagePanel.Layout.Column = [2 4];
+            app.RemoveaStagePanel.Layout.Column = 1;
 
             % Create GridLayout17
             app.GridLayout17 = uigridlayout(app.RemoveaStagePanel);
@@ -3444,15 +3518,16 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             app.StageNumberDropDown_3.Layout.Column = 2;
             app.StageNumberDropDown_3.Value = '1';
 
-            % Create StartTempCEditField_3Label
-            app.StartTempCEditField_3Label = uilabel(app.GridLayout17);
-            app.StartTempCEditField_3Label.HorizontalAlignment = 'right';
-            app.StartTempCEditField_3Label.Layout.Row = 2;
-            app.StartTempCEditField_3Label.Layout.Column = 1;
-            app.StartTempCEditField_3Label.Text = 'Start Temp (*C)';
+            % Create StartTempEditField_3Label
+            app.StartTempEditField_3Label = uilabel(app.GridLayout17);
+            app.StartTempEditField_3Label.HorizontalAlignment = 'right';
+            app.StartTempEditField_3Label.Layout.Row = 2;
+            app.StartTempEditField_3Label.Layout.Column = 1;
+            app.StartTempEditField_3Label.Text = 'Start Temp (*C)';
 
             % Create StartTempEditField_3
             app.StartTempEditField_3 = uieditfield(app.GridLayout17, 'numeric');
+            app.StartTempEditField_3.Editable = 'off';
             app.StartTempEditField_3.Layout.Row = 2;
             app.StartTempEditField_3.Layout.Column = 2;
 
@@ -3465,41 +3540,46 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
 
             % Create RampUpRateCminEditField_3
             app.RampUpRateCminEditField_3 = uieditfield(app.GridLayout17, 'numeric');
+            app.RampUpRateCminEditField_3.Editable = 'off';
             app.RampUpRateCminEditField_3.Layout.Row = 3;
             app.RampUpRateCminEditField_3.Layout.Column = 2;
 
-            % Create EndTempCEditField_3Label
-            app.EndTempCEditField_3Label = uilabel(app.GridLayout17);
-            app.EndTempCEditField_3Label.HorizontalAlignment = 'right';
-            app.EndTempCEditField_3Label.Layout.Row = 4;
-            app.EndTempCEditField_3Label.Layout.Column = 1;
-            app.EndTempCEditField_3Label.Text = 'End Temp (*C)';
+            % Create EndTempEditField_3Label
+            app.EndTempEditField_3Label = uilabel(app.GridLayout17);
+            app.EndTempEditField_3Label.HorizontalAlignment = 'right';
+            app.EndTempEditField_3Label.Layout.Row = 4;
+            app.EndTempEditField_3Label.Layout.Column = 1;
+            app.EndTempEditField_3Label.Text = 'End Temp (*C)';
 
             % Create EndTempEditField_3
             app.EndTempEditField_3 = uieditfield(app.GridLayout17, 'numeric');
+            app.EndTempEditField_3.Editable = 'off';
             app.EndTempEditField_3.Layout.Row = 4;
             app.EndTempEditField_3.Layout.Column = 2;
 
-            % Create HoldTimesecEditField_3Label
-            app.HoldTimesecEditField_3Label = uilabel(app.GridLayout17);
-            app.HoldTimesecEditField_3Label.HorizontalAlignment = 'right';
-            app.HoldTimesecEditField_3Label.Layout.Row = 5;
-            app.HoldTimesecEditField_3Label.Layout.Column = 1;
-            app.HoldTimesecEditField_3Label.Text = 'Hold Time (sec)';
+            % Create HoldTimeEditField_3Label
+            app.HoldTimeEditField_3Label = uilabel(app.GridLayout17);
+            app.HoldTimeEditField_3Label.HorizontalAlignment = 'right';
+            app.HoldTimeEditField_3Label.Layout.Row = 5;
+            app.HoldTimeEditField_3Label.Layout.Column = 1;
+            app.HoldTimeEditField_3Label.Text = 'Hold Time (sec)';
 
             % Create HoldTimeEditField_3
             app.HoldTimeEditField_3 = uieditfield(app.GridLayout17, 'numeric');
+            app.HoldTimeEditField_3.Editable = 'off';
             app.HoldTimeEditField_3.Layout.Row = 5;
             app.HoldTimeEditField_3.Layout.Column = 2;
 
             % Create RemoveStageButton
             app.RemoveStageButton = uibutton(app.GridLayout17, 'push');
+            app.RemoveStageButton.ButtonPushedFcn = createCallbackFcn(app, @RemoveStageButtonPushed, true);
             app.RemoveStageButton.Layout.Row = 6;
             app.RemoveStageButton.Layout.Column = 1;
             app.RemoveStageButton.Text = 'Remove Stage';
 
             % Create CancelButton_3
             app.CancelButton_3 = uibutton(app.GridLayout17, 'push');
+            app.CancelButton_3.ButtonPushedFcn = createCallbackFcn(app, @CancelButton_3Pushed, true);
             app.CancelButton_3.Layout.Row = 6;
             app.CancelButton_3.Layout.Column = 2;
             app.CancelButton_3.Text = 'Cancel';
@@ -3507,6 +3587,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             % Create LiveTemperatureDataTab
             app.LiveTemperatureDataTab = uitab(app.TabGroup);
             app.LiveTemperatureDataTab.Title = 'Live Temperature Data';
+            app.LiveTemperatureDataTab.BackgroundColor = [0.149 0.149 0.149];
 
             % Create GridLayout4
             app.GridLayout4 = uigridlayout(app.LiveTemperatureDataTab);
@@ -3530,6 +3611,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             % Create AnalysisTab
             app.AnalysisTab = uitab(app.TabGroup);
             app.AnalysisTab.Title = 'Analysis';
+            app.AnalysisTab.BackgroundColor = [0.149 0.149 0.149];
 
             % Create GridLayout5
             app.GridLayout5 = uigridlayout(app.AnalysisTab);
@@ -3708,11 +3790,12 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             % Create MaintenanceTab
             app.MaintenanceTab = uitab(app.TabGroup);
             app.MaintenanceTab.Title = 'Maintenance';
+            app.MaintenanceTab.BackgroundColor = [0.149 0.149 0.149];
 
             % Create GridLayout6
             app.GridLayout6 = uigridlayout(app.MaintenanceTab);
             app.GridLayout6.ColumnWidth = {160, 120, 30, 160, '1x'};
-            app.GridLayout6.RowHeight = {30, 70, '1x', 60, 120, 160, '1x', 30};
+            app.GridLayout6.RowHeight = {30, 70, '1x', 60, 120, 160, '2x', 30};
             app.GridLayout6.RowSpacing = 6;
             app.GridLayout6.Padding = [10 6 10 6];
 
@@ -3762,6 +3845,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
 
             % Create DAQStatusLamp
             app.DAQStatusLamp = uilamp(app.GridLayout10);
+            app.DAQStatusLamp.Enable = 'off';
             app.DAQStatusLamp.Layout.Row = 1;
             app.DAQStatusLamp.Layout.Column = 3;
             app.DAQStatusLamp.Color = [1 0 0];
@@ -3796,15 +3880,16 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
 
             % Create SensorCalibrationPanel
             app.SensorCalibrationPanel = uipanel(app.GridLayout6);
+            app.SensorCalibrationPanel.ForegroundColor = [1 1 1];
             app.SensorCalibrationPanel.Title = 'Sensor Calibration';
-            app.SensorCalibrationPanel.BackgroundColor = [0.9412 0.9412 0.9412];
+            app.SensorCalibrationPanel.BackgroundColor = [0.502 0.502 0.502];
             app.SensorCalibrationPanel.Layout.Row = [1 8];
             app.SensorCalibrationPanel.Layout.Column = 5;
             app.SensorCalibrationPanel.FontWeight = 'bold';
 
             % Create GridLayout9
             app.GridLayout9 = uigridlayout(app.SensorCalibrationPanel);
-            app.GridLayout9.RowHeight = {30, 90, 30, '1x', 180, '1x', 120};
+            app.GridLayout9.RowHeight = {'20x', '60x', '20x', '1x', '100x', '1x', '80x'};
 
             % Create TakeMeasurementButton
             app.TakeMeasurementButton = uibutton(app.GridLayout9, 'push');
@@ -3824,25 +3909,25 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
 
             % Create CalibrationSampleCelsiusEditFieldLabel
             app.CalibrationSampleCelsiusEditFieldLabel = uilabel(app.CalibrationSamplePanel);
-            app.CalibrationSampleCelsiusEditFieldLabel.Position = [81 38 45 22];
+            app.CalibrationSampleCelsiusEditFieldLabel.Position = [81 54 45 22];
             app.CalibrationSampleCelsiusEditFieldLabel.Text = 'Celsius';
 
             % Create CalibrationSampleCelsiusEditField
             app.CalibrationSampleCelsiusEditField = uieditfield(app.CalibrationSamplePanel, 'numeric');
             app.CalibrationSampleCelsiusEditField.ValueDisplayFormat = '%.2f';
             app.CalibrationSampleCelsiusEditField.Editable = 'off';
-            app.CalibrationSampleCelsiusEditField.Position = [11 38 60 22];
+            app.CalibrationSampleCelsiusEditField.Position = [11 54 60 22];
 
             % Create CalibrationSampleKelvinEditFieldLabel
             app.CalibrationSampleKelvinEditFieldLabel = uilabel(app.CalibrationSamplePanel);
-            app.CalibrationSampleKelvinEditFieldLabel.Position = [81 8 38 22];
+            app.CalibrationSampleKelvinEditFieldLabel.Position = [81 24 38 22];
             app.CalibrationSampleKelvinEditFieldLabel.Text = 'Kelvin';
 
             % Create CalibrationSampleKelvinEditField
             app.CalibrationSampleKelvinEditField = uieditfield(app.CalibrationSamplePanel, 'numeric');
             app.CalibrationSampleKelvinEditField.ValueDisplayFormat = '%.2f';
             app.CalibrationSampleKelvinEditField.Editable = 'off';
-            app.CalibrationSampleKelvinEditField.Position = [11 8 60 22];
+            app.CalibrationSampleKelvinEditField.Position = [11 24 60 22];
 
             % Create CalibrationActualTempPanel
             app.CalibrationActualTempPanel = uipanel(app.GridLayout9);
@@ -3853,30 +3938,30 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
 
             % Create CalibrationSampleKelvinEditFieldLabel_2
             app.CalibrationSampleKelvinEditFieldLabel_2 = uilabel(app.CalibrationActualTempPanel);
-            app.CalibrationSampleKelvinEditFieldLabel_2.Position = [81 48 38 22];
+            app.CalibrationSampleKelvinEditFieldLabel_2.Position = [81 70 38 22];
             app.CalibrationSampleKelvinEditFieldLabel_2.Text = 'Kelvin';
 
             % Create CalibrationActualTempEditField
             app.CalibrationActualTempEditField = uieditfield(app.CalibrationActualTempPanel, 'numeric');
             app.CalibrationActualTempEditField.ValueDisplayFormat = '%.2f';
             app.CalibrationActualTempEditField.ValueChangedFcn = createCallbackFcn(app, @CalibrationActualTempEditFieldValueChanged, true);
-            app.CalibrationActualTempEditField.Position = [11 48 60 22];
+            app.CalibrationActualTempEditField.Position = [11 70 60 22];
 
             % Create CalibrationActualLabel
             app.CalibrationActualLabel = uilabel(app.CalibrationActualTempPanel);
-            app.CalibrationActualLabel.Position = [11 78 123 22];
+            app.CalibrationActualLabel.Position = [11 100 123 22];
             app.CalibrationActualLabel.Text = 'Enter the actual temp:';
 
             % Create OffsetdeltaKLabel
             app.OffsetdeltaKLabel = uilabel(app.CalibrationActualTempPanel);
-            app.OffsetdeltaKLabel.Position = [81 18 90 22];
+            app.OffsetdeltaKLabel.Position = [80 40 90 22];
             app.OffsetdeltaKLabel.Text = 'Offset (delta K)';
 
             % Create ActualTempOffsetEditField
             app.ActualTempOffsetEditField = uieditfield(app.CalibrationActualTempPanel, 'numeric');
             app.ActualTempOffsetEditField.ValueDisplayFormat = '%+5.2f';
             app.ActualTempOffsetEditField.Editable = 'off';
-            app.ActualTempOffsetEditField.Position = [11 18 60 22];
+            app.ActualTempOffsetEditField.Position = [11 40 60 22];
 
             % Create CalibrationDataPanel
             app.CalibrationDataPanel = uipanel(app.GridLayout9);
@@ -3925,23 +4010,31 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             app.CalibrationOffsetPanel.Layout.Column = [1 2];
             app.CalibrationOffsetPanel.FontWeight = 'bold';
 
+            % Create GridLayout19
+            app.GridLayout19 = uigridlayout(app.CalibrationOffsetPanel);
+            app.GridLayout19.ColumnWidth = {'4x', '1x'};
+            app.GridLayout19.RowHeight = {30, 30, '1x'};
+
             % Create SaveCalibrationOffsetButton
-            app.SaveCalibrationOffsetButton = uibutton(app.CalibrationOffsetPanel, 'push');
+            app.SaveCalibrationOffsetButton = uibutton(app.GridLayout19, 'push');
             app.SaveCalibrationOffsetButton.ButtonPushedFcn = createCallbackFcn(app, @SaveCalibrationOffsetButtonPushed, true);
             app.SaveCalibrationOffsetButton.FontSize = 16;
-            app.SaveCalibrationOffsetButton.Position = [11 60 320 30];
+            app.SaveCalibrationOffsetButton.Layout.Row = 1;
+            app.SaveCalibrationOffsetButton.Layout.Column = [1 2];
             app.SaveCalibrationOffsetButton.Text = 'Save Calibration Offset';
 
             % Create CalibrationOffsetLabel
-            app.CalibrationOffsetLabel = uilabel(app.CalibrationOffsetPanel);
+            app.CalibrationOffsetLabel = uilabel(app.GridLayout19);
             app.CalibrationOffsetLabel.HorizontalAlignment = 'right';
-            app.CalibrationOffsetLabel.Position = [11 22 250 28];
+            app.CalibrationOffsetLabel.Layout.Row = 2;
+            app.CalibrationOffsetLabel.Layout.Column = 1;
             app.CalibrationOffsetLabel.Text = {'Reference Sample Temperature '; 'Calibration Offset (delta K):'};
 
             % Create CalibrationOffsetEditField
-            app.CalibrationOffsetEditField = uieditfield(app.CalibrationOffsetPanel, 'numeric');
+            app.CalibrationOffsetEditField = uieditfield(app.GridLayout19, 'numeric');
             app.CalibrationOffsetEditField.ValueDisplayFormat = '%+5.2f';
-            app.CalibrationOffsetEditField.Position = [271 28 60 22];
+            app.CalibrationOffsetEditField.Layout.Row = 2;
+            app.CalibrationOffsetEditField.Layout.Column = 2;
 
             % Create AutoCalibrateButton
             app.AutoCalibrateButton = uibutton(app.GridLayout9, 'push');
@@ -4110,23 +4203,23 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             % Create TemperatureReferenceSampleButton
             app.TemperatureReferenceSampleButton = uitogglebutton(app.SelectSensortoCalibrateButtonGroup);
             app.TemperatureReferenceSampleButton.Text = 'Temperature: Reference Sample';
-            app.TemperatureReferenceSampleButton.Position = [11 132 180 24];
+            app.TemperatureReferenceSampleButton.Position = [11 116 180 24];
             app.TemperatureReferenceSampleButton.Value = true;
 
             % Create TemperatureTestSampleButton
             app.TemperatureTestSampleButton = uitogglebutton(app.SelectSensortoCalibrateButtonGroup);
             app.TemperatureTestSampleButton.Text = 'Temperature: Test Sample';
-            app.TemperatureTestSampleButton.Position = [11 102 180 24];
+            app.TemperatureTestSampleButton.Position = [11 86 180 24];
 
             % Create CurrentReferenceSampleButton
             app.CurrentReferenceSampleButton = uitogglebutton(app.SelectSensortoCalibrateButtonGroup);
             app.CurrentReferenceSampleButton.Text = 'Current: Reference Sample';
-            app.CurrentReferenceSampleButton.Position = [11 52 180 24];
+            app.CurrentReferenceSampleButton.Position = [11 36 180 24];
 
             % Create CurrentTestSampleButton
             app.CurrentTestSampleButton = uitogglebutton(app.SelectSensortoCalibrateButtonGroup);
             app.CurrentTestSampleButton.Text = 'Current: Test Sample';
-            app.CurrentTestSampleButton.Position = [11 22 180 24];
+            app.CurrentTestSampleButton.Position = [11 6 180 24];
 
             % Show the figure after all components are created
             app.UIFigure.Visible = 'on';

@@ -184,14 +184,14 @@ classdef DAQBox < handle
         
         % Used to simulate the cooling of the samples when the heating
         % coils are off
-        SIMULATED_TEMP_COOLING_CONSTANT = -0.001;
+        SIMULATED_TEMP_COOLING_CONSTANT = -0.0005;
         
         % Used to simulate the heating of the samples when running the
         % software without a physical DAQ Box
         SIMULATED_HEATING_COEFFICIENT = 1.5;
         
         % Used to simulate random variance in the temperature
-        SIMULATED_TEMP_SPREAD_COEFFICIENT = 0.001;
+        SIMULATED_TEMP_SPREAD_COEFFICIENT = 0.0004;
         
         % Used to convert PWMDutyCycle to SimulatedCurrent when running the
         % software without a physical DAQ Box

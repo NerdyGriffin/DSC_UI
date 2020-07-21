@@ -1035,6 +1035,9 @@ classdef StageController < handle
                 
             end
             
+            % Clear the estimated duration for the current stage
+            obj.EstimatedStageDuration  = [];
+            
             % Set the target temp to the start temp
             obj.TargetTemp = obj.StartTemp;
             
@@ -1125,7 +1128,7 @@ classdef StageController < handle
                 
                 if obj.UseAppUI
                     % Refresh the staging info displayed on the UI
-                    obj.app.refreshStagingInfo(stageCounter, 'Holding at End Temp');
+                    obj.app.refreshStagingInfo(obj.StageCounter, 'Holding at End Temp');
                     
                 end
                 
