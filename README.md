@@ -23,6 +23,19 @@ You may contact the author at ckunis.contact@gmail.com
 
 NOTE: This project is currently a work-in-progress. Not all features have been implemented and all code may be subject to change.
 
+## Setup Instructions
+
+Plug in the DAQ Box to the computer via a USB cable.
+Run the command `daqlist("ni")` in the Command Window to ensure the DAQ Box is
+detected and the NI drivers/software are installed and running.
+
+If the NI-DAQmx driver is not installed, then the output of this commands will
+say `Unable to detect 'ni' hardware:`
+In this case, read through the output message in the Command Window and follow 
+the `Add-On Explorer` link provided in the last sentence of that message.
+This should open the appropriate page of the Add-On Explorer window where you
+can click `Install` to allow MATLAB to install the necessary drivers.
+
 ## Graphic UI Instructions
 
 To run the Graphical User Interface (GUI), run the file Run_DSC_GUI.m or `cd` to

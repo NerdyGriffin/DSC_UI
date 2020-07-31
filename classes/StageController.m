@@ -98,7 +98,16 @@ classdef StageController < handle
         % the target temperature. The error for both samples must be less
         % than this value before the stage controller will continue to the
         % next stage. Units: [\Delta degrees C]
-        MINIMUM_ACCEPTABLE_ERROR = 2
+        MINIMUM_ACCEPTABLE_ERROR = 1.5
+        
+        % The number of the consecutive samples within the
+        % MINIMUM_ACCEPTABLE_ERROR that are required before the program
+        % considers the target to be satisfied
+        TARGET_COUNTER_THRESHOLD = 1000;
+        
+        % The number of new samples to wait before attempting to refresh
+        % the plots
+        REFRESH_COUNTER_THRESHOLD = 20;
     end
     
     % Class Constructor
@@ -742,7 +751,7 @@ classdef StageController < handle
             % Compare the sample temperatures to the target temperature
             if (abs(obj.liveData.LatestTempError_Ref) < obj.MINIMUM_ACCEPTABLE_ERROR)...
                     && (abs(obj.liveData.LatestTempError_Samp) < obj.MINIMUM_ACCEPTABLE_ERROR)
-                if obj.TargetCounter < 100
+                if obj.TargetCounter < obj.TARGET_COUNTER_THRESHOLD
                     obj.TargetCounter = obj.TargetCounter + 1;
                 else
                     obj.TargetCounter = 0;
@@ -750,6 +759,8 @@ classdef StageController < handle
                     obj.TargetCounter = 0;
                     return
                 end
+            else
+                obj.TargetCounter = 0;
             end
         end
         
@@ -802,7 +813,7 @@ classdef StageController < handle
             if (obj.TargetTemp == obj.EndTemp)...
                     && (abs(obj.liveData.LatestTempError_Ref) < obj.MINIMUM_ACCEPTABLE_ERROR) ...
                     && (abs(obj.liveData.LatestTempError_Samp) < obj.MINIMUM_ACCEPTABLE_ERROR)
-                if obj.TargetCounter < 100
+                if obj.TargetCounter < obj.TARGET_COUNTER_THRESHOLD
                     obj.TargetCounter = obj.TargetCounter + 1;
                 else
                     obj.TargetCounter = 0;
@@ -810,6 +821,8 @@ classdef StageController < handle
                     obj.TargetCounter = 0;
                     return
                 end
+            else
+                obj.TargetCounter = 0;
             end
         end
         
@@ -852,7 +865,7 @@ classdef StageController < handle
             obj.liveData.LatestTargetTemp = obj.TargetTemp;
             
             % TODO DEBUG ================
-            debug_latestSerialDate = datenum(datetime);
+            %debug_latestSerialDate = datenum(datetime);
             % TODO DEBUG ================
             
             % Take the temperature and current readings
@@ -873,18 +886,18 @@ classdef StageController < handle
             end
             
             % TODO DEBUG ================
-            home
-            fprintf("============ DEBUG ============\n")
-            fprintf("---- Serial date format -------\n")
-            fprintf("DAQBox: %10.10f\n", latestSerialDate)
-            fprintf("MATLAB: %10.10f\n", debug_latestSerialDate)
-            fprintf("Diff:   %10.10f\n", latestSerialDate - debug_latestSerialDate)
-            fprintf("Diff in sec: %f\n", date2sec(abs(latestSerialDate - debug_latestSerialDate)))
-            formatOut = 'yyyy-mm-dd HH:MM:SS.FFF';
-            fprintf("---- Date String format -------\n")
-            fprintf("DAQBox: %s\n", datestr(latestSerialDate, formatOut))
-            fprintf("MATLAB: %s\n", datestr(debug_latestSerialDate, formatOut))
-            fprintf("\n")
+            %home
+            %fprintf("============ DEBUG ============\n")
+            %fprintf("---- Serial date format -------\n")
+            %fprintf("DAQBox: %10.10f\n", latestSerialDate)
+            %fprintf("MATLAB: %10.10f\n", debug_latestSerialDate)
+            %fprintf("Diff:   %10.10f\n", latestSerialDate - debug_latestSerialDate)
+            %fprintf("Diff in sec: %f\n", date2sec(abs(latestSerialDate - debug_latestSerialDate)))
+            %formatOut = 'yyyy-mm-dd HH:MM:SS.FFF';
+            %fprintf("---- Date String format -------\n")
+            %fprintf("DAQBox: %s\n", datestr(latestSerialDate, formatOut))
+            %fprintf("MATLAB: %s\n", datestr(debug_latestSerialDate, formatOut))
+            %fprintf("\n")
             % TODO DEBUG ================
             
             % Store the current elapsed time value in the DSCData object
@@ -909,18 +922,6 @@ classdef StageController < handle
             obj.liveData.LatestCurrent_Samp = latestCurrent_Samp;
             
             
-            % Have the DSCData object calculate and store the heat flow
-            % rate
-            obj.liveData.calculateLatestHeatFlow(obj.daqBox.HEATING_COIL_VOLTAGE);
-            
-            if obj.UseAppUI
-                obj.app.refreshOperationGauges(obj.TargetTemp,...
-                    latestTemp_Ref, latestTemp_Samp,...
-                    latestCurrent_Ref, latestCurrent_Samp);
-                
-            end
-            
-            
             % Run the PID controller algorithm
             [newDutyCycle_Ref, newDutyCycle_Samp]...
                 = obj.daqBox.runPIDAlgorithm(obj.liveData);
@@ -930,11 +931,24 @@ classdef StageController < handle
             obj.liveData.LatestPWMDutyCycle_Samp = newDutyCycle_Samp;
             
             
+            % Have the DSCData object calculate and store the heat flow
+            % rate
+            obj.liveData.calculateLatestHeatFlow(...
+                obj.daqBox.HEATING_COIL_VOLTAGE);
+            
+            if obj.UseAppUI
+                obj.app.refreshOperationGauges(obj.TargetTemp,...
+                    latestTemp_Ref, latestTemp_Samp,...
+                    latestCurrent_Ref, latestCurrent_Samp);
+                
+            end
+            
+            
             if obj.UseAppUI
                 % Refresh the clocks with the new values
                 obj.app.refreshOperationClock(latestSerialDate);
                 
-                if obj.RefreshCounter < 100
+                if obj.RefreshCounter < obj.REFRESH_COUNTER_THRESHOLD
                     obj.RefreshCounter = obj.RefreshCounter + 1;
                 else
                     % Refresh the data plots
