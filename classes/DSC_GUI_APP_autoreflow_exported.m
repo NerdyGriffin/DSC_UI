@@ -16,13 +16,13 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
         GridLayout22                    matlab.ui.container.GridLayout
         ReferenceCurrentEditField       matlab.ui.control.NumericEditField
         ReferenceTemperatureEditField   matlab.ui.control.NumericEditField
-        ReferenceCurrentGaugeLabel_2    matlab.ui.control.Label
+        ReferenceCurrentGaugeLabel      matlab.ui.control.Label
         ReferenceTemperatureGaugeLabel  matlab.ui.control.Label
         TestSampleLiveDataPanel         matlab.ui.container.Panel
         GridLayout23                    matlab.ui.container.GridLayout
         TestSampleCurrentEditField      matlab.ui.control.NumericEditField
         TestSampleTemperatureEditField  matlab.ui.control.NumericEditField
-        TestSampleCurrentGaugeLabel_2   matlab.ui.control.Label
+        TestSampleCurrentGaugeLabel     matlab.ui.control.Label
         TestSampleTemperatureGaugeLabel  matlab.ui.control.Label
         TargetTemperatureLiveDataPanel  matlab.ui.container.Panel
         GridLayout24                    matlab.ui.container.GridLayout
@@ -42,7 +42,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
         ReferenceSampleMassgramsSpinnerLabel  matlab.ui.control.Label
         ReferenceSampleMassgramsSpinner  matlab.ui.control.Spinner
         ReferenceSpecificHeatJgKSpinner_2Label  matlab.ui.control.Label
-        ReferenceSpecificHeatJgKSpinner_2  matlab.ui.control.Spinner
+        ReferenceSpecificHeatJgKSpinner  matlab.ui.control.Spinner
         ReferenceSampleMaterialEditFieldLabel  matlab.ui.control.Label
         ReferenceSampleMaterialEditField  matlab.ui.control.EditField
         TestSamplePropertiesPanel       matlab.ui.container.Panel
@@ -114,6 +114,9 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
         HoldTimeEditField_3             matlab.ui.control.NumericEditField
         RemoveStageButton               matlab.ui.control.Button
         CancelButton_3                  matlab.ui.control.Button
+        HeatFlowUnitsPanel              matlab.ui.container.Panel
+        GridLayout25                    matlab.ui.container.GridLayout
+        HeatFlowUnitsSwitch             matlab.ui.control.Switch
         LiveTemperatureDataTab          matlab.ui.container.Tab
         GridLayout4                     matlab.ui.container.GridLayout
         UIAxesTemperatures              matlab.ui.control.UIAxes
@@ -828,7 +831,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
                 % Enable the UI once data have been loaded
                 app.ReferenceSampleMaterialEditField.Value = app.analysisData.ReferenceSampleData.Material;
                 app.ReferenceSampleMassgramsSpinner.Value = app.analysisData.ReferenceSampleData.Mass;
-                app.ReferenceSpecificHeatJgKSpinner_2.Value = app.analysisData.ReferenceSampleData.SpecificHeat;
+                app.ReferenceSpecificHeatJgKSpinner.Value = app.analysisData.ReferenceSampleData.SpecificHeat;
                 
                 app.TestSampleMaterialEditField.Value = app.analysisData.TestSampleData.Material;
                 app.TestSampleMassgramsSpinner.Value = app.analysisData.TestSampleData.Mass;
@@ -853,7 +856,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
                 
                 app.ReferenceSampleMaterialEditField.Enable = 'on';
                 app.ReferenceSampleMassgramsSpinner.Enable = 'on';
-                app.ReferenceSpecificHeatJgKSpinner_2.Enable = 'on';
+                app.ReferenceSpecificHeatJgKSpinner.Enable = 'off';
                 
                 app.TestSampleMaterialEditField.Enable = 'on';
                 app.TestSampleMassgramsSpinner.Enable = 'on';
@@ -898,7 +901,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
                 
                 app.ReferenceSampleMaterialEditField.Enable = 'off';
                 app.ReferenceSampleMassgramsSpinner.Enable = 'off';
-                app.ReferenceSpecificHeatJgKSpinner_2.Enable = 'off';
+                app.ReferenceSpecificHeatJgKSpinner.Enable = 'off';
                 
                 app.TestSampleMaterialEditField.Enable = 'off';
                 app.TestSampleMassgramsSpinner.Enable = 'off';
@@ -1261,11 +1264,11 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
                     app.CalibrationDataUITable.ColumnName = {'Measured Temp (C)', 'Actual Temp (C)', 'Offset'};
                     
                 case app.CurrentReferenceSampleButton
-                    app.CalibrationSampleCelsiusEditFieldLabel.Text = 'Amps';
+                    app.CalibrationSampleCelsiusEditFieldLabel.Text = '(A)';
                     app.CalibrationSampleKelvinEditFieldLabel.Text = 'N/A';
                     app.CalibrationActualTempPanel.Title = 'Actual Current (A)';
                     app.CalibrationActualLabel.Text = 'Enter the actual current:';
-                    app.CalibrationSampleKelvinEditFieldLabel_2.Text = 'Amps';
+                    app.CalibrationSampleKelvinEditFieldLabel_2.Text = '(A)';
                     app.OffsetdeltaKLabel.Text = 'Offset (A)';
                     app.CalibrationDataPanel.Title = 'Reference Sample Current Sensor Calibration Data';
                     app.CalibrationOffsetPanel.Title = 'Reference Sample Calibration Offset';
@@ -1278,11 +1281,11 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
                     app.CalibrationDataUITable.ColumnName = {'Measured Current (A)', 'Actual Current (A)', 'Offset'};
                     
                 case app.CurrentTestSampleButton
-                    app.CalibrationSampleCelsiusEditFieldLabel.Text = 'Amps';
+                    app.CalibrationSampleCelsiusEditFieldLabel.Text = '(A)';
                     app.CalibrationSampleKelvinEditFieldLabel.Text = 'N/A';
                     app.CalibrationActualTempPanel.Title = 'Actual Current (A)';
                     app.CalibrationActualLabel.Text = 'Enter the actual current:';
-                    app.CalibrationSampleKelvinEditFieldLabel_2.Text = 'Amps';
+                    app.CalibrationSampleKelvinEditFieldLabel_2.Text = '(A)';
                     app.OffsetdeltaKLabel.Text = 'Offset (A)';
                     app.CalibrationDataPanel.Title = 'Test Sample Current Sensor Calibration Data';
                     app.CalibrationOffsetPanel.Title = 'Test Sample Calibration Offset';
@@ -2037,7 +2040,8 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
 
         % Button pushed function: TakeMeasurementButton
         function TakeMeasurementButtonPushed(app, event)
-            [temp_Ref, temp_Samp, current_Ref, current_Samp] = app.daqBox.getSingleScanData();
+            
+            [~, temp_Ref, temp_Samp, current_Ref, current_Samp] = app.daqBox.getSingleScanData();
             
             switch app.SelectSensortoCalibrateButtonGroup.SelectedObject
                 case app.TemperatureReferenceSampleButton
@@ -2101,6 +2105,8 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
                 app.SaveConfigToFileButton.Text = 'Save Config To File';
                 
             end
+            
+            drawnow;
             
         end
 
@@ -2256,7 +2262,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             
         end
 
-        % Callback function
+        % Value changed function: StageNumberDropDown_2
         function StageNumberDropDown_2ValueChanged(app, event)
             StageNumber = app.StageNumberDropDown_2.Value;
             
@@ -2365,7 +2371,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             
         end
 
-        % Callback function
+        % Value changed function: StageNumberDropDown_3
         function StageNumberDropDown_3ValueChanged(app, event)
             StageNumber = app.StageNumberDropDown_3.Value;
             
@@ -2658,8 +2664,8 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
                     app.CalibrationData_Offset = [];
                     app.CalibrationData = [];
                     
-                    app.daqBox.ConfigSaveStatus = false;
-                    app.SystemConfigStatus = false;
+                    %app.daqBox.ConfigSaveStatus = false;
+                    %app.SystemConfigStatus = false;
                     
                     app.refreshMaintenanceUI();
                     app.refreshOperationUI();
@@ -2744,9 +2750,9 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             
         end
 
-        % Value changed function: ReferenceSpecificHeatJgKSpinner_2
-        function ReferenceSpecificHeatJgKSpinner_2ValueChanged(app, event)
-            app.analysisData.ReferenceSampleData.SpecificHeat = app.ReferenceSpecificHeatJgKSpinner_2.Value;
+        % Value changed function: ReferenceSpecificHeatJgKSpinner
+        function ReferenceSpecificHeatJgKSpinnerValueChanged(app, event)
+            app.analysisData.ReferenceSampleData.SpecificHeat = app.ReferenceSpecificHeatJgKSpinner.Value;
             
             app.daqBox.ConfigSaveStatus = false;
             app.SystemConfigStatus = false;
@@ -2792,6 +2798,8 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
 
         % Button pushed function: AutoCalibrateButton
         function AutoCalibrateButtonPushed(app, event)
+            app.AutoCalibrateButton.Enable = 'off';
+            
             f = waitbar(0, 'Auto calibrating. Please wait...');
             
             for n = 1:100
@@ -2807,6 +2815,8 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             
             % Attempt to close the waitbar
             try close(f); catch, end
+            
+            app.AutoCalibrateButton.Enable = 'on';
         end
     end
 
@@ -2852,14 +2862,14 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             app.ClearDataButton.ButtonPushedFcn = createCallbackFcn(app, @ClearDataButtonPushed, true);
             app.ClearDataButton.BackgroundColor = [1 1 0];
             app.ClearDataButton.Layout.Row = 3;
-            app.ClearDataButton.Layout.Column = [2 3];
+            app.ClearDataButton.Layout.Column = 1;
             app.ClearDataButton.Text = 'Clear Data';
 
             % Create SaveDataToFileButton
             app.SaveDataToFileButton = uibutton(app.GridLayout2, 'push');
             app.SaveDataToFileButton.ButtonPushedFcn = createCallbackFcn(app, @SaveDataToFileButtonPushed, true);
             app.SaveDataToFileButton.BackgroundColor = [0 1 1];
-            app.SaveDataToFileButton.Layout.Row = 3;
+            app.SaveDataToFileButton.Layout.Row = 2;
             app.SaveDataToFileButton.Layout.Column = 1;
             app.SaveDataToFileButton.Text = 'Save Data To File';
 
@@ -2877,7 +2887,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             app.StopExperimentButton.ButtonPushedFcn = createCallbackFcn(app, @StopExperimentButtonPushed, true);
             app.StopExperimentButton.BackgroundColor = [1 0 0];
             app.StopExperimentButton.Enable = 'off';
-            app.StopExperimentButton.Layout.Row = 2;
+            app.StopExperimentButton.Layout.Row = 3;
             app.StopExperimentButton.Layout.Column = [2 3];
             app.StopExperimentButton.Text = 'Stop Experiment';
 
@@ -2895,7 +2905,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             app.SkipCurrentStageButton.BackgroundColor = [0.9294 0.6902 0.1294];
             app.SkipCurrentStageButton.Enable = 'off';
             app.SkipCurrentStageButton.Layout.Row = 2;
-            app.SkipCurrentStageButton.Layout.Column = 1;
+            app.SkipCurrentStageButton.Layout.Column = [2 3];
             app.SkipCurrentStageButton.Text = 'Skip Current Stage';
 
             % Create ReferenceSampleLiveDataPanel
@@ -2915,7 +2925,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
 
             % Create ReferenceCurrentEditField
             app.ReferenceCurrentEditField = uieditfield(app.GridLayout22, 'numeric');
-            app.ReferenceCurrentEditField.ValueDisplayFormat = '%.2f';
+            app.ReferenceCurrentEditField.ValueDisplayFormat = '%.3f';
             app.ReferenceCurrentEditField.Editable = 'off';
             app.ReferenceCurrentEditField.Layout.Row = 1;
             app.ReferenceCurrentEditField.Layout.Column = 1;
@@ -2927,11 +2937,11 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             app.ReferenceTemperatureEditField.Layout.Row = 2;
             app.ReferenceTemperatureEditField.Layout.Column = 1;
 
-            % Create ReferenceCurrentGaugeLabel_2
-            app.ReferenceCurrentGaugeLabel_2 = uilabel(app.GridLayout22);
-            app.ReferenceCurrentGaugeLabel_2.Layout.Row = 1;
-            app.ReferenceCurrentGaugeLabel_2.Layout.Column = 2;
-            app.ReferenceCurrentGaugeLabel_2.Text = 'Current (A)';
+            % Create ReferenceCurrentGaugeLabel
+            app.ReferenceCurrentGaugeLabel = uilabel(app.GridLayout22);
+            app.ReferenceCurrentGaugeLabel.Layout.Row = 1;
+            app.ReferenceCurrentGaugeLabel.Layout.Column = 2;
+            app.ReferenceCurrentGaugeLabel.Text = 'Current (A)';
 
             % Create ReferenceTemperatureGaugeLabel
             app.ReferenceTemperatureGaugeLabel = uilabel(app.GridLayout22);
@@ -2956,7 +2966,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
 
             % Create TestSampleCurrentEditField
             app.TestSampleCurrentEditField = uieditfield(app.GridLayout23, 'numeric');
-            app.TestSampleCurrentEditField.ValueDisplayFormat = '%.2f';
+            app.TestSampleCurrentEditField.ValueDisplayFormat = '%.3f';
             app.TestSampleCurrentEditField.Editable = 'off';
             app.TestSampleCurrentEditField.Layout.Row = 1;
             app.TestSampleCurrentEditField.Layout.Column = 1;
@@ -2968,11 +2978,11 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             app.TestSampleTemperatureEditField.Layout.Row = 2;
             app.TestSampleTemperatureEditField.Layout.Column = 1;
 
-            % Create TestSampleCurrentGaugeLabel_2
-            app.TestSampleCurrentGaugeLabel_2 = uilabel(app.GridLayout23);
-            app.TestSampleCurrentGaugeLabel_2.Layout.Row = 1;
-            app.TestSampleCurrentGaugeLabel_2.Layout.Column = 2;
-            app.TestSampleCurrentGaugeLabel_2.Text = 'Current (A)';
+            % Create TestSampleCurrentGaugeLabel
+            app.TestSampleCurrentGaugeLabel = uilabel(app.GridLayout23);
+            app.TestSampleCurrentGaugeLabel.Layout.Row = 1;
+            app.TestSampleCurrentGaugeLabel.Layout.Column = 2;
+            app.TestSampleCurrentGaugeLabel.Text = 'Current (A)';
 
             % Create TestSampleTemperatureGaugeLabel
             app.TestSampleTemperatureGaugeLabel = uilabel(app.GridLayout23);
@@ -3094,11 +3104,12 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
 
             % Create ReferenceSampleMassgramsSpinner
             app.ReferenceSampleMassgramsSpinner = uispinner(app.ReferenceSamplePropertiesPanel);
-            app.ReferenceSampleMassgramsSpinner.Step = 0.001;
-            app.ReferenceSampleMassgramsSpinner.ValueDisplayFormat = '%.3f';
+            app.ReferenceSampleMassgramsSpinner.Step = 0.0001;
+            app.ReferenceSampleMassgramsSpinner.Limits = [0 Inf];
+            app.ReferenceSampleMassgramsSpinner.ValueDisplayFormat = '%.4f';
             app.ReferenceSampleMassgramsSpinner.ValueChangedFcn = createCallbackFcn(app, @ReferenceSampleMassgramsSpinnerValueChanged, true);
             app.ReferenceSampleMassgramsSpinner.Position = [211 38 90 22];
-            app.ReferenceSampleMassgramsSpinner.Value = 0.001;
+            app.ReferenceSampleMassgramsSpinner.Value = 1;
 
             % Create ReferenceSpecificHeatJgKSpinner_2Label
             app.ReferenceSpecificHeatJgKSpinner_2Label = uilabel(app.ReferenceSamplePropertiesPanel);
@@ -3106,13 +3117,15 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             app.ReferenceSpecificHeatJgKSpinner_2Label.Position = [18 8 183 22];
             app.ReferenceSpecificHeatJgKSpinner_2Label.Text = 'Reference Specific Heat (J/(g*K))';
 
-            % Create ReferenceSpecificHeatJgKSpinner_2
-            app.ReferenceSpecificHeatJgKSpinner_2 = uispinner(app.ReferenceSamplePropertiesPanel);
-            app.ReferenceSpecificHeatJgKSpinner_2.Step = 0.001;
-            app.ReferenceSpecificHeatJgKSpinner_2.ValueDisplayFormat = '%.3f';
-            app.ReferenceSpecificHeatJgKSpinner_2.ValueChangedFcn = createCallbackFcn(app, @ReferenceSpecificHeatJgKSpinner_2ValueChanged, true);
-            app.ReferenceSpecificHeatJgKSpinner_2.Position = [211 8 90 22];
-            app.ReferenceSpecificHeatJgKSpinner_2.Value = 1;
+            % Create ReferenceSpecificHeatJgKSpinner
+            app.ReferenceSpecificHeatJgKSpinner = uispinner(app.ReferenceSamplePropertiesPanel);
+            app.ReferenceSpecificHeatJgKSpinner.Step = 0.0001;
+            app.ReferenceSpecificHeatJgKSpinner.Limits = [0 Inf];
+            app.ReferenceSpecificHeatJgKSpinner.ValueDisplayFormat = '%.4f';
+            app.ReferenceSpecificHeatJgKSpinner.ValueChangedFcn = createCallbackFcn(app, @ReferenceSpecificHeatJgKSpinnerValueChanged, true);
+            app.ReferenceSpecificHeatJgKSpinner.Enable = 'off';
+            app.ReferenceSpecificHeatJgKSpinner.Position = [211 8 90 22];
+            app.ReferenceSpecificHeatJgKSpinner.Value = 1;
 
             % Create ReferenceSampleMaterialEditFieldLabel
             app.ReferenceSampleMaterialEditFieldLabel = uilabel(app.ReferenceSamplePropertiesPanel);
@@ -3141,11 +3154,12 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
 
             % Create TestSampleMassgramsSpinner
             app.TestSampleMassgramsSpinner = uispinner(app.TestSamplePropertiesPanel);
-            app.TestSampleMassgramsSpinner.Step = 0.001;
-            app.TestSampleMassgramsSpinner.ValueDisplayFormat = '%.3f';
+            app.TestSampleMassgramsSpinner.Step = 0.0001;
+            app.TestSampleMassgramsSpinner.Limits = [0 Inf];
+            app.TestSampleMassgramsSpinner.ValueDisplayFormat = '%.4f';
             app.TestSampleMassgramsSpinner.ValueChangedFcn = createCallbackFcn(app, @TestSampleMassgramsSpinnerValueChanged, true);
             app.TestSampleMassgramsSpinner.Position = [201 38 90 22];
-            app.TestSampleMassgramsSpinner.Value = 0.001;
+            app.TestSampleMassgramsSpinner.Value = 1;
 
             % Create TestSampleMaterialEditFieldLabel
             app.TestSampleMaterialEditFieldLabel = uilabel(app.TestSamplePropertiesPanel);
@@ -3179,12 +3193,12 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             % Create OperationTab
             app.OperationTab = uitab(app.TabGroup);
             app.OperationTab.Title = 'Operation';
-            app.OperationTab.BackgroundColor = [0.149 0.149 0.149];
+            app.OperationTab.BackgroundColor = [0.502 0.502 0.502];
 
             % Create GridLayout3
             app.GridLayout3 = uigridlayout(app.OperationTab);
             app.GridLayout3.ColumnWidth = {420, 60, 60, '1x'};
-            app.GridLayout3.RowHeight = {30, 30, 30, 30, 60, '1x'};
+            app.GridLayout3.RowHeight = {30, 30, 60, 60, '1x'};
             app.GridLayout3.RowSpacing = 6;
             app.GridLayout3.Padding = [10 6 10 6];
 
@@ -3197,7 +3211,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             app.UIAxesSamples.Box = 'on';
             app.UIAxesSamples.XGrid = 'on';
             app.UIAxesSamples.YGrid = 'on';
-            app.UIAxesSamples.Layout.Row = [1 5];
+            app.UIAxesSamples.Layout.Row = [1 4];
             app.UIAxesSamples.Layout.Column = 4;
 
             % Create UIAxesDifferential
@@ -3205,16 +3219,17 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             title(app.UIAxesDifferential, 'Differential Heat Flow vs. Time')
             xlabel(app.UIAxesDifferential, 'Time (sec)')
             ylabel(app.UIAxesDifferential, '\Delta Heat Flow (W/g)')
+            app.UIAxesDifferential.YLim = [-1000000000 1000000000];
             app.UIAxesDifferential.Box = 'on';
             app.UIAxesDifferential.XGrid = 'on';
             app.UIAxesDifferential.YGrid = 'on';
-            app.UIAxesDifferential.Layout.Row = 6;
+            app.UIAxesDifferential.Layout.Row = 5;
             app.UIAxesDifferential.Layout.Column = [1 4];
 
             % Create ExperimentStagingConfigurationPanel
             app.ExperimentStagingConfigurationPanel = uipanel(app.GridLayout3);
             app.ExperimentStagingConfigurationPanel.Title = 'Experiment Staging Configuration';
-            app.ExperimentStagingConfigurationPanel.Layout.Row = [1 5];
+            app.ExperimentStagingConfigurationPanel.Layout.Row = [1 4];
             app.ExperimentStagingConfigurationPanel.Layout.Column = 1;
             app.ExperimentStagingConfigurationPanel.FontWeight = 'bold';
 
@@ -3286,7 +3301,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             % Create XAxisDataPanel
             app.XAxisDataPanel = uipanel(app.GridLayout3);
             app.XAxisDataPanel.Title = 'X-Axis Data';
-            app.XAxisDataPanel.Layout.Row = 5;
+            app.XAxisDataPanel.Layout.Row = 4;
             app.XAxisDataPanel.Layout.Column = [2 3];
             app.XAxisDataPanel.FontWeight = 'bold';
 
@@ -3307,7 +3322,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             app.LoadStagingFileButton = uibutton(app.GridLayout3, 'push');
             app.LoadStagingFileButton.ButtonPushedFcn = createCallbackFcn(app, @LoadStagingFileButtonPushed, true);
             app.LoadStagingFileButton.BackgroundColor = [0.302 0.749 0.9294];
-            app.LoadStagingFileButton.Layout.Row = 2;
+            app.LoadStagingFileButton.Layout.Row = 1;
             app.LoadStagingFileButton.Layout.Column = [2 3];
             app.LoadStagingFileButton.Text = 'Load Staging File';
 
@@ -3315,7 +3330,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             app.SaveStagingFileButton = uibutton(app.GridLayout3, 'push');
             app.SaveStagingFileButton.ButtonPushedFcn = createCallbackFcn(app, @SaveStagingFileButtonPushed, true);
             app.SaveStagingFileButton.BackgroundColor = [0 1 1];
-            app.SaveStagingFileButton.Layout.Row = 3;
+            app.SaveStagingFileButton.Layout.Row = 2;
             app.SaveStagingFileButton.Layout.Column = [2 3];
             app.SaveStagingFileButton.Text = 'Save Staging File';
 
@@ -3323,7 +3338,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             app.AddaStagePanel = uipanel(app.GridLayout3);
             app.AddaStagePanel.Title = 'Add a Stage';
             app.AddaStagePanel.Visible = 'off';
-            app.AddaStagePanel.Layout.Row = [1 5];
+            app.AddaStagePanel.Layout.Row = [1 4];
             app.AddaStagePanel.Layout.Column = 1;
 
             % Create GridLayout15
@@ -3410,7 +3425,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             app.EditaStagePanel = uipanel(app.GridLayout3);
             app.EditaStagePanel.Title = 'Edit a Stage';
             app.EditaStagePanel.Visible = 'off';
-            app.EditaStagePanel.Layout.Row = [1 5];
+            app.EditaStagePanel.Layout.Row = [1 4];
             app.EditaStagePanel.Layout.Column = 1;
 
             % Create GridLayout16
@@ -3427,6 +3442,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             % Create StageNumberDropDown_2
             app.StageNumberDropDown_2 = uidropdown(app.GridLayout16);
             app.StageNumberDropDown_2.Items = {'1'};
+            app.StageNumberDropDown_2.ValueChangedFcn = createCallbackFcn(app, @StageNumberDropDown_2ValueChanged, true);
             app.StageNumberDropDown_2.Layout.Row = 1;
             app.StageNumberDropDown_2.Layout.Column = 2;
             app.StageNumberDropDown_2.Value = '1';
@@ -3497,7 +3513,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             app.RemoveaStagePanel = uipanel(app.GridLayout3);
             app.RemoveaStagePanel.Title = 'Remove a Stage';
             app.RemoveaStagePanel.Visible = 'off';
-            app.RemoveaStagePanel.Layout.Row = [1 5];
+            app.RemoveaStagePanel.Layout.Row = [1 4];
             app.RemoveaStagePanel.Layout.Column = 1;
 
             % Create GridLayout17
@@ -3514,6 +3530,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             % Create StageNumberDropDown_3
             app.StageNumberDropDown_3 = uidropdown(app.GridLayout17);
             app.StageNumberDropDown_3.Items = {'1'};
+            app.StageNumberDropDown_3.ValueChangedFcn = createCallbackFcn(app, @StageNumberDropDown_3ValueChanged, true);
             app.StageNumberDropDown_3.Layout.Row = 1;
             app.StageNumberDropDown_3.Layout.Column = 2;
             app.StageNumberDropDown_3.Value = '1';
@@ -3584,10 +3601,30 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             app.CancelButton_3.Layout.Column = 2;
             app.CancelButton_3.Text = 'Cancel';
 
+            % Create HeatFlowUnitsPanel
+            app.HeatFlowUnitsPanel = uipanel(app.GridLayout3);
+            app.HeatFlowUnitsPanel.Title = 'Heat Flow Units';
+            app.HeatFlowUnitsPanel.Layout.Row = 3;
+            app.HeatFlowUnitsPanel.Layout.Column = [2 3];
+            app.HeatFlowUnitsPanel.FontWeight = 'bold';
+
+            % Create GridLayout25
+            app.GridLayout25 = uigridlayout(app.HeatFlowUnitsPanel);
+            app.GridLayout25.ColumnWidth = {'1x'};
+            app.GridLayout25.RowHeight = {22};
+
+            % Create HeatFlowUnitsSwitch
+            app.HeatFlowUnitsSwitch = uiswitch(app.GridLayout25, 'slider');
+            app.HeatFlowUnitsSwitch.Items = {'W', 'W/g'};
+            app.HeatFlowUnitsSwitch.Enable = 'off';
+            app.HeatFlowUnitsSwitch.Layout.Row = 1;
+            app.HeatFlowUnitsSwitch.Layout.Column = 1;
+            app.HeatFlowUnitsSwitch.Value = 'W/g';
+
             % Create LiveTemperatureDataTab
             app.LiveTemperatureDataTab = uitab(app.TabGroup);
             app.LiveTemperatureDataTab.Title = 'Live Temperature Data';
-            app.LiveTemperatureDataTab.BackgroundColor = [0.149 0.149 0.149];
+            app.LiveTemperatureDataTab.BackgroundColor = [0.502 0.502 0.502];
 
             % Create GridLayout4
             app.GridLayout4 = uigridlayout(app.LiveTemperatureDataTab);
@@ -3611,7 +3648,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             % Create AnalysisTab
             app.AnalysisTab = uitab(app.TabGroup);
             app.AnalysisTab.Title = 'Analysis';
-            app.AnalysisTab.BackgroundColor = [0.149 0.149 0.149];
+            app.AnalysisTab.BackgroundColor = [0.502 0.502 0.502];
 
             % Create GridLayout5
             app.GridLayout5 = uigridlayout(app.AnalysisTab);
@@ -3790,7 +3827,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             % Create MaintenanceTab
             app.MaintenanceTab = uitab(app.TabGroup);
             app.MaintenanceTab.Title = 'Maintenance';
-            app.MaintenanceTab.BackgroundColor = [0.149 0.149 0.149];
+            app.MaintenanceTab.BackgroundColor = [0.502 0.502 0.502];
 
             % Create GridLayout6
             app.GridLayout6 = uigridlayout(app.MaintenanceTab);
@@ -3882,7 +3919,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
             app.SensorCalibrationPanel = uipanel(app.GridLayout6);
             app.SensorCalibrationPanel.ForegroundColor = [1 1 1];
             app.SensorCalibrationPanel.Title = 'Sensor Calibration';
-            app.SensorCalibrationPanel.BackgroundColor = [0.502 0.502 0.502];
+            app.SensorCalibrationPanel.BackgroundColor = [0.149 0.149 0.149];
             app.SensorCalibrationPanel.Layout.Row = [1 8];
             app.SensorCalibrationPanel.Layout.Column = 5;
             app.SensorCalibrationPanel.FontWeight = 'bold';
@@ -3914,7 +3951,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
 
             % Create CalibrationSampleCelsiusEditField
             app.CalibrationSampleCelsiusEditField = uieditfield(app.CalibrationSamplePanel, 'numeric');
-            app.CalibrationSampleCelsiusEditField.ValueDisplayFormat = '%.2f';
+            app.CalibrationSampleCelsiusEditField.ValueDisplayFormat = '%.4f';
             app.CalibrationSampleCelsiusEditField.Editable = 'off';
             app.CalibrationSampleCelsiusEditField.Position = [11 54 60 22];
 
@@ -3925,7 +3962,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
 
             % Create CalibrationSampleKelvinEditField
             app.CalibrationSampleKelvinEditField = uieditfield(app.CalibrationSamplePanel, 'numeric');
-            app.CalibrationSampleKelvinEditField.ValueDisplayFormat = '%.2f';
+            app.CalibrationSampleKelvinEditField.ValueDisplayFormat = '%.4f';
             app.CalibrationSampleKelvinEditField.Editable = 'off';
             app.CalibrationSampleKelvinEditField.Position = [11 24 60 22];
 
@@ -3943,7 +3980,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
 
             % Create CalibrationActualTempEditField
             app.CalibrationActualTempEditField = uieditfield(app.CalibrationActualTempPanel, 'numeric');
-            app.CalibrationActualTempEditField.ValueDisplayFormat = '%.2f';
+            app.CalibrationActualTempEditField.ValueDisplayFormat = '%.4f';
             app.CalibrationActualTempEditField.ValueChangedFcn = createCallbackFcn(app, @CalibrationActualTempEditFieldValueChanged, true);
             app.CalibrationActualTempEditField.Position = [11 70 60 22];
 
@@ -3959,7 +3996,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
 
             % Create ActualTempOffsetEditField
             app.ActualTempOffsetEditField = uieditfield(app.CalibrationActualTempPanel, 'numeric');
-            app.ActualTempOffsetEditField.ValueDisplayFormat = '%+5.2f';
+            app.ActualTempOffsetEditField.ValueDisplayFormat = '%+5.4f';
             app.ActualTempOffsetEditField.Editable = 'off';
             app.ActualTempOffsetEditField.Position = [11 40 60 22];
 
@@ -4032,7 +4069,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
 
             % Create CalibrationOffsetEditField
             app.CalibrationOffsetEditField = uieditfield(app.GridLayout19, 'numeric');
-            app.CalibrationOffsetEditField.ValueDisplayFormat = '%+5.2f';
+            app.CalibrationOffsetEditField.ValueDisplayFormat = '%+5.4f';
             app.CalibrationOffsetEditField.Layout.Row = 2;
             app.CalibrationOffsetEditField.Layout.Column = 2;
 
@@ -4088,7 +4125,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
 
             % Create KpproportionalgainSpinner
             app.KpproportionalgainSpinner = uispinner(app.GridLayout12);
-            app.KpproportionalgainSpinner.Step = 0.0001;
+            app.KpproportionalgainSpinner.Step = 1e-05;
             app.KpproportionalgainSpinner.ValueDisplayFormat = '%.5f';
             app.KpproportionalgainSpinner.ValueChangedFcn = createCallbackFcn(app, @KpproportionalgainSpinnerValueChanged, true);
             app.KpproportionalgainSpinner.Layout.Row = 1;
@@ -4103,7 +4140,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
 
             % Create KiintegralgainSpinner
             app.KiintegralgainSpinner = uispinner(app.GridLayout12);
-            app.KiintegralgainSpinner.Step = 0.0001;
+            app.KiintegralgainSpinner.Step = 1e-05;
             app.KiintegralgainSpinner.ValueDisplayFormat = '%.5f';
             app.KiintegralgainSpinner.ValueChangedFcn = createCallbackFcn(app, @KiintegralgainSpinnerValueChanged, true);
             app.KiintegralgainSpinner.Layout.Row = 2;
@@ -4118,7 +4155,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
 
             % Create KdderivativegainSpinner
             app.KdderivativegainSpinner = uispinner(app.GridLayout12);
-            app.KdderivativegainSpinner.Step = 0.0001;
+            app.KdderivativegainSpinner.Step = 1e-05;
             app.KdderivativegainSpinner.ValueDisplayFormat = '%.5f';
             app.KdderivativegainSpinner.ValueChangedFcn = createCallbackFcn(app, @KdderivativegainSpinnerValueChanged, true);
             app.KdderivativegainSpinner.Layout.Row = 3;
@@ -4145,7 +4182,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
 
             % Create ReferenceSampleTemperatureCalibrationOffsetdeltaKEditField
             app.ReferenceSampleTemperatureCalibrationOffsetdeltaKEditField = uieditfield(app.GridLayout8, 'numeric');
-            app.ReferenceSampleTemperatureCalibrationOffsetdeltaKEditField.ValueDisplayFormat = '%+5.2f';
+            app.ReferenceSampleTemperatureCalibrationOffsetdeltaKEditField.ValueDisplayFormat = '%+5.4f';
             app.ReferenceSampleTemperatureCalibrationOffsetdeltaKEditField.Editable = 'off';
             app.ReferenceSampleTemperatureCalibrationOffsetdeltaKEditField.Layout.Row = 1;
             app.ReferenceSampleTemperatureCalibrationOffsetdeltaKEditField.Layout.Column = 3;
@@ -4159,7 +4196,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
 
             % Create TestSampleTemperatureCalibrationOffsetdeltaKEditField
             app.TestSampleTemperatureCalibrationOffsetdeltaKEditField = uieditfield(app.GridLayout8, 'numeric');
-            app.TestSampleTemperatureCalibrationOffsetdeltaKEditField.ValueDisplayFormat = '%+5.2f';
+            app.TestSampleTemperatureCalibrationOffsetdeltaKEditField.ValueDisplayFormat = '%+5.4f';
             app.TestSampleTemperatureCalibrationOffsetdeltaKEditField.Editable = 'off';
             app.TestSampleTemperatureCalibrationOffsetdeltaKEditField.Layout.Row = 2;
             app.TestSampleTemperatureCalibrationOffsetdeltaKEditField.Layout.Column = 3;
@@ -4173,7 +4210,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
 
             % Create ReferenceSampleCurrentCalibrationOffsetdeltaAEditField
             app.ReferenceSampleCurrentCalibrationOffsetdeltaAEditField = uieditfield(app.GridLayout8, 'numeric');
-            app.ReferenceSampleCurrentCalibrationOffsetdeltaAEditField.ValueDisplayFormat = '%+5.2f';
+            app.ReferenceSampleCurrentCalibrationOffsetdeltaAEditField.ValueDisplayFormat = '%+5.4f';
             app.ReferenceSampleCurrentCalibrationOffsetdeltaAEditField.Editable = 'off';
             app.ReferenceSampleCurrentCalibrationOffsetdeltaAEditField.Layout.Row = 3;
             app.ReferenceSampleCurrentCalibrationOffsetdeltaAEditField.Layout.Column = 3;
@@ -4187,7 +4224,7 @@ classdef DSC_GUI_APP_autoreflow_exported < matlab.apps.AppBase
 
             % Create TestSampleCurrentCalibrationOffsetdeltaAEditField
             app.TestSampleCurrentCalibrationOffsetdeltaAEditField = uieditfield(app.GridLayout8, 'numeric');
-            app.TestSampleCurrentCalibrationOffsetdeltaAEditField.ValueDisplayFormat = '%+5.2f';
+            app.TestSampleCurrentCalibrationOffsetdeltaAEditField.ValueDisplayFormat = '%+5.4f';
             app.TestSampleCurrentCalibrationOffsetdeltaAEditField.Editable = 'off';
             app.TestSampleCurrentCalibrationOffsetdeltaAEditField.Layout.Row = 4;
             app.TestSampleCurrentCalibrationOffsetdeltaAEditField.Layout.Column = 3;

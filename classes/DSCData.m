@@ -163,13 +163,13 @@ classdef DSCData < handle
             if nargin > 1
                 obj.ReferenceSampleData = referenceSampleData;
             else
-                obj.ReferenceSampleData = SampleData('Unknown Reference Sample', 0.001, 1);
+                obj.ReferenceSampleData = SampleData('Unknown Reference Sample', 0.1, 1);
             end
             
             if nargin > 2
                 obj.TestSampleData = testSampleData;
             else
-                obj.TestSampleData = SampleData('Unknown Test Sample', 0.001, 1);
+                obj.TestSampleData = SampleData('Unknown Test Sample', 0.1, 1);
             end
         end
         
@@ -486,7 +486,7 @@ classdef DSCData < handle
             %   Return the interpolated reference sample heat flow data,
             %   calculated using the original reference sample heat flow
             %   data and the interpolated temperature data
-            n = length(obj.HeatFlowData_Ref);
+            n = obj.DataLength; %length(obj.HeatFlowData_Ref);
             switch n
                 case 0
                     heatFlowData_Ref_Interpolated = [0, 0];
@@ -496,17 +496,25 @@ classdef DSCData < handle
                 case 2
                     heatFlowData_Ref_Interpolated = obj.HeatFlowData_Ref;
                 otherwise
+                    % Interpolation requires that sample points must be
+                    % unique and sorted in ascending order
+                    
+                    % Store corresponding temperature and heat flow data
+                    unsortedData = [obj.TempData_Ref', obj.HeatFlowData_Ref'];
+                    % Sort the data by temperature
+                    sortedData = sortrows(unsortedData);
+                    % Find unique x values
+                    [~,idx] = unique(sortedData(:,1));
+                    % Remove rows with duplicate x values
+                    uniqueData = sortedData(idx,:);
+                    % Store the sorted data in separate arrays
+                    sortedTempData_Ref = uniqueData(:,1);
+                    sortedHeatFlowData_Ref = uniqueData(:,2);
+                    % Interpolate the heat flow data
                     heatFlowData_Ref_Interpolated...
-                        = interp1(obj.TempData_Ref, obj.HeatFlowData_Ref,...
+                        = interp1(sortedTempData_Ref, sortedHeatFlowData_Ref,...
                         obj.TempData_Interpolated, obj.INTERP_METHOD);
             end
-            % if length(obj.HeatFlowData_Ref) > 2
-            %     heatFlowData_Ref_Interpolated...
-            %         = interp1(obj.TempData_Ref, obj.HeatFlowData_Ref,...
-            %         obj.TempData_Interpolated, obj.INTERP_METHOD);
-            % else
-            %     heatFlowData_Ref_Interpolated = obj.HeatFlowData_Ref;
-            % end
         end
         
         function heatFlowData_Samp_Interpolated = get.HeatFlowData_Samp_Interpolated(obj)
@@ -514,7 +522,7 @@ classdef DSCData < handle
             %   Return the interpolated test sample heat flow data,
             %   calculated using the original test sample heat flow data
             %   and the interpolated temperature data
-            n = length(obj.HeatFlowData_Samp);
+            n = obj.DataLength; %length(obj.HeatFlowData_Samp);
             switch n
                 case 0
                     heatFlowData_Samp_Interpolated = [0, 0];
@@ -524,17 +532,25 @@ classdef DSCData < handle
                 case 2
                     heatFlowData_Samp_Interpolated = obj.HeatFlowData_Samp;
                 otherwise
+                    % Interpolation requires that sample points must be
+                    % unique and sorted in ascending order
+                    
+                    % Store corresponding temperature and heat flow data
+                    unsortedData = [obj.TempData_Samp', obj.HeatFlowData_Samp'];
+                    % Sort the data by temperature
+                    sortedData = sortrows(unsortedData);
+                    % Find unique x values
+                    [~,idx] = unique(sortedData(:,1));
+                    % Remove rows with duplicate x values
+                    uniqueData = sortedData(idx,:);
+                    % Store the sorted data in separate arrays
+                    sortedTempData_Samp = uniqueData(:,1);
+                    sortedHeatFlowData_Samp = uniqueData(:,2);
+                    % Interpolate the heat flow data
                     heatFlowData_Samp_Interpolated...
-                        = interp1(obj.TempData_Samp, obj.HeatFlowData_Samp,...
+                        = interp1(sortedTempData_Samp, sortedHeatFlowData_Samp,...
                         obj.TempData_Interpolated, obj.INTERP_METHOD);
             end
-            % if length(obj.HeatFlowData_Samp) > 2
-            %     heatFlowData_Samp_Interpolated...
-            %         = interp1(obj.TempData_Samp, obj.HeatFlowData_Samp,...
-            %         obj.TempData_Interpolated, obj.INTERP_METHOD);
-            % else
-            %     heatFlowData_Samp_Interpolated = obj.HeatFlowData_Samp;
-            % end
         end
         
         function heatFlowData_Diff_Interpolated = get.HeatFlowData_Diff_Interpolated(obj)
@@ -778,12 +794,12 @@ classdef DSCData < handle
                     [~, ~, sampleInfoCellArray] = xlsread(dataFileName, 'T2:U4');
                     
                     obj.ReferenceSampleData.Material = sampleInfoCellArray{1,1};
-                    obj.ReferenceSampleData.Mass = sampledataCellArray(2,1);
+                    obj.ReferenceSampleData.Mass = sampleInfoCellArray(2,1);
                     obj.ReferenceSampleData.SpecificHeat = sampleInfoCellArray{3,1};
                     
-                    obj.TestSampleData.Material = sampledataCellArray(1,2);
-                    obj.TestSampleData.Mass = sampledataCellArray(2,2);
-                    obj.TestSampleData.SpecifcHeat = sampledataCellArray(3,2);
+                    obj.TestSampleData.Material = sampleInfoCellArray(1,2);
+                    obj.TestSampleData.Mass = sampleInfoCellArray(2,2);
+                    obj.TestSampleData.SpecifcHeat = sampleInfoCellArray(3,2);
                     
                     dataLoadStatus = true;
             end
@@ -960,6 +976,7 @@ classdef DSCData < handle
                     % Write the data to the desired .xlsx file
                     [dataSaveStatus, message] = xlswrite(dataFullPath, outputCellArray);
                     if (~isempty(message) && (length(message) > 0))
+                        disp('xlswrite message output (DEBUG INFO)')
                         disp(message)
                     end
             end
@@ -973,11 +990,11 @@ classdef DSCData < handle
             
             % Calculate the heat flow for the reference sample
             obj.LatestHeatFlow_Ref = obj.LatestCurrent_Ref .* heatingCoilVoltage...
-                / obj.ReferenceSampleData.Mass;
+                .* obj.LatestPWMDutyCycle_Ref / obj.ReferenceSampleData.Mass;
             
             % Calculate the heat flow for the test sample
             obj.LatestHeatFlow_Samp = obj.LatestCurrent_Samp .* heatingCoilVoltage...
-                / obj.TestSampleData.Mass;
+                .* obj.LatestPWMDutyCycle_Samp / obj.TestSampleData.Mass;
             
             % Calculate the differential heat flow
             obj.LatestHeatFlow_Diff = obj.LatestHeatFlow_Samp - obj.LatestHeatFlow_Ref;
@@ -991,11 +1008,11 @@ classdef DSCData < handle
             
             % Calculate the new heat flow data for the reference sample
             obj.HeatFlowData_Ref = obj.CurrentData_Ref .* heatingCoilVoltage...
-                / obj.ReferenceSampleData.Mass;
+                .* obj.PWMDutyCycleData_Ref / obj.ReferenceSampleData.Mass;
             
             % Calculate the new heat flow data for the test sample
             obj.HeatFlowData_Samp = obj.CurrentData_Samp .* heatingCoilVoltage...
-                / obj.TestSampleData.Mass;
+                .* obj.PWMDutyCycleData_Samp / obj.TestSampleData.Mass;
             
             % Calculate the new differential heat flow data
             obj.HeatFlowData_Diff = obj.HeatFlowData_Samp - obj.HeatFlowData_Ref;

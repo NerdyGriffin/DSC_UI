@@ -111,8 +111,8 @@ classdef DAQBox < handle
         SimulatedCurrent_Samp(1,1) = 0
     end
     
-    % Dependent Properties % TODO Update this comment
-    properties %(Dependent)
+    % PWM Properties
+    properties
         PWMDutyCycle_Ref
         PWMDutyCycle_Samp
     end
@@ -145,13 +145,6 @@ classdef DAQBox < handle
         % ScansAvailableFcn callback (default: 100)
         SCANS_AVAILABLE_FCN_COUNT = 100
         
-        % The scan rate used by the mimiced PWM (default: 1000)
-        % OUTPUT_SCAN_RATE = 1000 % TODO Remove this
-        
-        % The number of scans at which to generate more data for the output
-        % (default: 500)
-        % SCANS_REQUIRED_FCN_COUNT = 500; % TODO Remove this
-        
         % The duration in seconds of the sensor readings
         %INPUT_DURATION_IN_SECONDS = 60; % TODO Delete this
         
@@ -166,8 +159,8 @@ classdef DAQBox < handle
         PWM_MAX_DUTY_CYCLE = 1 - 1e-3;
         
         % The PWM frequency of the PWM channels
-        % (default: 100)
-        %PWM_FREQUENCY = 100; % TODO Remove this
+        % (default: 100) Relay has response time of 10ms
+        PWM_FREQUENCY = 10;
         
         MAX_PWM_ATTEMPTS = 10;
         
@@ -178,6 +171,10 @@ classdef DAQBox < handle
         CURRENT_SENSOR_SENS = 0.1; % Sensitivity (Sens) 100 mV/A = 0.1 V/A
         
         HEATING_COIL_VOLTAGE = 24; % The constant voltage supplied to the heating coils
+        
+        PID_THRESHOLD = 4;
+        
+        PID_SAMPLE_SIZE = 1000000; % The max number of samples to use in PID integral calculations
         
         % Used to simulate the ambient temperate of the lab while running
         % the software without a physical DAQ Box
@@ -301,36 +298,6 @@ classdef DAQBox < handle
         end
     end
     
-    % % Dependant Properties Accessor Methods
-    % methods
-    %     function pwmDutyCycle_Ref = get.PWMDutyCycle_Ref(obj)
-    %         % Return the PWM duty cycle currently set for the reference
-    %         % sample heating coil output channel
-    %         pwmDutyCycle_Ref = obj.ctr_PWM_Ref.DutyCycle;
-    %     end
-    
-    %     function pwmDutyCycle_Samp = get.PWMDutyCycle_Samp(obj)
-    %         % Return the PWM duty cycle currently set for the test sample
-    %         % heating coil output channel
-    %         pwmDutyCycle_Samp = obj.ctr_PWM_Samp.DutyCycle;
-    %     end
-    % end
-    
-    % % Dependant Properties Mutator Methods
-    % methods
-    %     function set.PWMDutyCycle_Ref(obj, newPWMDutyCycle_Ref)
-    %         if obj.dqOutput.Running
-    %             obj.ctr_PWM_Ref.DutyCycle = newPWMDutyCycle_Ref;
-    %         end
-    %     end
-    
-    %     function set.PWMDutyCycle_Samp(obj, newPWMDutyCycle_Samp)
-    %         if obj.dqOutput.Running
-    %             obj.ctr_PWM_Samp.DutyCycle = newPWMDutyCycle_Samp;
-    %         end
-    %     end
-    % end
-    
     % daq.createSession Methods
     methods
         function obj = initializeInput(obj)
@@ -435,22 +402,16 @@ classdef DAQBox < handle
                 % sample
                 obj.ctr_PWM_Ref = addoutput(obj.dqOutput, obj.DeviceID,...
                     obj.CHANNEL_ID_PWM_REF, "PulseGeneration");
-                % obj.ctr_PWM_Ref.DutyCycle = obj.PWM_MIN_DUTY_CYCLE; % TODO Remove this (because default is 0.50)
-                % obj.ctr_PWM_Ref.Frequency = obj.PWM_FREQUENCY; % TODO Remove this (because default is 100)
+                obj.ctr_PWM_Ref.Frequency = obj.PWM_FREQUENCY;
                 obj.ctr_PWM_Ref.Name = 'Heating Coil PWM: Reference';
                 disp('Created: counter output channel for reference sample heating coil')
                 
                 % Add the heating coil output channel for the test sample
                 obj.ctr_PWM_Samp = addoutput(obj.dqOutput, obj.DeviceID,...
                     obj.CHANNEL_ID_PWM_SAMP, "PulseGeneration");
-                % obj.ctr_PWM_Samp.DutyCycle = obj.PWM_MIN_DUTY_CYCLE; % TODO Remove this (because default is 0.50)
-                % obj.ctr_PWM_Samp.Frequency = obj.PWM_FREQUENCY; % TODO Remove this (because default is 100)
+                obj.ctr_PWM_Samp.Frequency = obj.PWM_FREQUENCY;
                 obj.ctr_PWM_Samp.Name = 'Heating Coil PWM: Test Sample';
                 disp('Created: counter output channel for test sample heating coil')
-                
-                % obj.dqOutput.Rate = obj.OUTPUT_SCAN_RATE; % TODO Remove this (because default is used)
-                
-                % obj.dqOutput.ScansRequiredFcnCount = obj.SCANS_REQUIRED_FCN_COUNT; % TODO Remove this (because default is used)
             else
                 % Delete the session object if no DAQ devices are found
                 delete(obj.dqOutput)
@@ -770,8 +731,7 @@ classdef DAQBox < handle
         function obj = startPWM(obj)
             %startPWM
             %   Start generating the PWM outputs on the counter channels in
-            %   the background (will run for 1 second unless manually
-            %   stopped)
+            %   the background
             
             if obj.UseDAQHardware
                 err_count = 0;
@@ -781,10 +741,7 @@ classdef DAQBox < handle
                     end
                     
                     try
-                        % obj.dqOutput.ScansRequiredFcn = @obj.loadMorePWMDataFcn;
                         start(obj.dqOutput, "Continuous")
-                        % start(obj.dqOutput,...
-                        %    "Duration", seconds(obj.OUTPUT_DURATION));
                     catch
                         warning('An error occured while attempting to start the PWM. Retrying...')
                         err_count = err_count + 1;
@@ -818,79 +775,22 @@ classdef DAQBox < handle
         end
         
         function updatePWMDutyCycle(obj,...
-                newPWMDutyCycle_Ref, newPWMDutyCycle_Samp)
+                newDutyCycle_Ref, newDutyCycle_Samp)
             %updatePWMDutyCycle
             %   Adjusts the PWM duty cycle for the reference and test
             %   sample heating coil outputs
             
-            % Bounds checking on duty cycle for reference sample
-            if newPWMDutyCycle_Ref > obj.PWM_MAX_DUTY_CYCLE
-                newPWMDutyCycle_Ref = obj.PWM_MAX_DUTY_CYCLE;
-            elseif newPWMDutyCycle_Ref < obj.PWM_MIN_DUTY_CYCLE
-                newPWMDutyCycle_Ref = obj.PWM_MIN_DUTY_CYCLE;
-            end
-            
-            % Bounds checking on duty cycle for test sample
-            if newPWMDutyCycle_Samp > obj.PWM_MAX_DUTY_CYCLE
-                newPWMDutyCycle_Samp = obj.PWM_MAX_DUTY_CYCLE;
-            elseif newPWMDutyCycle_Samp < obj.PWM_MIN_DUTY_CYCLE
-                newPWMDutyCycle_Samp = obj.PWM_MIN_DUTY_CYCLE;
-            end
-            
             % Assign the new duty cycle values
-            obj.PWMDutyCycle_Ref = newPWMDutyCycle_Ref;
-            obj.PWMDutyCycle_Samp = newPWMDutyCycle_Samp;
-            obj.ctr_PWM_Ref.DutyCycle = newPWMDutyCycle_Ref;
-            obj.ctr_PWM_Samp.DutyCycle = newPWMDutyCycle_Samp;
-            
-            % fprintf("PWMDutyCycle_Ref  = %g\n", obj.PWMDutyCycle_Ref); % TODO Remove this
-            % fprintf("PWMDutyCycle_Samp = %g\n", obj.PWMDutyCycle_Samp); % TODO Remove this
+            obj.PWMDutyCycle_Ref = newDutyCycle_Ref;
+            obj.PWMDutyCycle_Samp = newDutyCycle_Samp;
+            obj.ctr_PWM_Ref.DutyCycle = newDutyCycle_Ref;
+            obj.ctr_PWM_Samp.DutyCycle = newDutyCycle_Samp;
             
             if ~obj.UseDAQHardware
                 obj.simulateOutput();
                 
             end
         end
-        
-        % function loadMorePWMDataFcn(obj, ~, ~)
-        %     %loadMorePWMDataFcn
-        %     %   Loads more data of a pregenerated PWM waveform into the
-        %     %   buffer of the outputs, using the most recent value defined
-        %     %   for the duty cycles
-        
-        %     numScans = 0.2 * obj.SCANS_REQUIRED_FCN_COUNT;
-        
-        %     scanData_Ref = zeros(1,numScans);
-        %     scanData_Samp = zeros(1,numScans);
-        
-        %     period = obj.OUTPUT_SCAN_RATE / obj.PWM_FREQUENCY;
-        
-        %     for i=1:numScans
-        %         proportion = mod(1,period)/period;
-        %         if proportion < obj.PWMDutyCycle_Ref
-        %             scanData_Ref(i) = 5;
-        %         else
-        %             scanData_Ref(i) = -5;
-        %         end
-        %         if proportion < obj.PWMDutyCycle_Samp
-        %             scanData_Samp(i) = 5;
-        %         else
-        %             scanData_Samp(i) = -5;
-        %         end
-        %     end
-        
-        %     % PWM_Length_Ref = round(numScans * obj.PWMDutyCycle_Ref);
-        %     % PWM_Length_Samp = round(numScans * obj.PWMDutyCycle_Samp);
-        
-        %     % PWM_scanData_Ref = [ones(1,PWM_Length_Ref), ...
-        %     %     zeros(1,numScans-PWM_Length_Ref)];
-        %     % PWM_scanData_Samp = [ones(1,PWM_Length_Samp), ...
-        %     %     zeros(1,numScans-PWM_Length_Samp)];
-        
-        %     PWM_scanData = [PWM_scanData_Ref', PWM_scanData_Samp'];
-        
-        %     preload(obj.dqOutput,PWM_scanData);
-        % end
     end
     
     % PID Controller Methods
@@ -912,12 +812,26 @@ classdef DAQBox < handle
                 % exceeds the maximum temperature limit
                 newDutyCycle_Ref = 0;
                 
+            elseif liveData.LatestTempError_Ref > obj.PID_THRESHOLD
+                newDutyCycle_Ref = obj.PWM_MIN_DUTY_CYCLE;
+                
+            elseif liveData.LatestTempError_Ref < -obj.PID_THRESHOLD
+                newDutyCycle_Ref = obj.PWM_MAX_DUTY_CYCLE;
+                
             else
                 % porportional term
                 proportionalTerm_Ref = -liveData.LatestTempError_Ref;
                 Pp_Ref = obj.PID_Kp * proportionalTerm_Ref;
                 
-                if liveData.DataLength > 1
+                if liveData.DataLength > obj.PID_SAMPLE_SIZE
+                    % intergral term
+                    integralTerm_Ref = trapz(...
+                        liveData.TimeData(end-obj.PID_SAMPLE_SIZE:end),...
+                        -liveData.TempErrorData_Ref(end-obj.PID_SAMPLE_SIZE:end),...
+                        2);
+                    Pi_Ref = obj.PID_Ki * integralTerm_Ref;
+                    
+                elseif liveData.DataLength > 1
                     % intergral term
                     integralTerm_Ref = trapz(liveData.TimeData, -liveData.TempErrorData_Ref, 2);
                     Pi_Ref = obj.PID_Ki * integralTerm_Ref;
@@ -946,12 +860,26 @@ classdef DAQBox < handle
                 % exceeds the maximum temperature limit
                 newDutyCycle_Samp = 0;
                 
+            elseif liveData.LatestTempError_Samp > obj.PID_THRESHOLD
+                newDutyCycle_Samp = obj.PWM_MIN_DUTY_CYCLE;
+                
+            elseif liveData.LatestTempError_Samp < -obj.PID_THRESHOLD
+                newDutyCycle_Samp = obj.PWM_MAX_DUTY_CYCLE;
+                
             else
                 % porportional term
                 proportionalTerm_Samp = -liveData.LatestTempError_Samp;
                 Pp_Samp = obj.PID_Kp * proportionalTerm_Samp;
                 
-                if liveData.DataLength > 1
+                if liveData.DataLength > obj.PID_SAMPLE_SIZE
+                    % intergral term
+                    integralTerm_Samp = trapz(...
+                        liveData.TimeData(end-obj.PID_SAMPLE_SIZE:end),...
+                        -liveData.TempErrorData_Samp(end-obj.PID_SAMPLE_SIZE:end),...
+                        2);
+                    Pi_Samp = obj.PID_Ki * integralTerm_Samp;
+                    
+                elseif liveData.DataLength > 1
                     % intergral term
                     integralTerm_Samp = trapz(liveData.TimeData, -liveData.TempErrorData_Samp, 2);
                     Pi_Samp = obj.PID_Ki * integralTerm_Samp;
@@ -972,6 +900,20 @@ classdef DAQBox < handle
                 % and the test sample
                 newDutyCycle_Samp = Pp_Samp + Pi_Samp + Pd_Samp;
                 
+            end
+            
+            % Bounds checking on duty cycle for reference sample
+            if newDutyCycle_Ref > obj.PWM_MAX_DUTY_CYCLE
+                newDutyCycle_Ref = obj.PWM_MAX_DUTY_CYCLE;
+            elseif newDutyCycle_Ref < obj.PWM_MIN_DUTY_CYCLE
+                newDutyCycle_Ref = obj.PWM_MIN_DUTY_CYCLE;
+            end
+            
+            % Bounds checking on duty cycle for test sample
+            if newDutyCycle_Samp > obj.PWM_MAX_DUTY_CYCLE
+                newDutyCycle_Samp = obj.PWM_MAX_DUTY_CYCLE;
+            elseif newDutyCycle_Samp < obj.PWM_MIN_DUTY_CYCLE
+                newDutyCycle_Samp = obj.PWM_MIN_DUTY_CYCLE;
             end
             
             % Refresh the PWM duty cycle values of pulse generators using

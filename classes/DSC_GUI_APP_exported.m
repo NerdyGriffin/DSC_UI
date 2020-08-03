@@ -427,29 +427,37 @@ classdef DSC_GUI_APP_exported < matlab.apps.AppBase
         
         function stopExperiment(app)
             % Prevent this function from running more than once at a time
-            app.StopExperimentSemaphore.wait();
-            app.StopExperimentSemaphore.lock();
+            if ~isempty(app.StopExperimentSemaphore) && isvalid(app.StopExperimentSemaphore)
+                app.StopExperimentSemaphore.wait();
+                app.StopExperimentSemaphore.lock();
+            end
             
             if app.stageController.ExperimentInProgress
                 app.stageController.forceStop();
             end
             
-            app.StopExperimentSemaphore.release();
+            if ~isempty(app.StopExperimentSemaphore) && isvalid(app.StopExperimentSemaphore)
+                app.StopExperimentSemaphore.release();
+            end
             
             app.refreshOperationUI();
         end
         
         function stopPWM(app)
             % Prevent this function from running more than once at a time
-            app.SetupSemaphore.wait();
-            app.SetupSemaphore.lock();
+            if ~isempty(app.SetupSemaphore) && isvalid(app.SetupSemaphore)
+                app.SetupSemaphore.wait();
+                app.SetupSemaphore.lock();
+            end
             
             % Stop the PWM outputs
             if ~isempty(app.daqBox) && isvalid(app.daqBox)
                 app.daqBox.stopPWM();
             end
             
-            app.SetupSemaphore.release();
+            if ~isempty(app.SetupSemaphore) && isvalid(app.SetupSemaphore)
+                app.SetupSemaphore.release();
+            end
             
             app.refreshOperationUI();
         end
