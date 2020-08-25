@@ -23,6 +23,11 @@ You may contact the author at ckunis.contact@gmail.com
 
 NOTE: This project is currently a work-in-progress. Not all features have been implemented and all code may be subject to change.
 
+## New version available
+
+This version of the software is now deprecated and the project has be remade for use with Arduino rather than the NI DAQ Box.
+## The new version can be found here: https://github.com/NerdyGriffin/DSC_v2
+
 ## Setup Instructions
 
 Plug in the DAQ Box to the computer via a USB cable.
